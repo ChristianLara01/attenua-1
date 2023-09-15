@@ -30,7 +30,7 @@ def webhook():
             payment_data = response.json()
             payment_status = payment_data.get('status')
             payment_id = payment_data.get('id')
-            print("\n\npayment_data\n\n")
+            print(payment_data)
             
             if payment_status == 'approved':
                 print("\n\naprovou\n\n")
