@@ -3,7 +3,6 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 # Defina suas credenciais de produção
-MERCADO_PAGO_PUBLIC_KEY = 'APP_USR-aae65e8a-96a8-4e1c-ae28-152ba3c86ea1'
 MERCADO_PAGO_ACCESS_TOKEN = 'APP_USR-698417925527845-042300-824e07ad45574df479088eebe0fad53c-726883686'
 
 @app.route('/')
@@ -14,9 +13,9 @@ def hello_world():
 @app.route('/webhook', methods=['POST'])
 def webhook():
     try:
-        # Verifique a autenticidade da webhook usando a Public Key
+        # Verifique a autenticidade da webhook usando o Access Token
         request_data = request.json
-        if request_data.get('public_key') == MERCADO_PAGO_PUBLIC_KEY:
+        if request_data.get('access_token') == MERCADO_PAGO_ACCESS_TOKEN:
             
             # A webhook é autêntica, você pode processar os dados do pagamento aqui
             payment_data = request_data.get('data')
