@@ -43,7 +43,7 @@ def webhook():
             payment_data = response.json()
             payment_status = payment_data.get('status')
             payment_id = payment_data.get('id')
-            if(payment_data.get('external_reference') == 'ca1'):
+            if(payment_data.get('collection', {}).get('external_reference') == 'ca1'):
                 send_mqtt_message("1")
             print(payment_data)
             
