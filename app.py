@@ -31,7 +31,20 @@ def webhook():
             elif payment_status == 'pending':
                 pass
 
-            print(payment_data)
+            print(payment_data.get('\n\n___'))
+            print(payment_data.get('id'))
+            print(payment_data.get('___'))
+            print(payment_data.get('status'))
+            print(payment_data.get('___'))
+            print(payment_data.get('transaction_amount'))
+            print(payment_data.get('___'))
+            print(payment_data.get('payment_method_id'))
+            print(payment_data.get('___'))
+            print(payment_data.get('payer'))
+            print(payment_data.get('___'))
+            print(payment_data.get('transaction_details'))
+            print(payment_data.get('___'))
+            print(payment_data.get('___\n\n'))
             
             return jsonify({'status': 'success'}), 200
         else:
