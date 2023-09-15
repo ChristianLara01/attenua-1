@@ -23,28 +23,20 @@ def webhook():
             # Retrieve the payment information from the resource URL
             response = requests.get(resource_url)
             payment_data = response.json()
+            
             payment_status = payment_data.get('status')
             payment_id = payment_data.get('id')
+            transaction_amount = payment_data.get('transaction_amount')
+            payment_method_id = payment_data.get('payment_method_id')
+            payer = payment_data.get('payer')
+            transaction_details = payment_data.get('transaction_details')
             
-            if payment_status == 'approved':
-                pass
-            elif payment_status == 'pending':
-                pass
-
-            print(payment_data.get('\n\n___'))
-            print(payment_data.get('id'))
-            print(payment_data.get('___'))
-            print(payment_data.get('status'))
-            print(payment_data.get('___'))
-            print(payment_data.get('transaction_amount'))
-            print(payment_data.get('___'))
-            print(payment_data.get('payment_method_id'))
-            print(payment_data.get('___'))
-            print(payment_data.get('payer'))
-            print(payment_data.get('___'))
-            print(payment_data.get('transaction_details'))
-            print(payment_data.get('___'))
-            print(payment_data.get('___\n\n'))
+            print(f'Payment ID: {payment_id}')
+            print(f'Payment Status: {payment_status}')
+            print(f'Transaction Amount: {transaction_amount}')
+            print(f'Payment Method ID: {payment_method_id}')
+            print(f'Payer: {payer}')
+            print(f'Transaction Details: {transaction_details}')
             
             return jsonify({'status': 'success'}), 200
         else:
