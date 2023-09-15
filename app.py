@@ -20,8 +20,13 @@ def webhook():
         resource_url = request_data.get('resource')
         
         if resource_url:
+            # Configure os cabeçalhos para incluir o token de acesso
+            headers = {
+                'Authorization': f'Bearer {MERCADO_PAGO_ACCESS_TOKEN}'
+            }
+            
             # Retrieve the payment information from the resource URL
-            response = requests.get(resource_url)
+            response = requests.get(resource_url, headers=headers)
             payment_data = response.json()
             payment_status = payment_data.get('status')
             payment_id = payment_data.get('id')
