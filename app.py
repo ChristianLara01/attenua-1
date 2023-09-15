@@ -28,7 +28,7 @@ def mercado_pago_webhook():
     # Print the JSON data to the terminal
     print("Pagamento recebido de Mercado Pago:")
     print(webhook_data)
-    send_mqtt_message("Pagou"):
+    send_mqtt_message("Pagou")
 
     # Optionally, you can process the webhook data here as needed
 
