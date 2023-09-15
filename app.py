@@ -45,7 +45,7 @@ def webhook():
             payment_id = payment_data.get('id')
             if(payment_data.get('reason') == "Cabine Sei - 1h - -25.503908587851214, -49.16897904592699"):
                 send_mqtt_message("1")
-                print(payment_data)
+            print(payment_data)
             
             if payment_status == 'approved':
                 print("\n\naprovou\n\n")
