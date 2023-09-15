@@ -1,56 +1,46 @@
 from flask import Flask, request, jsonify
-import mercadopago
-import paho.mqtt.client as mqtt
-
-# Configure estas credenciais com as fornecidas pelo Mercado Pago
-CLIENT_ID = "698417925527845"
-CLIENT_SECRET = "sjeML9fRWV9eJbKAa3c3doRVFVDulnIL"
-
-# Seu token secreto para autenticação
-SECRETO_MERCADO_PAGO = "APP_USR-698417925527845-042300-824e07ad45574df479088eebe0fad53c-726883686"
-
-# MQTT Configuration
-MQTT_BROKER_HOST = "mqtt.eclipseprojects.io"
-MQTT_BROKER_PORT = 1883
-MQTT_TOPIC = "estado"
-
-# Function to send MQTT message
-def send_mqtt_message(payload):
-    client = mqtt.Client()
-    client.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT)
-    client.publish(MQTT_TOPIC, payload)
-    client.disconnect()
 
 app = Flask(__name__)
+
+# Defina suas credenciais de produção
+MERCADO_PAGO_PUBLIC_KEY = 'APP_USR-aae65e8a-96a8-4e1c-ae28-152ba3c86ea1'
+MERCADO_PAGO_ACCESS_TOKEN = 'APP_USR-698417925527845-042300-824e07ad45574df479088eebe0fad53c-726883686'
 
 @app.route('/')
 def hello_world():
     return 'Hello, Attenua!'
 
+# Rota para receber a webhook do Mercado Pago
 @app.route('/webhook', methods=['POST'])
-def mercado_pago_webhook():
-    # Verifique a autenticação usando as credenciais do Mercado Pago
-    if not verificar_autenticacao(request):
-        return 'Unauthorized', 401  # Não autorizado
-
-    # Receba e processe os dados do webhook do Mercado Pago
-    data = request.json
-    # Aqui, você pode acessar as informações sobre a venda, como usuário, produto, valor, etc.
-    
-    # Exemplo: Imprimir os dados da venda no terminal
-    print("Venda recebida do Mercado Pago:")
-    print(data)
-    send_mqtt_message("pagou")
-
-    # Responda ao webhook com sucesso
-    return 'OK', 200
-
-def verificar_autenticacao(request):
-    # Verifique a autenticação usando as credenciais fornecidas no cabeçalho do pedido
-    client_id = request.headers.get("X-Client-ID")
-    client_secret = request.headers.get("X-Client-Secret")
-
-    return client_id == CLIENT_ID and client_secret == CLIENT_SECRET
+def webhook():
+    try:
+        # Verifique a autenticidade da webhook usando a Public Key
+        request_data = request.json
+        if request_data.get('public_key') == MERCADO_PAGO_PUBLIC_KEY:
+            
+            # A webhook é autêntica, você pode processar os dados do pagamento aqui
+            payment_data = request_data.get('data')
+            payment_status = payment_data.get('status')
+            payment_id = payment_data.get('id')
+            
+            # Execute o código de acordo com o status do pagamento (aprovado, pendente, etc.)
+            if payment_status == 'approved':
+                # O pagamento foi aprovado, faça o que for necessário
+                # (por exemplo, atualize um banco de dados, envie um e-mail de confirmação, etc.)
+                pass
+            elif payment_status == 'pending':
+                # O pagamento está pendente, faça o que for necessário
+                pass
+            # Outros casos podem ser tratados aqui
+            
+            # Responda com sucesso para confirmar a recepção da webhook
+            return jsonify({'status': 'success'}), 200
+        else:
+            # As credenciais não coincidem, não processe a webhook
+            return jsonify({'status': 'unauthorized'}), 401
+    except Exception as e:
+        # Lida com erros
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
