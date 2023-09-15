@@ -110,4 +110,4 @@ def card_payment():
     return jsonify({"message": "Card payment completed", "payment_info": payment})
 
 if __name__ == '__main__':
-    app.run(host='200.169.66.166', port=5000)
+    app.run()
