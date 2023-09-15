@@ -23,7 +23,11 @@ def send_mqtt_message(payload):
     client.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT)
     client.publish(MQTT_TOPIC, payload)
     client.disconnect()
-
+    
+@app.route("/")
+def index():
+    return "Attenua"
+    
 # Pix Payment Endpoint
 @app.route('/pix-payment', methods=['POST'])
 def pix_payment():
