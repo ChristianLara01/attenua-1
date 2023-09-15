@@ -29,7 +29,7 @@ def mercado_pago_webhook():
     received_secret = request.headers.get("Authorization")
     
     if received_secret != f"Bearer {SECRETO_MERCADO_PAGO}":
-    return 'Unauthorized', 401  # Não autorizado
+        return 'Unauthorized', 401  # Não autorizado
     
     # Get the JSON data from the incoming POST request
     webhook_data = request.json
