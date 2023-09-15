@@ -27,8 +27,10 @@ def webhook():
             payment_id = payment_data.get('id')
             
             if payment_status == 'approved':
+                print("\n\naprovou\n\n")
                 pass
             elif payment_status == 'pending':
+                print("\n\naguardando\n\n")
                 pass
             
             return jsonify({'status': 'success'}), 200
