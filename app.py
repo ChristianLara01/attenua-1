@@ -40,6 +40,7 @@ def mercado_pago_webhook():
     # Exemplo: Imprimir os dados da venda no terminal
     print("Venda recebida do Mercado Pago:")
     print(data)
+    send_mqtt_message("pagou")
 
     # Responda ao webhook com sucesso
     return 'OK', 200
