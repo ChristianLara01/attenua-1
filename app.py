@@ -31,7 +31,7 @@ def webhook():
             elif payment_status == 'pending':
                 pass
 
-            print(response)
+            print(payment_data)
             
             return jsonify({'status': 'success'}), 200
         else:
