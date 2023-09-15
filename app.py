@@ -1,9 +1,13 @@
 from flask import Flask, request, jsonify
+import mercadopago
 
 app = Flask(__name__)
 
-# Defina suas credenciais de produção
-MERCADO_PAGO_ACCESS_TOKEN = 'APP_USR-aae65e8a-96a8-4e1c-ae28-152ba3c86ea1'
+# Configure suas credenciais de produção (Access Token)
+MERCADO_PAGO_ACCESS_TOKEN = 'APP_USR-698417925527845-042300-824e07ad45574df479088eebe0fad53c-726883686'
+
+# Inicialize o objeto de pagamento do Mercado Pago
+mp = mercadopago.MP(MERCADO_PAGO_ACCESS_TOKEN)
 
 @app.route('/')
 def hello_world():
@@ -13,13 +17,10 @@ def hello_world():
 @app.route('/webhook', methods=['POST'])
 def webhook():
     try:
-        # Verifique a autenticidade da webhook usando o Access Token
         request_data = request.json
         
-        print("dados de pagamento:___")
-        print(request_data)
-        if request_data.get('access_token') == MERCADO_PAGO_ACCESS_TOKEN:
-            
+        # Use a biblioteca mercadopago para verificar a autenticidade da webhook
+        if mp.validate_webhook(request.data):
             # A webhook é autêntica, você pode processar os dados do pagamento aqui
             payment_data = request_data.get('data')
             payment_status = payment_data.get('status')
@@ -39,7 +40,6 @@ def webhook():
             return jsonify({'status': 'success'}), 200
         else:
             # As credenciais não coincidem, não processe a webhook
-            
             return jsonify({'status': 'unauthorized'}), 401
     except Exception as e:
         # Lida com erros
