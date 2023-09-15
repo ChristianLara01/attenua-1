@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 # Defina suas credenciais de produção
-MERCADO_PAGO_ACCESS_TOKEN = 'APP_USR-698417925527845-042300-824e07ad45574df479088eebe0fad53c-726883686'
+MERCADO_PAGO_ACCESS_TOKEN = 'APP_USR-aae65e8a-96a8-4e1c-ae28-152ba3c86ea1'
 
 @app.route('/')
 def hello_world():
