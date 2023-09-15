@@ -1,6 +1,19 @@
 from flask import Flask, request, jsonify
 import requests
+import paho.mqtt.client as mqtt
 
+# MQTT Configuration
+MQTT_BROKER_HOST = "mqtt.eclipseprojects.io"
+MQTT_BROKER_PORT = 1883
+MQTT_TOPIC = "estado"
+
+# Function to send MQTT message
+def send_mqtt_message(payload):
+    client = mqtt.Client()
+    client.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT)
+    client.publish(MQTT_TOPIC, payload)
+    client.disconnect()
+    
 app = Flask(__name__)
 
 MERCADO_PAGO_ACCESS_TOKEN = 'APP_USR-698417925527845-042300-824e07ad45574df479088eebe0fad53c-726883686'
@@ -30,7 +43,9 @@ def webhook():
             payment_data = response.json()
             payment_status = payment_data.get('status')
             payment_id = payment_data.get('id')
-            print(payment_data)
+            if(payment_data.get('reason') == "Cabine Sei - 1h - -25.503908587851214, -49.16897904592699")
+                send_mqtt_message("1")
+                print(payment_data)
             
             if payment_status == 'approved':
                 print("\n\naprovou\n\n")
