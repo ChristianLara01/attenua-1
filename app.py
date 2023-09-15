@@ -1,11 +1,9 @@
 from flask import Flask, request, jsonify
-import mercadopago
+import requests
 
 app = Flask(__name__)
 
 MERCADO_PAGO_ACCESS_TOKEN = 'APP_USR-698417925527845-042300-824e07ad45574df479088eebe0fad53c-726883686'
-
-sdk = mercadopago.SDK(MERCADO_PAGO_ACCESS_TOKEN)
 
 @app.route('/')
 def hello_world():
@@ -14,22 +12,28 @@ def hello_world():
 # Rota para receber a webhook do Mercado Pago
 @app.route('/webhook', methods=['POST'])
 def webhook():
-
-    
-    request_data = request.json
-    print(request_data)
     try:
+        request_data = request.json
+        print(request_data)
         
-        payment_data = request_data.get('data')
-        payment_status = payment_data.get('status')
-        payment_id = payment_data.get('id')
+        # Extract the resource URL from the request data
+        resource_url = request_data.get('resource')
         
-        if payment_status == 'approved':
-            pass
-        elif payment_status == 'pending':
-            pass
-        
-        return jsonify({'status': 'success'}), 200
+        if resource_url:
+            # Retrieve the payment information from the resource URL
+            response = requests.get(resource_url)
+            payment_data = response.json()
+            payment_status = payment_data.get('status')
+            payment_id = payment_data.get('id')
+            
+            if payment_status == 'approved':
+                pass
+            elif payment_status == 'pending':
+                pass
+            
+            return jsonify({'status': 'success'}), 200
+        else:
+            return jsonify({'status': 'error', 'message': 'Resource URL not found'}), 500
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
