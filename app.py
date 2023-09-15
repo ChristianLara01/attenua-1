@@ -15,6 +15,9 @@ def webhook():
     try:
         # Verifique a autenticidade da webhook usando o Access Token
         request_data = request.json
+        
+        print("dados de pagamento:___")
+        print(request_data)
         if request_data.get('access_token') == MERCADO_PAGO_ACCESS_TOKEN:
             
             # A webhook é autêntica, você pode processar os dados do pagamento aqui
@@ -36,6 +39,7 @@ def webhook():
             return jsonify({'status': 'success'}), 200
         else:
             # As credenciais não coincidem, não processe a webhook
+            
             return jsonify({'status': 'unauthorized'}), 401
     except Exception as e:
         # Lida com erros
