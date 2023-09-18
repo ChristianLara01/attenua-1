@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meu Mapa</title>
+    <style>
+        #map {
+            width: 800px;
+            height: 600px;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}"></script>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script>
+        var map;
+        var pontos = {{ pontos | tojson | safe }};
+
+        function initMap() {
+            var centro = {lat: -23.5505, lng: -46.6333};
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15,
+                center: centro
+            });
+
+            // Adicione os marcadores para todos os pontos
+            for (var i = 0; i < pontos.length; i++) {
+                var ponto = pontos[i];
+                var marker = new google.maps.Marker({
+                    position: {lat: ponto.lat, lng: ponto.lng},
+                    map: map,
+                    title: 'Ponto ' + (i + 1)
+                });
+            }
+        }
+
+        window.onload = initMap;
+    </script>
+</body>
+</html>
