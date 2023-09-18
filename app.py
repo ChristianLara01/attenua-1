@@ -13,14 +13,25 @@ def send_mqtt_message(payload):
     client.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT)
     client.publish(MQTT_TOPIC, payload)
     client.disconnect()
-    
+
+# Sua chave da API do Google Maps
+api_key = "AIzaSyCuzKLRuerHBHR9ArHvJm5HzpD7E_Ap170"
+
+# Lista de pontos com suas coordenadas de latitude e longitude
+pontos = [
+    {"lat": -23.5505, "lng": -46.6333},
+    {"lat": -23.5500, "lng": -46.6330},
+    {"lat": -23.5495, "lng": -46.6335},
+    {"lat": -23.5490, "lng": -46.6340}
+]
+
 app = Flask(__name__)
 
 MERCADO_PAGO_ACCESS_TOKEN = 'APP_USR-698417925527845-042300-824e07ad45574df479088eebe0fad53c-726883686'
 
 @app.route('/')
-def hello_world():
-    return 'Hello, Attenua!'
+def mapa():
+    return render_template('mapa.html', pontos=pontos, api_key=api_key)
 
 # Rota para receber a webhook do Mercado Pago
 @app.route('/webhook', methods=['POST'])
