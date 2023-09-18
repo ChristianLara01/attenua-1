@@ -21,14 +21,31 @@ MERCADO_PAGO_ACCESS_TOKEN = 'APP_USR-698417925527845-042300-824e07ad45574df47908
 # Sua chave da API do Google Maps
 api_key = "AIzaSyCuzKLRuerHBHR9ArHvJm5HzpD7E_Ap170"
 
-# Lista de pontos com suas coordenadas de latitude e longitude
-pontos = [
-    {"lat": -25.503600050960685, "lng": -49.16696527260166}
-]
+@app.route('/produtos')
+def produtos():
+    return render_template('produtos.html')
 
 @app.route('/mapa')
 def mapa():
-    return render_template('mapa.html', pontos=pontos, api_key=api_key)
+    produto_selecionado = request.args.get('produto')
+    # Lógica para determinar o ponto no mapa com base no produto selecionado
+    # Você pode usar um dicionário ou outra estrutura de dados para mapear produtos para coordenadas
+
+    # Suponha que você tenha um dicionário que mapeie produtos para coordenadas
+    coordenadas = {
+        'produto1': {"lat": -25.503600050960685, "lng": -49.16696527260166},
+        'produto2': {"lat": ...},
+        'produto3': {"lat": ...},
+        'produto4': {"lat": ...},
+        'produto5': {"lat": ...},
+    }
+
+    ponto = coordenadas.get(produto_selecionado)
+
+    if ponto:
+        return render_template('mapa.html', ponto=ponto, api_key=api_key)
+    else:
+        return "Produto não encontrado", 404
 
 # Rota para receber a webhook do Mercado Pago
 @app.route('/webhook', methods=['POST'])
