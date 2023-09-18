@@ -23,13 +23,10 @@ api_key = "AIzaSyCuzKLRuerHBHR9ArHvJm5HzpD7E_Ap170"
 
 # Lista de pontos com suas coordenadas de latitude e longitude
 pontos = [
-    {"lat": -23.5505, "lng": -46.6333},
-    {"lat": -23.5500, "lng": -46.6330},
-    {"lat": -23.5495, "lng": -46.6335},
-    {"lat": -23.5490, "lng": -46.6340}
+    {"lat": -25.503600050960685, "lng": -49.16696527260166}
 ]
 
-@app.route('/')
+@app.route('/mapa')
 def mapa():
     return render_template('mapa.html', pontos=pontos, api_key=api_key)
 
