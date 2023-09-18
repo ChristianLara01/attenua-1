@@ -45,7 +45,8 @@
             }
         }
 
-        window.onload = initMap;
+        // Certifique-se de chamar a função initMap após o carregamento da API do Google Maps
+        google.maps.event.addDomListener(window, 'load', initMap);
     </script>
 </body>
 </html>
