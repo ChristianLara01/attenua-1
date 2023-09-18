@@ -15,23 +15,33 @@
 
     <script>
         var map;
-        var pontos = {{ pontos | tojson | safe }};
+        var produtoSelecionado = "{{ produto }}"; // Obtém o nome do produto da URL
+
+        var coordenadas = {
+            'produto1': {"lat": -25.503600050960685, "lng": -49.16696527260166},
+            'produto2': {"lat": ...},
+            'produto3': {"lat": ...},
+            'produto4': {"lat": ...},
+            'produto5': {"lat": ...},
+        };
+
+        var ponto = coordenadas[produtoSelecionado]; // Obtenha as coordenadas com base no nome do produto
 
         function initMap() {
-            var centro = pontos;
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 15,
-                center: centro
-            });
-
-            // Adicione os marcadores para todos os pontos
-            for (var i = 0; i < pontos.length; i++) {
-                var ponto = pontos[i];
-                var marker = new google.maps.Marker({
-                    position: {lat: ponto.lat, lng: ponto.lng},
-                    map: map,
-                    title: 'Ponto ' + (i + 1)
+            if (ponto) {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 15,
+                    center: ponto
                 });
+
+                var marker = new google.maps.Marker({
+                    position: ponto,
+                    map: map,
+                    title: 'Local do Produto ' + produtoSelecionado
+                });
+            } else {
+                // Lógica para tratar o caso em que o produto não é encontrado
+                alert("Produto não encontrado");
             }
         }
 
