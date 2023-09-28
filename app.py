@@ -25,7 +25,7 @@ api_key = "AIzaSyCuzKLRuerHBHR9ArHvJm5HzpD7E_Ap170"
 def produtos():
     return render_template('produtos.html')
 
-@app.route('/home/<json_data>', methods=['GET'])
+@app.route('/home/<json_data>', methods=['POST', 'GET'])
 def home(json_data):
     try:
         data = jsonify(eval(json_data))
