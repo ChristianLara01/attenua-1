@@ -25,6 +25,12 @@ api_key = "AIzaSyCuzKLRuerHBHR9ArHvJm5HzpD7E_Ap170"
 def produtos():
     return render_template('produtos.html')
 
+@app.route('/home', methods=['POST'])
+def home():
+    data = request.get_json()
+    message = data.get('message', 'Oi')
+    return f'Recebi a mensagem: {message}'
+
 @app.route('/mapa')
 def mapa():
     produto_selecionado = request.args.get('produto')
