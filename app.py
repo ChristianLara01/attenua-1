@@ -25,9 +25,13 @@ api_key = "AIzaSyCuzKLRuerHBHR9ArHvJm5HzpD7E_Ap170"
 def produtos():
     return render_template('produtos.html')
 
-@app.route('/home/<message>', methods=['GET'])
-def home(message):
-    return f'Mensagem recebida: {message}'
+@app.route('/home/<json_data>', methods=['GET'])
+def home(json_data):
+    try:
+        data = jsonify(eval(json_data))
+        return jsonify({'response': data})
+    except Exception as e:
+        return jsonify({'error': 'Erro ao processar JSON'}), 400
 
 @app.route('/mapa')
 def mapa():
