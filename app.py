@@ -27,16 +27,19 @@ def produtos():
     
 @app.route('/')
 def home():
-    return "hi"
+    return "oi"  # Esta string será exibida no navegador quando você acessar a rota "/"
     
 @app.route('/home/<json_data>', methods=['POST'])
 def homedata(json_data):
     try:
-        data = jsonify(eval(json_data))
-        print(json_data)
-        return render_template(jsonify({'response': data}))
+        # O parâmetro json_data conterá o JSON na URL
+        # Vamos imprimir este JSON no console
+        print("JSON recebido:", json_data)
+
+        # Se você quiser retornar uma resposta HTTP com o JSON, você pode fazer isso também
+        return json_data
     except Exception as e:
-        return render_template(jsonify({'error': 'Erro ao processar JSON'}), 400)
+        return str(e), 400  # Retorna um código de status 400 (Bad Request) em caso de erro
 
 @app.route('/mapa')
 def mapa():
