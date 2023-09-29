@@ -29,7 +29,7 @@ def produtos():
 def home():
     return 'hi'
     
-@app.route('/home/<json_data>', methods=['POST', 'GET'])
+@app.route('/home/<json_data>', methods=['POST'])
 def homedata(json_data):
     try:
         data = jsonify(eval(json_data))
