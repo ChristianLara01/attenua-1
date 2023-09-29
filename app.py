@@ -27,7 +27,7 @@ def produtos():
     
 @app.route('/')
 def home():
-    return 'hi'
+    return "hi"
     
 @app.route('/home/<json_data>', methods=['POST'])
 def homedata(json_data):
