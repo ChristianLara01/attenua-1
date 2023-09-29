@@ -33,7 +33,7 @@ def home():
 def homedata(json_data):
     try:
         data = jsonify(eval(json_data))
-        print(data)
+        print(json_data)
         return render_template(jsonify({'response': data}))
     except Exception as e:
         return render_template(jsonify({'error': 'Erro ao processar JSON'}), 400)
