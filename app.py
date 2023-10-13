@@ -7,7 +7,7 @@ import mercadopago
 import secrets
 import base64
 
-token = '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'
+token = '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'
 owner = 'ChristianLara01'
 repo = 'attenua-1'
 file_path = 'data/cabins.json'
