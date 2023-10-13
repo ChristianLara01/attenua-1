@@ -140,8 +140,8 @@ def webhook():
             # Retrieve the payment information from the resource URL
             response = requests.get(resource_url, headers=headers)
             payment_data = response.json()
-            payment_status = payment_data.get('status')
-            payment_reason = payment_data.get('reason')
+            payment_status = payment_data.get('collection', {}).get('status')
+            payment_reason = payment_data.get('collection', {}).get('reason')
             print("\n\noi\n")               
             print(payment_data)      
             print(payment_status)            
