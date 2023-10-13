@@ -1,0 +1,115 @@
+/* Estilos para o corpo da página */
+body {
+    max-width: 800px;
+    margin: 0 auto; /* Margens automáticas para centralizar na tela */
+    width: 90%; /* Tamanho personalizado */
+    font-family: Arial, sans-serif;
+    padding: 0;
+    background-color: #151829;
+    color: #2fb191; /* Cor da fonte */
+    justify-content: center; /* Centralizar horizontalmente */
+    height: 100vh; /* Tornar a altura do corpo igual à altura da janela de visualização */
+}
+/* Estilos para botoes*/
+.btn{
+    background-color: #2fb191;padding: 10px 20px; /* Espaçamento interno do botão */
+    color: #ffffff; /* Cor do texto do botão */
+    border: none; /* Remove a borda padrão do botão */
+    border-radius: 10px; /* Raio das bordas para arredondar o botão */
+    cursor: pointer; /* Transforma o cursor em uma mão quando passa sobre o botão */
+    transition: background-color 0.3s ease;
+}
+
+/* Estilos para o botão quando hover (passar o mouse sobre o botão) */
+.btn:hover {
+    background-color: #2fb19091; /* Cor de fundo alterada quando passa o mouse */
+}
+
+/* Estilos para o contêiner do produto */
+.produtos {
+    background-color: #151829;
+    border: 1px solid #ffffff; /* Adiciona uma borda de 1px sólida ao redor do produto */
+    display: flex;
+    padding: 50%;
+}
+
+/* Estilos para a primeira coluna (coluna1) */
+.coluna1 {
+    width: 40%;
+    flex: 1; /* A segunda coluna ocupa 50% da largura do produto */
+    padding-left: 10px;
+    box-sizing: border-box;
+    display: grid;
+    text-align: center;
+    order: 2; /* Define a ordem para 2, colocando-a na segunda coluna */
+    align-items: center; /* Centralizar verticalmente o conteúdo */
+    justify-items: center; /* Centralizar horizontalmente o conteúdo */
+}
+
+/* Estilos para a segunda coluna (coluna2) */
+.coluna2 {
+    text-align: center;
+    width: 60%;
+    flex: 1; /* A segunda coluna ocupa 50% da largura do produto */
+    padding-left: 10px;
+    box-sizing: border-box;
+    display: grid;
+    order: 2; /* Define a ordem para 2, colocando-a na segunda coluna */
+    align-items: center; /* Centralizar verticalmente o conteúdo */
+    justify-items: center; /* Centralizar horizontalmente o conteúdo */
+}
+
+/* Exemplo de personalização */
+.custom-image {
+    max-width: 100%; /* Define uma largura máxima para a imagem */
+    height: auto; /* Mantém a proporção original da imagem */
+    float: left; /* Alinha a imagem à esquerda */
+}
+
+/* Estilos para computador (tela maior que 768px de largura) */
+@media screen and (min-width: 768px) {
+    .produtos {
+        width: 50%;
+        float: left;
+        box-sizing: border-box;
+        padding: 20px;
+    }
+}
+
+/* Estilos para celular (tela menor ou igual a 768px de largura) */
+@media screen and (max-width: 768px) {
+    .produtos {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 20px;
+    }
+}
+
+/* Estilo para a tabela */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  /* Estilo para as células da tabela */
+  td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ccc;
+    cursor: pointer;
+  }
+  
+  /* Estilo para o cabeçalho (opcional) */
+  th {
+    background-color: #f2f2f2;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ccc;
+  }
+  
+  /* Estilo para as células da tabela quando hover */
+  td:hover {
+    background-color: #e0e0e0;
+  }
+  
