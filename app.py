@@ -127,7 +127,6 @@ def add_appointment(cabinId, clickedHour):
 def webhook():
     try:
         request_data = request.json
-        print(request_data)
         
         # Extract the resource URL from the request data
         resource_url = request_data.get('resource')
@@ -142,17 +141,11 @@ def webhook():
             response = requests.get(resource_url, headers=headers)
             payment_data = response.json()
             payment_status = payment_data.get('status')
-            payment_id = payment_data.get('id')
-            if(payment_data.get('collection', {}).get('status') == 'approved'):
+            payment_reason = payment_data.get('reason')
+            if payment_status == 'approved':
                 if(payment_data.get('collection', {}).get('reason') == 'CABINE 1 14-10-2023 09:00'):
                     print(payment_data)            
-            if payment_status == 'approved':
-                print("\n\naprovou\n\n")
-                pass
-            elif payment_status == 'pending':
-                print("\n\naguardando\n\n")
-                pass
-            
+                    print(payment_reason)            
             return jsonify({'status': 'success'}), 200
         else:
             return jsonify({'status': 'error', 'message': 'Resource URL not found'}), 500
