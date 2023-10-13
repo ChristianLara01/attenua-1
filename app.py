@@ -5,6 +5,12 @@ import datetime
 import os
 import mercadopago
 import secrets
+import base64
+
+token = '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'
+owner = 'ChristianLara01'
+repo = 'attenua-1'
+file_path = 'data/cabins.json'
 
 MERCADO_PAGO_ACCESS_TOKEN = "APP_USR-698417925527845-042300-824e07ad45574df479088eebe0fad53c-726883686"
 # Configure sua chave de acesso ao Mercado Pago
@@ -14,6 +20,33 @@ app = Flask(__name__)
 
 # Caminho para o arquivo JSON de cabines
 cabins_file = os.path.join(os.path.dirname(__file__), 'data', 'cabins.json')
+
+import requests
+import base64
+
+def update_json_on_github(token, owner, repo, file_path, new_content, branch="main"):
+    # Define the API URL
+    url = f'https://api.github.com/repos/{owner}/{repo}/contents/{file_path}'
+
+    # Create a JSON payload with the new content
+    payload = {
+        "message": "Update JSON file",
+        "content": base64.b64encode(new_content.encode()).decode(),
+        "branch": branch
+    }
+
+    # Define headers with the personal access token for authentication
+    headers = {
+        "Authorization": f"token {token}"
+    }
+
+    # Make the PUT request to update the file
+    response = requests.put(url, json=payload, headers=headers)
+
+    if response.status_code == 200:
+        return f"File {file_path} has been updated successfully."
+    else:
+        return f"Failed to update file {file_path}. Status code: {response.status_code}, Message: {response.text}"
 
 # Função para carregar os dados do JSON
 def load_cabins():
@@ -94,7 +127,7 @@ def save_cabins_data(cabins_data):
 def add_appointment(cabinId, clickedHour, pagamento):
     # Parse the JSON data
     cabins_data = load_cabins()
-
+    
     # Find the cabin with the given ID
     for cabin in cabins_data:
         if str(cabin['id']) == cabinId:
@@ -116,7 +149,9 @@ def add_appointment(cabinId, clickedHour, pagamento):
             cabin['agendamentos'].append(new_appointment)
 
             # Save the updated JSON data
-            save_cabins_data(cabins_data)
+            
+            result = update_json_on_github(token, owner, repo, file_path, cabins_data)
+            print(result)
 
             return 'Appointment added successfully'
 
@@ -152,8 +187,7 @@ def webhook():
 
             if payment_status == 'approved':
                 if(payment_data.get('collection', {}).get('reason') == 'CABINE 1 14-10-2023 09:00'):
-                    print("passou")  
-                    print(add_appointment(cabinId, clickedHour, True))  
+                    print("passou")                      
                     add_appointment(cabinId, clickedHour, True)              
             return jsonify({'status': 'success'}), 200
         else:
