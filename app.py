@@ -123,7 +123,7 @@ def add_appointment(cabinId, clickedHour):
     return 'Cabin not found'
 
 # Rota para receber a webhook do Mercado Pago
-@app.route('/webhook', methods=['POST'])
+@app.route('/webhook', methods=['POST', 'GET'])
 def webhook():
     try:
         request_data = request.json
