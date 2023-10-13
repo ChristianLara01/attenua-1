@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/x-icon">
+    <title>Catálogo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</head>
+<body>
+    <h1>Reservar Cabine</h1>
+    
+    <!-- Date Selection Button -->
+    <label for="data">Escolha a Data:</label>
+    <br><input class="data" type="date" id="datePicker" required></br>
+
+    <!-- Confirmation Button -->
+    <button class="btn" id="confirmButton">Verificar disponibilidade</button>
+
+    <!-- Display Area for Agendamentos -->
+    <div id="agendamentos"></div>
+    <div id="cabinsContent"></div>
+
+    <script>
+        // Get the date picker element
+        const datePicker = document.getElementById("datePicker");
+
+        // Get the current date in ISO format (yyyy-mm-dd)
+        const today = new Date().toISOString().split("T")[0];
+
+        // Set the min attribute of the date picker to the current date
+        datePicker.setAttribute("min", today);
+
+               // Function to click the "Verificar disponibilidade" button
+        function autoClickConfirmButton() {
+            const confirmButton = document.getElementById("confirmButton");
+            confirmButton.click();
+        }
+
+        // Automatically click the button every 10 seconds
+        setInterval(autoClickConfirmButton, 10000); // 10000 milliseconds = 10 seconds
+    </script>
+    </script>
+</body>
+</html>
