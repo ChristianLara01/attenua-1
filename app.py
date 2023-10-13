@@ -142,10 +142,11 @@ def webhook():
             payment_data = response.json()
             payment_status = payment_data.get('status')
             payment_reason = payment_data.get('reason')
+            print(payment_data)            
+            print(payment_reason)            
             if payment_status == 'approved':
                 if(payment_data.get('collection', {}).get('reason') == 'CABINE 1 14-10-2023 09:00'):
-                    print(payment_data)            
-                    print(payment_reason)            
+                    print("passou")                
             return jsonify({'status': 'success'}), 200
         else:
             return jsonify({'status': 'error', 'message': 'Resource URL not found'}), 500
