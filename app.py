@@ -153,6 +153,7 @@ def webhook():
             if payment_status == 'approved':
                 if(payment_data.get('collection', {}).get('reason') == 'CABINE 1 14-10-2023 09:00'):
                     print("passou")  
+                    print(add_appointment(cabinId, clickedHour, True))  
                     add_appointment(cabinId, clickedHour, True)              
             return jsonify({'status': 'success'}), 200
         else:
