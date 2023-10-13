@@ -55,7 +55,7 @@ def agendar(dia):
 @app.route('/<cabinId>/<clickedHour>', methods=['GET'])
 def pagamento(cabinId, clickedHour):
 
-    add_appointment(cabinId, clickedHour)
+    #add_appointment(cabinId, clickedHour, False)
 
     # Informações do produto
     print(cabinId)
@@ -91,7 +91,7 @@ def save_cabins_data(cabins_data):
     with open('data/cabins.json', 'w') as file:
         json.dump(cabins_data, file, indent=4)
 
-def add_appointment(cabinId, clickedHour):
+def add_appointment(cabinId, clickedHour, pagamento):
     # Parse the JSON data
     cabins_data = load_cabins()
 
@@ -109,7 +109,7 @@ def add_appointment(cabinId, clickedHour):
                 'qtde_horas': 1,  # You can set the duration as needed
                 'id_usuario': 1,  # Replace with the user ID
                 'senha_unica': password,  # Replace with a generated password
-                'pagamento': False  # Replace with a generated password
+                'pagamento': pagamento  # Replace with a generated password
             }
 
             # Add the new appointment to the cabin's appointments
@@ -142,14 +142,18 @@ def webhook():
             payment_data = response.json()
             payment_status = payment_data.get('collection', {}).get('status')
             payment_reason = payment_data.get('collection', {}).get('reason')
-            print("\n\noi\n")               
-            print(payment_data)      
-            print(payment_status)            
-            print(payment_reason)            
-            print("\n fui\n\n")            
+
+            # Split the string by spaces
+            parts = payment_reason.split()
+
+            # Extract the cabinId and clickedHour
+            cabinId = parts[1]  # "CABINE 1" is the second part (index 1)
+            clickedHour = parts[2] + " " + parts[3]  # "14-10-2023 09:00" is parts 2 and 3
+
             if payment_status == 'approved':
                 if(payment_data.get('collection', {}).get('reason') == 'CABINE 1 14-10-2023 09:00'):
-                    print("passou")                
+                    print("passou")  
+                    add_appointment(cabinId, clickedHour, True)              
             return jsonify({'status': 'success'}), 200
         else:
             return jsonify({'status': 'error', 'message': 'Resource URL not found'}), 500
