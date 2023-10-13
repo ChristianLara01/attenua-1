@@ -142,8 +142,10 @@ def webhook():
             payment_data = response.json()
             payment_status = payment_data.get('status')
             payment_reason = payment_data.get('reason')
-            print(payment_data)            
+            print("\n\noi\n")            
+            print(payment_status)            
             print(payment_reason)            
+            print("\n fui\n\n")            
             if payment_status == 'approved':
                 if(payment_data.get('collection', {}).get('reason') == 'CABINE 1 14-10-2023 09:00'):
                     print("passou")                
