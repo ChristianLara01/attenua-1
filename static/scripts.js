@@ -41,12 +41,13 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 // Filtrar as cabines com o ID igual a cabinId
                 const filteredCabins = data.filter(cabin => cabin.id === cabinId);
-
                 // Verificar se alguma cabine foi encontrada
                 if (filteredCabins.length > 0) {
                     // Filtrar os agendamentos do dia 
-                    const agendamentosDia = filteredCabins[0].agendamentos.filter(agendamento => agendamento.dia.includes(dia)  && agendamento.pagamento === true);
+                    const agendamentosDia = filteredCabins[0].agendamentos.filter(agendamento => agendamento.dia.includes(dia));
 
+                    console.log(filteredCabins)
+                    console.log(agendamentosDia)
                     if(dia != "NaN-NaN-NaN"){
                         // Verificar se existem agendamentos para o dia 
                         if (agendamentosDia.length >= 0) {
