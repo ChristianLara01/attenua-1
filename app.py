@@ -97,7 +97,8 @@ def pagamento(cabinId, clickedHour):
                 "title": produto_nome,
                 "quantity": 1,
                 "currency_id": "BRL",
-                "unit_price": produto_preco
+                "unit_price": produto_preco,
+                "codigo": "xxxxxx"
 
             }
         ],
@@ -144,10 +145,11 @@ def webhook():
             cabinId = parts[1]  # "CABINE 1" is the second part (index 1)
             clickedHour = parts[2] + " " + parts[3]  # "14-10-2023 09:00" is parts 2 and 3
 
+            print(payment_data)                      
             if payment_status == 'approved':
                 if(payment_data.get('collection', {}).get('reason') == 'CABINE 1 14-10-2023 09:00'):
                     print("passou")                      
-                    add_appointment(cabinId, clickedHour, True)              
+                    #add_appointment(cabinId, clickedHour, True)              
             return jsonify({'status': 'success'}), 200
         else:
             return jsonify({'status': 'error', 'message': 'Resource URL not found'}), 500
