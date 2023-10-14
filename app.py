@@ -6,63 +6,57 @@ import os
 import mercadopago
 import secrets
 import base64
+import pymongo
+from bson import json_util  # Importe o json_util do módulo bson
 
 token = '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'
 owner = 'ChristianLara01'
 repo = 'attenua-1'
-file_path = 'data/cabins.json'
 
+MONGO_URI = "mongodb+srv://attenua:agendamento@attenua.qypnplu.mongodb.net/"
 MERCADO_PAGO_ACCESS_TOKEN = "APP_USR-698417925527845-042300-824e07ad45574df479088eebe0fad53c-726883686"
 # Configure sua chave de acesso ao Mercado Pago
 mp = mercadopago.SDK(MERCADO_PAGO_ACCESS_TOKEN)
 
+#Mongo configurações
+def mongo_connect():
+    client = pymongo.MongoClient(MONGO_URI)
+    try:
+        client.admin.command('ping')
+        print("Conectado ao MongoDB!")
+    except Exception as e:
+        print(e)
+    return client
+
+def carregar():
+    client = mongo_connect()
+    db = client.attenua
+    reservas = db.reservas
+    # Use the find method to retrieve data from the collection
+    cursor = reservas.find({})
+    # Convert the cursor to a list of JSON objects
+    data = [doc for doc in cursor]
+    return data
+
+def salvar():
+    client = mongo_connect()
+    db = client.attenua
+    reservas = db.reservas
+    # Use the find method to retrieve data from the collection
+    cursor = reservas.find({})
+    # Convert the cursor to a list of JSON objects
+    data = [doc for doc in cursor]
+    return data
+
 app = Flask(__name__)
-
-# Caminho para o arquivo JSON de cabines
-cabins_file = os.path.join(os.path.dirname(__file__), 'data', 'cabins.json')
-
-import requests
-import base64
-
-def update_json_on_github(token, owner, repo, file_path, new_content, branch="main"):
-    # Define the API URL
-    url = f'https://api.github.com/repos/{owner}/{repo}/contents/{file_path}'
-
-    # Create a JSON payload with the new content
-    payload = {
-        "message": "Update JSON file",
-        "content": base64.b64encode(new_content.encode()).decode(),
-        "branch": branch
-    }
-
-    # Define headers with the personal access token for authentication
-    headers = {
-        "Authorization": f"token {token}"
-    }
-
-    # Make the PUT request to update the file
-    response = requests.put(url, json=payload, headers=headers)
-
-    if response.status_code == 200:
-        return f"File {file_path} has been updated successfully."
-    else:
-        return f"Failed to update file {file_path}. Status code: {response.status_code}, Message: {response.text}"
-
-# Função para carregar os dados do JSON
-def load_cabins():
-    with open(cabins_file, 'r') as file:
-        cabins = json.load(file)
-    return cabins
 
 @app.route('/data/cabins.json')
 def get_cabins_data():
     try:
-        # Carregue o conteúdo do arquivo JSON
-        with open('data/cabins.json', 'r') as json_file:
-            data = json_file.read()
-        # Transforme o conteúdo JSON em um objeto Python (dicionário)
-        data_dict = json.loads(data)
-        return jsonify(data_dict)
+        cabins = carregar()
+        # Convertemos os ObjectId para strings para torná-los serializáveis
+        cabins_json = json.loads(json_util.dumps(cabins))
+        return jsonify(cabins_json)
     except FileNotFoundError:
         # Se o arquivo não for encontrado, retorne uma resposta 404 (Not Found)
         return "Arquivo não encontrado", 404
@@ -72,7 +66,7 @@ def get_cabins_data():
     
 @app.route('/')
 def catalog():
-    cabins = load_cabins()
+    cabins = carregar()
     return render_template('catalog.html', cabins=cabins)
 
 @app.route('/reserve/<int:cabin_id>')
@@ -113,9 +107,7 @@ def pagamento(cabinId, clickedHour):
             "pending": "http://seusite.com/pendente"
         }
     }
-
     preference = mp.preference().create(preference_data)
-
     # Redirecione o usuário para a página de pagamento do Mercado Pago
     return redirect(preference['response']['init_point'])
 
@@ -123,39 +115,6 @@ def pagamento(cabinId, clickedHour):
 def save_cabins_data(cabins_data):
     with open('data/cabins.json', 'w') as file:
         json.dump(cabins_data, file, indent=4)
-
-def add_appointment(cabinId, clickedHour, pagamento):
-    # Parse the JSON data
-    cabins_data = load_cabins()
-    
-    # Find the cabin with the given ID
-    for cabin in cabins_data:
-        if str(cabin['id']) == cabinId:
-            # Extract the date and hour from clickedHour
-            date, hour = clickedHour.split(' ')
-            password = secrets.token_hex(3)
-
-            # Create a new appointment dictionary
-            new_appointment = {
-                'dia': date,
-                'hora': hour,
-                'qtde_horas': 1,  # You can set the duration as needed
-                'id_usuario': 1,  # Replace with the user ID
-                'senha_unica': password,  # Replace with a generated password
-                'pagamento': pagamento  # Replace with a generated password
-            }
-
-            # Add the new appointment to the cabin's appointments
-            cabin['agendamentos'].append(new_appointment)
-
-            # Save the updated JSON data
-            
-            result = update_json_on_github(token, owner, repo, file_path, cabins_data)
-            print(result)
-
-            return 'Appointment added successfully'
-
-    return 'Cabin not found'
 
 # Rota para receber a webhook do Mercado Pago
 @app.route('/webhook', methods=['POST', 'GET'])
