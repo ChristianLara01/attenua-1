@@ -4,3 +4,5 @@ mercadopago==2.2.1
 paho-mqtt==1.5.1
 gunicorn==20.1.0
 requests==2.26.0
+dnspython-2.4.2
+pymongo-4.5.0
