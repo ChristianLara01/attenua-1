@@ -22,15 +22,13 @@ MERCADO_PAGO_ACCESS_TOKEN = "APP_USR-698417925527845-042300-824e07ad45574df47908
 mp = mercadopago.SDK(MERCADO_PAGO_ACCESS_TOKEN)
 
 def sendEmail(dia, hora, senha):
-    dia = dia
-    hora = hora
-    senha = senha
+    
     # Email configuration
     sender_email = "attenua@atualle.com.br"
     receiver_email = "christian.0407@live.com"
     password = "Wwck$22xO4O#8V"
     subject = "Reserva realizada com sucesso - ATTENUA CABINES ACÚSTICAS"
-    message = "\nSua reserva ATTENUA foi realizada com sucesso!\n\nDia: {dia}\n\nHora: {hora}\n\nSenha: {senha}\n\nGuarde sua senha e utilize para liberar o acesso à sua bacine no momento da utilização\nAtenciosamente,\n ATTENUA CABINES ACÚSTICAS"
+    message = f'Sua reserva ATTENUA foi realizada com sucesso!\n\nDia: #{dia}\n\nHora: {hora}\n\nSenha: {senha}\n\nGuarde sua senha e utilize para liberar o acesso à sua bacine no momento da utilização\nAtenciosamente,\n ATTENUA CABINES ACÚSTICAS'
 
     # Create the MIME object
     msg = MIMEMultipart()
