@@ -8,6 +8,9 @@ import secrets
 import base64
 import pymongo
 from bson import json_util  # Importe o json_util do módulo bson
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 token = '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'
 owner = 'ChristianLara01'
@@ -17,6 +20,46 @@ MONGO_URI = "mongodb+srv://attenua:agendamento@attenua.qypnplu.mongodb.net/"
 MERCADO_PAGO_ACCESS_TOKEN = "APP_USR-698417925527845-042300-824e07ad45574df479088eebe0fad53c-726883686"
 # Configure sua chave de acesso ao Mercado Pago
 mp = mercadopago.SDK(MERCADO_PAGO_ACCESS_TOKEN)
+
+def sendEmail(dia, hora, senha):
+    dia = dia
+    hora = hora
+    senha = senha
+    # Email configuration
+    sender_email = "attenua@atualle.com.br"
+    receiver_email = "christian.0407@live.com"
+    password = "Wwck$22xO4O#8V"
+    subject = "Reserva realizada com sucesso - ATTENUA CABINES ACÚSTICAS"
+    message = "\nSua reserva ATTENUA foi realizada com sucesso!\n\nDia: {dia}\n\nHora: {hora}\n\nSenha: {senha}\n\nGuarde sua senha e utilize para liberar o acesso à sua bacine no momento da utilização\nAtenciosamente,\n ATTENUA CABINES ACÚSTICAS"
+
+    # Create the MIME object
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = subject
+
+    # Attach the message to the MIME object
+    msg.attach(MIMEText(message, 'plain'))
+
+    # Establish a connection to the SMTP server
+    smtp_server = "server51.srvlinux.info"  # For Gmail
+    smtp_port = 587  # Port for TLS
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()  # Upgrade the connection to a secure, encrypted connection
+
+        # Log in to your email account
+        server.login(sender_email, password)
+
+        # Send the email
+        server.sendmail(sender_email, receiver_email, msg.as_string())
+        print("Email sent successfully")
+
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+
+    finally:
+        server.quit()  # Close the connection
 
 #Mongo configurações
 def mongo_connect():
@@ -163,16 +206,18 @@ def webhook():
                 #if(payment_data.get('collection', {}).get('reason') == 'CABINE {cabinId} {clickedHour}'):
                 print("passou")                      
                 # Usage example
+                senha = secrets.token_hex(3)
                 novo_agendamento = {
                     "dia": parts[2],
                     "hora": parts[3],
                     "qtde_horas": 1,
                     "id_usuario": 3,
-                    "senha_unica": "123abc"
+                    "senha_unica": senha
                 }
 
                 resultado = adicionar_agendamento(1, novo_agendamento)
                 print(resultado)            
+                sendEmail(parts[2], parts[3], senha)
             return jsonify({'status': 'success'}), 200
         else:
             return jsonify({'status': 'error', 'message': 'Resource URL not found'}), 500
