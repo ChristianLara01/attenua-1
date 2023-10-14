@@ -38,15 +38,29 @@ def carregar():
     data = [doc for doc in cursor]
     return data
 
-def salvar():
+def adicionar_agendamento(id_cabin, novo_agendamento):
+    # Connect to MongoDB
     client = mongo_connect()
     db = client.attenua
     reservas = db.reservas
-    # Use the find method to retrieve data from the collection
-    cursor = reservas.find({})
-    # Convert the cursor to a list of JSON objects
-    data = [doc for doc in cursor]
-    return data
+
+    # Define the filter condition to find the document with the specified id
+    filter_condition = {"id": id_cabin}
+
+    # Define the update operation to push the new agendamento to the "agendamentos" array
+    update_operation = {
+        "$push": {
+            "agendamentos": novo_agendamento
+        }
+    }
+
+    # Update the document with the new agendamento
+    result = reservas.update_one(filter_condition, update_operation)
+
+    if result.modified_count > 0:
+        return "Agendamento adicionado com sucesso."
+    else:
+        return "Cabin não encontrado ou agendamento não adicionado."
 
 app = Flask(__name__)
 
@@ -98,7 +112,6 @@ def pagamento(cabinId, clickedHour):
                 "quantity": 1,
                 "currency_id": "BRL",
                 "unit_price": produto_preco,
-                "codigo": "xxxxxx"
 
             }
         ],
@@ -147,9 +160,19 @@ def webhook():
 
             print(payment_data)                      
             if payment_status == 'approved':
-                if(payment_data.get('collection', {}).get('reason') == 'CABINE 1 14-10-2023 09:00'):
-                    print("passou")                      
-                    #add_appointment(cabinId, clickedHour, True)              
+                #if(payment_data.get('collection', {}).get('reason') == 'CABINE {cabinId} {clickedHour}'):
+                print("passou")                      
+                # Usage example
+                novo_agendamento = {
+                    "dia": parts[2],
+                    "hora": parts[3],
+                    "qtde_horas": 1,
+                    "id_usuario": 3,
+                    "senha_unica": "123abc"
+                }
+
+                resultado = adicionar_agendamento(1, novo_agendamento)
+                print(resultado)            
             return jsonify({'status': 'success'}), 200
         else:
             return jsonify({'status': 'error', 'message': 'Resource URL not found'}), 500
