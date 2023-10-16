@@ -235,7 +235,7 @@ def webhook():
 
             # Split the string by spaces
             parts = payment_reason.split()
-
+            print(parts)
             # Extract the cabinId and clickedHour
             cabinId = parts[1]  # "CABINE 1" is the second part (index 1)
             clickedHour = parts[2] + " " + parts[3]  # "14-10-2023 09:00" is parts 2 and 3
