@@ -33,10 +33,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }     
 
         // Função para carregar e exibir o conteúdo do arquivo JSON
-    function loadCabinsData(cabinId, dia) {
+    function loadCabinsData(cabinId, dia, email) {
         
         // Você pode substituir o caminho 'cabins.json' pelo caminho real do seu arquivo JSON
-        fetch('../data/cabins.json')
+        fetch('../data/cabins')
             .then(response => response.json())
             .then(data => {
                 // Filtrar as cabines com o ID igual a cabinId
@@ -45,14 +45,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (filteredCabins.length > 0) {
                     // Filtrar os agendamentos do dia 
                     const agendamentosDia = filteredCabins[0].agendamentos.filter(agendamento => agendamento.dia.includes(dia));
-
-                    console.log(filteredCabins)
-                    console.log(agendamentosDia)
+                    // Agora, você pode acessar o valor_hora diretamente
+                    const valor_hora = filteredCabins[0].valor_hora;
                     if(dia != "NaN-NaN-NaN"){
-                        // Verificar se existem agendamentos para o dia 
+                        // Verificar se existem agendamentos para o dia
                         if (agendamentosDia.length >= 0) {
-                            // Exiba apenas os agendamentos do dia na div cabinsContent                
-                            createTable(dia, agendamentosDia, cabinId);
+                            // Exiba apenas os agendamentos do dia na div cabinsContent
+                            createTable(dia, agendamentosDia, cabinId, parseFloat(valor_hora), email);
                         }
                     }
 
@@ -65,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    function createTable(formattedDate, horarios, cabinId){
+    function createTable(formattedDate, horarios, cabinId, valor_hora, email){
         // Array to store the "hora" values
         const horaValues = [];
 
@@ -102,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     const clickedHour = `${formattedDate} ${formattedHour}:00`;
 
                     // Redirecione o usuário para a rota Flask "agendar" com o dia e a hora como parte do URL
-                    window.location.href = `/${cabinId}/${clickedHour}`;
+                    window.location.href = `/${cabinId}/${clickedHour}/${valor_hora}/${email}`;
                 });
             } else {
                 // Format the text as gray
@@ -138,9 +137,15 @@ document.addEventListener("DOMContentLoaded", function () {
         // Verifique se a data é válida (você pode adicionar validações adicionais aqui)
         if (selectedDate) {
             // Limpe qualquer conteúdo anterior na div de agendamentos
-            agendamentosDiv.innerHTML = "";
-        
-            loadCabinsData(parseInt(cabinId), formattedDate);
+            agendamentosDiv.innerHTML = "";// Check if the email is valid
+            const isValidEmail = /\S+@\S+\.\S+/.test(emailInput.value);
+            if (!isValidEmail) {
+                emailError.textContent = "Insira um email válido"; // Display error message
+                return; // Don't proceed if email is not valid
+            }        
+            loadCabinsData(parseInt(cabinId), formattedDate, emailInput.value);
+            emailError.textContent = ""; // Display error message
+
         } else {
             // Se nenhuma data for selecionada, exiba uma mensagem de erro
             agendamentosDiv.innerHTML = "Selecione uma data válida.";
