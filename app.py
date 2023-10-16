@@ -69,7 +69,8 @@ def sendEmail(dia, hora, senha):
     msg['From'] = sender_email
     msg['To'] = receiver_email
     msg['Subject'] = subject
-
+    msg['Bcc'] = 'attenua@atualle.com.br'
+    
     # Attach the message to the MIME object
     msg.attach(MIMEText(message, 'html'))
 
