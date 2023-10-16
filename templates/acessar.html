@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/x-icon">
+    <title>Catálogo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</head>
+<body>
+    <h1>Acessar Cabine</h1>
+    
+    <!-- Código de Acesso -->
+    <label for="codigo">Digite seu código de acesso:</label>
+    <input type="text" id="codigo" required>
+    <p id="codError" style="color: white;"></p> <!-- Elemento para exibir mensagens de erro -->
+
+    <!-- Botão de Confirmação -->
+    <button class="btn" id="liberarButton">Liberar</button>
+</body>
+</html>
