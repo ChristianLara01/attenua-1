@@ -21,71 +21,69 @@ MERCADO_PAGO_ACCESS_TOKEN = "APP_USR-698417925527845-042300-824e07ad45574df47908
 # Configure sua chave de acesso ao Mercado Pago
 mp = mercadopago.SDK(MERCADO_PAGO_ACCESS_TOKEN)
 
-def sendEmail(dia, hora, senha):
+def sendEmail(dia, hora, senha, recipients):
     
     # Email configuration
     sender_email = "attenua@atualle.com.br"
-    receiver_email = "christian.0407@live.com"
     password = "Wwck$22xO4O#8V"
     subject = "Reserva realizada com sucesso - ATTENUA CABINES ACÚSTICAS"
     message = f"""
-    <html>
-    <head>
-        <style>
-            /* Define the card style */
-            .card {{
-                background-color: #f3f3f3;
-                border: 1px solid #ddd;
-                border-radius: 5px;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-            }}
-            .card h1 {{
-                color: #333;
-                font-size: 24px;
-            }}
-            .card p {{
-                color: #666;
-                font-size: 16px;
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <h1>Reserva realizada com sucesso - ATTENUA CABINES ACÚSTICAS</h1>
-            <p>Sua reserva ATTENUA foi realizada com sucesso!</p>
-            <p>Dia: {dia}</p>
-            <p>Hora: {hora}</p>
-            <p>Senha: {senha}</p>
-            <p>Guarde sua senha e utilize para liberar o acesso à sua cabine no momento da utilização.</p>
-            <p>Atenciosamente, ATTENUA CABINES ACÚSTICAS</p>
-        </div>
-    </body>
-    </html>
-    """
+        <html>
+        <head>
+            <style>
+                /* Define the card style */
+                .card {{
+                    background-color: #f3f3f3;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                    padding: 20px;
+                    font-family: Arial, sans-serif;
+                }}
+                .card h1 {{
+                    color: #333;
+                    font-size: 24px;
+                }}
+                .card p {{
+                    color: #666;
+                    font-size: 16px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h1>Reserva realizada com sucesso - ATTENUA CABINES ACÚSTICAS</h1>
+                <p>Sua reserva ATTENUA foi realizada com sucesso!</p>
+                <p>Dia: {dia}</p>
+                <p>Hora: {hora}</p>
+                <p>Senha: {senha}</p>
+                <p>Guarde sua senha e utilize para liberar o acesso à sua cabine no momento da utilização.</p>
+                <p>Atenciosamente, ATTENUA CABINES ACÚSTICAS</p>
+            </div>
+        </body>
+        </html>
+        """
 
     # Create the MIME object
     msg = MIMEMultipart("alternative")
     msg['From'] = sender_email
-    msg['To'] = receiver_email
     msg['Subject'] = subject
-    msg['Bcc'] = 'attenua@atualle.com.br'
-    
+
+    # Set 'To' header with multiple recipients
+    msg['To'] = ', '.join(recipients)
+
     # Attach the message to the MIME object
     msg.attach(MIMEText(message, 'html'))
 
     # Establish a connection to the SMTP server
-    smtp_server = "server51.srvlinux.info"  # For Gmail
-    smtp_port = 465  # Port for TLS
-    try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()  # Upgrade the connection to a secure, encrypted connection
+    smtp_server = "server51.srvlinux.info"
+    smtp_port = 465  # Port for SMTPS (SSL/TLS)
 
-        # Log in to your email account
+    try:
+        server = smtplib.SMTP_SSL(smtp_server, smtp_port)  # Use SMTP_SSL for SSL/TLS
         server.login(sender_email, password)
 
         # Send the email
-        server.sendmail(sender_email, receiver_email, msg.as_string())
+        server.sendmail(sender_email, recipients, msg.as_string())
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
@@ -241,6 +239,8 @@ def webhook():
             # Extract the cabinId and clickedHour
             cabinId = parts[1]  # "CABINE 1" is the second part (index 1)
             clickedHour = parts[2] + " " + parts[3]  # "14-10-2023 09:00" is parts 2 and 3
+            email = parts[4]
+            print(email)
                      
             if payment_status == 'approved':
                 #if(payment_data.get('collection', {}).get('reason') == 'CABINE {cabinId} {clickedHour}'):
@@ -255,7 +255,11 @@ def webhook():
                 }
 
                 resultado = adicionar_agendamento(1, novo_agendamento)
-                sendEmail(parts[2], parts[3], senha)
+                # List of recipient email addresses
+                recipients = ["attenua@atualle.com.br", email]
+
+                # Call the function to send the email to multiple recipients
+                sendEmail(parts[2], parts[3], senha, recipients)
             return jsonify({'status': 'success'}), 200
         else:
             return jsonify({'status': 'error', 'message': 'Resource URL not found'}), 500
