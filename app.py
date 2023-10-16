@@ -230,17 +230,15 @@ def webhook():
             # Retrieve the payment information from the resource URL
             response = requests.get(resource_url, headers=headers)
             payment_data = response.json()
+            print(payment_data)
             payment_status = payment_data.get('collection', {}).get('status')
             payment_reason = payment_data.get('collection', {}).get('reason')
 
             # Split the string by spaces
             parts = payment_reason.split()
-            print(parts)
             # Extract the cabinId and clickedHour
             cabinId = parts[1]  # "CABINE 1" is the second part (index 1)
             clickedHour = parts[2] + " " + parts[3]  # "14-10-2023 09:00" is parts 2 and 3
-            email = parts[4]
-            print(email)
                      
             if payment_status == 'approved':
                 #if(payment_data.get('collection', {}).get('reason') == 'CABINE {cabinId} {clickedHour}'):
@@ -256,7 +254,7 @@ def webhook():
 
                 resultado = adicionar_agendamento(1, novo_agendamento)
                 # List of recipient email addresses
-                recipients = ["attenua@atualle.com.br", email]
+                recipients = ["attenua@atualle.com.br", "produto3@atualle.com.br"]
 
                 # Call the function to send the email to multiple recipients
                 sendEmail(parts[2], parts[3], senha, recipients)
