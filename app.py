@@ -75,7 +75,7 @@ def sendEmail(dia, hora, senha):
 
     # Establish a connection to the SMTP server
     smtp_server = "server51.srvlinux.info"  # For Gmail
-    smtp_port = 587  # Port for TLS
+    smtp_port = 465  # Port for TLS
     try:
         server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()  # Upgrade the connection to a secure, encrypted connection
