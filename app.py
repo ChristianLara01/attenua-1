@@ -28,16 +28,50 @@ def sendEmail(dia, hora, senha):
     receiver_email = "christian.0407@live.com"
     password = "Wwck$22xO4O#8V"
     subject = "Reserva realizada com sucesso - ATTENUA CABINES ACÚSTICAS"
-    message = f'Sua reserva ATTENUA foi realizada com sucesso!\n\nDia: #{dia}\n\nHora: {hora}\n\nSenha: {senha}\n\nGuarde sua senha e utilize para liberar o acesso à sua bacine no momento da utilização\nAtenciosamente,\n ATTENUA CABINES ACÚSTICAS'
+    message = f"""
+    <html>
+    <head>
+        <style>
+            /* Define the card style */
+            .card {{
+                background-color: #f3f3f3;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 20px;
+                font-family: Arial, sans-serif;
+            }}
+            .card h1 {{
+                color: #333;
+                font-size: 24px;
+            }}
+            .card p {{
+                color: #666;
+                font-size: 16px;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>Reserva realizada com sucesso - ATTENUA CABINES ACÚSTICAS</h1>
+            <p>Sua reserva ATTENUA foi realizada com sucesso!</p>
+            <p>Dia: {dia}</p>
+            <p>Hora: {hora}</p>
+            <p>Senha: {senha}</p>
+            <p>Guarde sua senha e utilize para liberar o acesso à sua cabine no momento da utilização.</p>
+            <p>Atenciosamente, ATTENUA CABINES ACÚSTICAS</p>
+        </div>
+    </body>
+    </html>
+    """
 
     # Create the MIME object
-    msg = MIMEMultipart()
+    msg = MIMEMultipart("alternative")
     msg['From'] = sender_email
     msg['To'] = receiver_email
     msg['Subject'] = subject
 
     # Attach the message to the MIME object
-    msg.attach(MIMEText(message, 'plain'))
+    msg.attach(MIMEText(message, 'html'))
 
     # Establish a connection to the SMTP server
     smtp_server = "server51.srvlinux.info"  # For Gmail
@@ -51,7 +85,6 @@ def sendEmail(dia, hora, senha):
 
         # Send the email
         server.sendmail(sender_email, receiver_email, msg.as_string())
-        print("Email sent successfully")
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
@@ -64,7 +97,6 @@ def mongo_connect():
     client = pymongo.MongoClient(MONGO_URI)
     try:
         client.admin.command('ping')
-        print("Conectado ao MongoDB!")
     except Exception as e:
         print(e)
     return client
@@ -105,7 +137,7 @@ def adicionar_agendamento(id_cabin, novo_agendamento):
 
 app = Flask(__name__)
 
-@app.route('/data/cabins.json')
+@app.route('/data/cabins')
 def get_cabins_data():
     try:
         cabins = carregar()
@@ -134,16 +166,13 @@ def agendar(dia):
     return f'Dia selecionado: {dia}'
 
 
-@app.route('/<cabinId>/<clickedHour>', methods=['GET'])
-def pagamento(cabinId, clickedHour):
+@app.route('/<cabinId>/<clickedHour>/<valor_hora>/<email>', methods=['GET'])
+def pagamento(cabinId, clickedHour, valor_hora, email):
 
     #add_appointment(cabinId, clickedHour, False)
 
     # Informações do produto
-    print(cabinId)
-    print(clickedHour)
     produto_nome = "CABINE " +  cabinId + " " + clickedHour
-    produto_preco = 0.02
 
     # Crie uma preferência de pagamento
     preference_data = {
@@ -152,14 +181,27 @@ def pagamento(cabinId, clickedHour):
                 "title": produto_nome,
                 "quantity": 1,
                 "currency_id": "BRL",
-                "unit_price": produto_preco,
+                "unit_price": float(valor_hora),
 
             }
         ],
         "back_urls": {
-            "success": "http://seusite.com/sucesso",
-            "failure": "http://seusite.com/erro",
-            "pending": "http://seusite.com/pendente"
+            "success": "http://attenua.com.br/",
+            "failure": "http://attenua.com.br/",
+            "pending": "http://attenua.com.br/"
+        },
+        "payer": {
+            "email": email  # Inclui o e-mail do comprador
+        },
+        "payment_methods": {
+            "excluded_payment_methods": [
+                {"id": "bolbradesco"},  # Exclui o boleto bancário
+                {"id": "bank_transfer"}  # Exclui transferência bancária
+            ],
+            "excluded_payment_types": [
+                {"id": "atm"},  # Exclui pagamento em caixas eletrônicos
+                {"id": "ticket"}  # Exclui pagamento com ticket
+            ]
         }
     }
     preference = mp.preference().create(preference_data)
@@ -198,11 +240,9 @@ def webhook():
             # Extract the cabinId and clickedHour
             cabinId = parts[1]  # "CABINE 1" is the second part (index 1)
             clickedHour = parts[2] + " " + parts[3]  # "14-10-2023 09:00" is parts 2 and 3
-
-            print(payment_data)                      
+                     
             if payment_status == 'approved':
                 #if(payment_data.get('collection', {}).get('reason') == 'CABINE {cabinId} {clickedHour}'):
-                print("passou")                      
                 # Usage example
                 senha = secrets.token_hex(3)
                 novo_agendamento = {
@@ -214,7 +254,6 @@ def webhook():
                 }
 
                 resultado = adicionar_agendamento(1, novo_agendamento)
-                print(resultado)            
                 sendEmail(parts[2], parts[3], senha)
             return jsonify({'status': 'success'}), 200
         else:
