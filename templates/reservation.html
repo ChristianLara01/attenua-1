@@ -14,6 +14,12 @@
     <!-- Date Selection Button -->
     <label for="data">Escolha a Data:</label>
     <br><input class="data" type="date" id="datePicker" required></br>
+    
+    <!-- E-mail -->
+    <label for="email">E-mail:</label>
+    <br><input type="email" id="email" required></br>
+    <p id="emailError" style="color: rgb(255, 255, 255);"></p> <!-- Element to display error message -->
+
 
     <!-- Confirmation Button -->
     <button class="btn" id="confirmButton">Verificar disponibilidade</button>
@@ -25,6 +31,8 @@
     <script>
         // Get the date picker element
         const datePicker = document.getElementById("datePicker");
+        const emailInput = document.getElementById("email");
+        const emailError = document.getElementById("emailError");
 
         // Get the current date in ISO format (yyyy-mm-dd)
         const today = new Date().toISOString().split("T")[0];
@@ -32,15 +40,13 @@
         // Set the min attribute of the date picker to the current date
         datePicker.setAttribute("min", today);
 
-               // Function to click the "Verificar disponibilidade" button
+        // Function to click the "Verificar disponibilidade" button
         function autoClickConfirmButton() {
             const confirmButton = document.getElementById("confirmButton");
-            confirmButton.click();
         }
 
         // Automatically click the button every 30 seconds
         setInterval(autoClickConfirmButton, 30000); // 30000 milliseconds = 30 seconds
-    </script>
     </script>
 </body>
 </html>
