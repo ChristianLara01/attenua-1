@@ -10,6 +10,27 @@ document.addEventListener("DOMContentLoaded", function () {
     // Selecione a div onde você deseja exibir o conteúdo do arquivo JSON
     const cabinsContentDiv = document.getElementById("cabinsContent");
 
+    // Obtenha o elemento de entrada e o elemento de mensagem de erro
+    const codigoInput = document.getElementById("codigo");
+    const codError = document.getElementById("codError");
+
+    // Obtenha o botão de confirmação
+    const liberarButton = document.getElementById("liberarButton");
+
+    // Adicione um ouvinte de evento de clique ao botão de confirmação
+    liberarButton.addEventListener("click", function () {
+        // Obtenha o valor do campo de código
+        const codigoValue = codigoInput.value;
+
+        // Verifique se o código não está vazio
+        if (codigoValue.trim() !== "") {
+            loadCabinsAccess(codigoValue);
+        } else {
+            codError.textContent = "Código inválido"; // Exibir "Não Ok"
+            codError.style.color = "white"; // Definir a cor do texto como vermelho
+        }
+    });
+
     // Função para formatar a data no formato "dd-mm-aaaa"
     function formatDate(selectedDate) {
         const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
@@ -32,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return cabinId;
     }     
 
-        // Função para carregar e exibir o conteúdo do arquivo JSON
+    // Função para carregar e exibir o conteúdo do arquivo JSON
     function loadCabinsData(cabinId, dia, email) {
         
         // Você pode substituir o caminho 'cabins.json' pelo caminho real do seu arquivo JSON
@@ -63,6 +84,24 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error('Erro ao carregar o arquivo JSON:', error);
             });
     }
+
+    function loadCabinsAccess(codigo) {
+        // Certifique-se de que o código tem pelo menos 6 caracteres
+        if (codigo.length > 6) {
+            // Obtenha as primeiras 6 letras (senha)
+            const senha = codigo.substring(0, 6);
+
+            // Obtenha o restante do código (identificação da cabine)
+            const identificacaoCabine = codigo.substring(6);
+            console.log("liberou");
+
+            
+    
+        } else {
+            console.log("Código de acesso muito curto");
+        }
+    }
+    
 
     function createTable(formattedDate, horarios, cabinId, valor_hora, email){
         // Array to store the "hora" values
@@ -151,4 +190,20 @@ document.addEventListener("DOMContentLoaded", function () {
             agendamentosDiv.innerHTML = "Selecione uma data válida.";
         }
     });
+
+    // Add a click event listener to the confirmation button
+    liberarButton.addEventListener("click", function () {
+        // Get the value from the codigo input
+        const codigoValue = codigoInput.value;
+
+        // Check if the codigoValue is not empty
+        if (codigoValue.trim() !== "") {
+            codError.textContent = "Ok"; // Display "Ok"
+            codError.style.color = "green"; // Set text color to green
+        } else {
+            codError.textContent = "Não Ok"; // Display "Não Ok"
+            codError.style.color = "red"; // Set text color to red
+        }
+    });
+
 });
