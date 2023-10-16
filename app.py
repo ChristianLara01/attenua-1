@@ -171,7 +171,7 @@ def pagamento(cabinId, clickedHour, valor_hora, email):
     #add_appointment(cabinId, clickedHour, False)
 
     # Informações do produto
-    produto_nome = "CABINE " +  cabinId + " " + clickedHour
+    produto_nome = "CABINE " +  cabinId + " " + clickedHour + " " + email
 
     # Crie uma preferência de pagamento
     preference_data = {
@@ -239,6 +239,7 @@ def webhook():
             # Extract the cabinId and clickedHour
             cabinId = parts[1]  # "CABINE 1" is the second part (index 1)
             clickedHour = parts[2] + " " + parts[3]  # "14-10-2023 09:00" is parts 2 and 3
+            email = parts[4]
                      
             if payment_status == 'approved':
                 #if(payment_data.get('collection', {}).get('reason') == 'CABINE {cabinId} {clickedHour}'):
@@ -254,7 +255,7 @@ def webhook():
 
                 resultado = adicionar_agendamento(1, novo_agendamento)
                 # List of recipient email addresses
-                recipients = ["attenua@atualle.com.br", "produto3@atualle.com.br"]
+                recipients = ["attenua@atualle.com.br", email]
 
                 # Call the function to send the email to multiple recipients
                 sendEmail(parts[2], parts[3], senha, recipients)
