@@ -155,6 +155,11 @@ def catalog():
     cabins = carregar()
     return render_template('catalog.html', cabins=cabins)
 
+
+@app.route('/acessar')
+def acesso():
+    return render_template('acessar.html')
+
 @app.route('/reserve/<int:cabin_id>')
 def reserve(cabin_id):
     return render_template('reservation.html', cabin_id=cabin_id)
@@ -230,6 +235,7 @@ def webhook():
             # Retrieve the payment information from the resource URL
             response = requests.get(resource_url, headers=headers)
             payment_data = response.json()
+            print(payment_data)
             payment_status = payment_data.get('collection', {}).get('status')
             payment_reason = payment_data.get('collection', {}).get('reason')
 
