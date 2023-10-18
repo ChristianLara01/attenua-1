@@ -283,7 +283,6 @@ def webhook():
                     "id_usuario": 3,
                     "senha_unica": senha
                 }
-                send_mqtt_message("1")
                 resultado = adicionar_agendamento(1, novo_agendamento)
                 # List of recipient email addresses
                 recipients = ["attenua@atualle.com.br", email]
