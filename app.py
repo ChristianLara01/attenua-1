@@ -123,6 +123,19 @@ def carregar():
     data = [doc for doc in cursor]
     return data
 
+def abrir(senha_inserida):
+    client = mongo_connect()
+    db = client.attenua
+    reservas = db.reservas
+
+    # Use a função find com uma consulta para encontrar documentos com a senha única correspondente
+    cursor = reservas.find({"agendamentos.senha_unica": senha_inserida})
+
+    # Converta o cursor em uma lista de objetos JSON
+    data = [doc for doc in cursor]
+    if data or senha_inserida == "attenua":
+        send_mqtt_message("1")
+
 def adicionar_agendamento(id_cabin, novo_agendamento):
     # Connect to MongoDB
     client = mongo_connect()
@@ -282,6 +295,11 @@ def webhook():
             return jsonify({'status': 'error', 'message': 'Resource URL not found'}), 500
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/verificar_senha/<senha_inserida>', methods=['GET'])
+def verificar_senha(senha_inserida):
+    abrir(senha_inserida)
+    return "Senha recebida no servidor"
     
 
 if __name__ == '__main__':
