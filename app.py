@@ -11,6 +11,19 @@ from bson import json_util  # Importe o json_util do módulo bson
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import paho.mqtt.client as mqtt
+
+# MQTT Configuration
+MQTT_BROKER_HOST = "mqtt.eclipseprojects.io"
+MQTT_BROKER_PORT = 1883
+MQTT_TOPIC = "estado"
+# Function to send MQTT message
+
+def send_mqtt_message(payload):
+    client = mqtt.Client()
+    client.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT)
+    client.publish(MQTT_TOPIC, payload)
+    client.disconnect()
 
 token = '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'
 owner = 'ChristianLara01'
@@ -257,7 +270,7 @@ def webhook():
                     "id_usuario": 3,
                     "senha_unica": senha
                 }
-
+                send_mqtt_message("1")
                 resultado = adicionar_agendamento(1, novo_agendamento)
                 # List of recipient email addresses
                 recipients = ["attenua@atualle.com.br", email]
