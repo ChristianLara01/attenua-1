@@ -9,7 +9,19 @@
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </head>
 <body>
-    <h1 class="head">Catálogo</h1>
+    
+
+    <h1>Acessar Cabine</h1>
+
+    <!-- Código de Acesso -->
+    <label for="codigo">Digite seu código de acesso:</label>
+    <input type="text" id="codigo" required>
+    <button class="btn" id="liberarButton" onclick="redirecionar()">Liberar</button>
+    <p id="codError" style="color: white;"></p> <!-- Elemento para exibir mensagens de erro -->
+
+
+    
+    <h1 class="head">Reserve seu horário</h1>
     <div class="product-container"><abbr title=""></abbr>
         {% for cabin in cabins %}
         <div class="produtos">
@@ -28,8 +40,28 @@
         </div>
         {% endfor %}
     </div>
+    <script>
+
+    function redirecionar() {
+            var codigo = document.getElementById("codigo").value; // Obtém o valor do campo "codigo"
+
+            // Faça uma solicitação AJAX para a rota do Flask
+            fetch('/verificar_senha/' + codigo, {
+                method: 'GET'
+            })
+            .then(response => response.text())
+            .then(data => {
+                // Exiba a resposta no console (no terminal Flask)
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+            });
+        }
+    </script>
 </body>
 </html>
+    
 
 
 
