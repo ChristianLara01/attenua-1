@@ -35,10 +35,11 @@ MERCADO_PAGO_ACCESS_TOKEN = "APP_USR-698417925527845-042300-824e07ad45574df47908
 # Configure sua chave de acesso ao Mercado Pago
 mp = mercadopago.SDK(MERCADO_PAGO_ACCESS_TOKEN)
 
-def sendEmail(dia, hora, senha, recipients):
-    
+def sendEmail(novo_agendamento):    
+
     # Email configuration
     sender_email = "attenua@atualle.com.br"
+    recipients = [sender_email, novo_agendamento['id_usuario']]
     password = "Wwck$22xO4O#8V"
     subject = "Reserva realizada com sucesso - ATTENUA CABINES ACÚSTICAS"
     message = f"""
@@ -67,9 +68,9 @@ def sendEmail(dia, hora, senha, recipients):
             <div class="card">
                 <h1>Reserva realizada com sucesso - ATTENUA CABINES ACÚSTICAS</h1>
                 <p>Sua reserva ATTENUA foi realizada com sucesso!</p>
-                <p>Dia: {dia}</p>
-                <p>Hora: {hora}</p>
-                <p>Senha: {senha}</p>
+                <p>Dia: {novo_agendamento['dia']}</p>
+                <p>Hora: {novo_agendamento['hora']}</p>
+                <p>Senha: {novo_agendamento['senha_unica']}</p>
                 <p>Guarde sua senha e utilize para liberar o acesso à sua cabine no momento da utilização.</p>
                 <p>Atenciosamente, ATTENUA CABINES ACÚSTICAS</p>
             </div>
@@ -173,12 +174,8 @@ def adicionar_agendamento(id_cabin, novo_agendamento):
      # Defina a senha gerada no 'novo_agendamento'
     novo_agendamento["senha_unica"] = senha
 
-    recipients = ["attenua@atualle.com.br", novo_agendamento['id_usuario']]
-    # Call the function to send the email to multiple recipients
-    sendEmail(novo_agendamento['dia'], novo_agendamento['hora'], senha, recipients)
-
     # Define the filter condition to find the document with the specified id
-    filter_condition = {"id": id_cabin}
+    filter_condition = {"id": int(id_cabin)}
 
     # Define the update operation to push the new agendamento to the "agendamentos" array
     update_operation = {
@@ -191,6 +188,7 @@ def adicionar_agendamento(id_cabin, novo_agendamento):
     result = reservas.update_one(filter_condition, update_operation)
 
     if result.modified_count > 0:
+        sendEmail(novo_agendamento)
         print ("Agendamento adicionado com sucesso.")
     else:
         print ("Cabin não encontrado ou agendamento não adicionado.")
@@ -273,11 +271,6 @@ def pagamento(cabinId, clickedHour, valor_hora, email):
     preference = mp.preference().create(preference_data)
     # Redirecione o usuário para a página de pagamento do Mercado Pago
     return redirect(preference['response']['init_point'])
-
-# Save the JSON data back to the file
-def save_cabins_data(cabins_data):
-    with open('data/cabins.json', 'w') as file:
-        json.dump(cabins_data, file, indent=4)
 
 # Rota para receber a webhook do Mercado Pago
 @app.route('/webhook', methods=['POST', 'GET'])
