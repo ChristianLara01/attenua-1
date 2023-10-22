@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
     // Selecione o botão de confirmação e a caixa de datas
     const cabinId = getCabinIdFromURL();
