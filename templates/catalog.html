@@ -3,39 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/x-icon">
     <title>Reservas</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </head>
 <body>
-    
+    <div class="faixa-superior">
+        <a class="link-home" href="/">
+            <img src="static/images/logo.png" alt="Attenua">
+        </a>
+    </div>
+    <div class="horizontal-faixa">
+        <!-- Código de Acesso -->
+        <label for="codigo">Acessar Cabine:</label>
+        <input type="text" id="codigo" required placeholder="Insira seu código de acesso">
+        <button class="btn" id="liberarButton" onclick="redirecionar()">Liberar</button>
+        <p id="codError" style="color: white;"></p> <!-- Elemento para exibir mensagens de erro -->
+    </div>
 
-    <h1>Acessar Cabine</h1>
-
-    <!-- Código de Acesso -->
-    <label for="codigo">Digite seu código de acesso:</label>
-    <input type="text" id="codigo" required>
-    <button class="btn" id="liberarButton" onclick="redirecionar()">Liberar</button>
-    <p id="codError" style="color: white;"></p> <!-- Elemento para exibir mensagens de erro -->
-
-
+    <div >
+        <br>
+    </div>
     
     <h1 class="head">Reserve seu horário</h1>
     <div class="product-container"><abbr title=""></abbr>
         {% for cabin in cabins %}
         <div class="produtos">
+            <h2>{{ cabin['nome'] }}</h2>
+            <div class="card">
             <div class="coluna1">
-                <h2>{{ cabin['nome'] }}</h2>
                 <img class="custom-image {{ cabin['image_class'] }}" src="{{ url_for('static', filename='images/' + cabin['imagem']) }}" alt="{{ cabin['nome'] }}">
             </div>    
             <div class="coluna2">
-                <p>{{ cabin['valor_hora'] }} R$ / hora</p>
+                <p> R$ {{ cabin['valor_hora'] }}/hora</p>
+                <p></p>
+                <label>Localizar</label>      
                 <a href="https://www.google.com/maps/place/{{ cabin['latitude'] }},{{ cabin['longitude'] }}" target="_blank">
                     <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 384 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#00c896}</style><path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg>
-                </a> 
-                <label>Localizar</label>               
+                </a>          
+                <p></p>
                 <a href="{{ url_for('reserve', cabin_id=cabin['id']) }}" class="btn" style="text-decoration: none;">Reservar</a>
+            </div>
             </div>    
         </div>
         {% endfor %}
@@ -61,8 +70,3 @@
     </script>
 </body>
 </html>
-    
-
-
-
-
