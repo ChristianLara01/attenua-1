@@ -12,6 +12,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import paho.mqtt.client as mqtt
+import pytz
 
 
 # MQTT Configuration
@@ -134,12 +135,14 @@ def abrir(senha_inserida):
     if doc:
         agendamento = next(ag for ag in doc["agendamentos"] if ag["senha_unica"] == senha_inserida)
         if( verificar_agendamento(agendamento)):
+             send_mqtt_message(doc['id'])
              print(f"Abriu cabine ID: {doc['id']}")
 
 
 def verificar_agendamento(agendamento):
+    fuso_horario = pytz.timezone('America/Sao_Paulo')
     # Obtenha a data e hora atuais
-    data_hora_atual = datetime.now()
+    data_hora_atual = datetime.now(fuso_horario)
     
     # Formate a data atual no mesmo formato que o agendamento
     data_atual_formatada = data_hora_atual.strftime('%d-%m-%Y')
