@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, make_response
 import requests
 import json
-import datetime
+from datetime import datetime
 import os
 import mercadopago
 import secrets
@@ -12,6 +12,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import paho.mqtt.client as mqtt
+
 
 # MQTT Configuration
 MQTT_BROKER_HOST = "mqtt.eclipseprojects.io"
@@ -128,19 +129,56 @@ def abrir(senha_inserida):
     db = client.attenua
     reservas = db.reservas
 
-    # Use a função find com uma consulta para encontrar documentos com a senha única correspondente
-    cursor = reservas.find({"agendamentos.senha_unica": senha_inserida})
+    doc = reservas.find_one({"agendamentos.senha_unica": senha_inserida})
+    if doc:
+        agendamento = next(ag for ag in doc["agendamentos"] if ag["senha_unica"] == senha_inserida)
+        if( verificar_agendamento(agendamento)):
+             print(f"Abriu cabine ID: {doc['id']}")
 
-    # Converta o cursor em uma lista de objetos JSON
-    data = [doc for doc in cursor]
-    if data or senha_inserida == "attenua":
-        send_mqtt_message("1")
+
+def verificar_agendamento(agendamento):
+    # Obtenha a data e hora atuais
+    data_hora_atual = datetime.now()
+    
+    # Formate a data atual no mesmo formato que o agendamento
+    data_atual_formatada = data_hora_atual.strftime('%d-%m-%Y')
+    
+    # Verifique se a data atual corresponde à data do agendamento
+    if data_atual_formatada == agendamento['dia']:
+        # Obtenha a hora atual no formato HH:MM
+        hora_atual_formatada = data_hora_atual.strftime('%H')
+        
+        # Verifique se a hora atual corresponde à hora do agendamento
+        if hora_atual_formatada == agendamento['hora'][:2]:
+            return True
+        else:
+            return False
+    
+    return False
 
 def adicionar_agendamento(id_cabin, novo_agendamento):
     # Connect to MongoDB
     client = mongo_connect()
     db = client.attenua
-    reservas = db.reservas
+    reservas = db.reservas    
+    
+    # List of recipient email addresses
+    senha = secrets.token_hex(3)
+    doc = reservas.find_one({"agendamentos.senha_unica": senha})
+
+    print("chegou")
+    while(doc):
+        senha = secrets.token_hex(3)
+        doc = reservas.find_one({"agendamentos.senha_unica": senha})
+
+    print("passou")
+
+     # Defina a senha gerada no 'novo_agendamento'
+    novo_agendamento["senha_unica"] = senha
+    
+    recipients = ["attenua@atualle.com.br", novo_agendamento['id_usuario']]
+    # Call the function to send the email to multiple recipients
+    sendEmail(novo_agendamento['dia'], novo_agendamento['hora'], senha, recipients)
 
     # Define the filter condition to find the document with the specified id
     filter_condition = {"id": id_cabin}
@@ -161,6 +199,7 @@ def adicionar_agendamento(id_cabin, novo_agendamento):
         return "Cabin não encontrado ou agendamento não adicionado."
 
 app = Flask(__name__)
+app.config['STATIC_FOLDER'] = 'static'
 
 @app.route('/data/cabins')
 def get_cabins_data():
@@ -273,22 +312,15 @@ def webhook():
             email = parts[4]
                      
             if payment_status == 'approved':
-                #if(payment_data.get('collection', {}).get('reason') == 'CABINE {cabinId} {clickedHour}'):
-                # Usage example
-                senha = secrets.token_hex(3)
+          
                 novo_agendamento = {
                     "dia": parts[2],
                     "hora": parts[3],
                     "qtde_horas": 1,
-                    "id_usuario": 3,
-                    "senha_unica": senha
+                    "id_usuario": email,
+                    "senha_unica": ""
                 }
-                resultado = adicionar_agendamento(1, novo_agendamento)
-                # List of recipient email addresses
-                recipients = ["attenua@atualle.com.br", email]
-
-                # Call the function to send the email to multiple recipients
-                sendEmail(parts[2], parts[3], senha, recipients)
+                adicionar_agendamento(cabinId, novo_agendamento)
             return jsonify({'status': 'success'}), 200
         else:
             return jsonify({'status': 'error', 'message': 'Resource URL not found'}), 500
