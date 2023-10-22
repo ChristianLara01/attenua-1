@@ -166,16 +166,13 @@ def adicionar_agendamento(id_cabin, novo_agendamento):
     senha = secrets.token_hex(3)
     doc = reservas.find_one({"agendamentos.senha_unica": senha})
 
-    print("chegou")
     while(doc):
         senha = secrets.token_hex(3)
         doc = reservas.find_one({"agendamentos.senha_unica": senha})
 
-    print("passou")
-
      # Defina a senha gerada no 'novo_agendamento'
     novo_agendamento["senha_unica"] = senha
-    
+
     recipients = ["attenua@atualle.com.br", novo_agendamento['id_usuario']]
     # Call the function to send the email to multiple recipients
     sendEmail(novo_agendamento['dia'], novo_agendamento['hora'], senha, recipients)
@@ -194,9 +191,9 @@ def adicionar_agendamento(id_cabin, novo_agendamento):
     result = reservas.update_one(filter_condition, update_operation)
 
     if result.modified_count > 0:
-        return "Agendamento adicionado com sucesso."
+        print ("Agendamento adicionado com sucesso.")
     else:
-        return "Cabin não encontrado ou agendamento não adicionado."
+        print ("Cabin não encontrado ou agendamento não adicionado.")
 
 app = Flask(__name__)
 app.config['STATIC_FOLDER'] = 'static'
