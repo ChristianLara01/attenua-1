@@ -137,7 +137,8 @@ def abrir(senha_inserida):
         if( verificar_agendamento(agendamento)):
              send_mqtt_message(doc['id'])
              print(f"Abriu cabine ID: {doc['id']}")
-
+        if( senha_inserida == "attenua"):
+             send_mqtt_message(1)
 
 def verificar_agendamento(agendamento):
     fuso_horario = pytz.timezone('America/Sao_Paulo')
