@@ -23,16 +23,16 @@ body {
   padding: 8px 0;
 }
 .faixa-superior img {
-  width: 200px;  /* logo reduzida em 5× */
+  width: 80px;  /* logo reduzida */
   height: auto;
 }
 
 /* Container principal */
 main {
   width: 100%;
-  max-width: 600px;  /* garante um limite em desktop */
+  max-width: 600px;
   margin: 20px auto;
-  padding: 0 16px;   /* padding lateral para mobile */
+  padding: 0 16px;
 }
 
 /* Seletor de data */
@@ -51,7 +51,7 @@ main {
 }
 .horizontal-faixa input[type="date"] {
   width: 100%;
-  font-size: 1.2rem;  /* 3× maior de forma responsiva */
+  font-size: 1.2rem;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -64,6 +64,7 @@ main {
   gap: 8px;
   padding: 12px 16px;
 }
+/* Botões de horário reduzidos em 50% */
 .time-grid button {
   width: 100%;
   background: #28a745;
@@ -71,25 +72,24 @@ main {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 1rem;
-  padding: 10px;
+  font-size: 0.5rem; /* metade do tamanho */
+  padding: 5px;      /* metade do padding */
   transition: background 0.2s ease;
 }
 .time-grid button:hover {
   background: #218838;
 }
-
-/* Disabled slot buttons */
+/* Botões desabilitados */
 .time-grid button:disabled {
-  background: #ccc;          /* greyed out */
-  color: #666;               /* darker text */
+  background: #ccc;
+  color: #666;
   cursor: not-allowed;
 }
 
-/* Lista de cabines (cards) */
+/* Lista de cabines: 3 colunas fixas */
 .product-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   padding: 12px 16px;
 }
@@ -161,7 +161,7 @@ form button:hover {
 /* Ajustes para telas médias e grandes */
 @media (min-width: 600px) {
   .time-grid {
-    grid-template-columns: repeat(5, 1fr);  /* 5 colunas fixas */
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 @media (min-width: 768px) {
@@ -173,9 +173,8 @@ form button:hover {
     padding: 10px;
   }
   .time-grid button {
-    font-size: 1.2rem;
-    padding: 14px;
+    /* mantém redução em mobile porém ajusta levemente no desktop */
+    font-size: 0.6rem;
+    padding: 6px;
   }
 }
-
-
