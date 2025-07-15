@@ -168,3 +168,25 @@ table {
     text-align: center;
     border: 1px solid #ccc;
   }
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 80px);
+  gap: 10px;
+  margin: 20px 0;
+}
+.time-btn {
+  width: 80px;
+  height: 80px;
+  border: 1px solid #2fb191;
+  background: #151829;
+  color: #2fb191;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.time-btn:hover {
+  background: #2fb191;
+  color: #151829;
+}
