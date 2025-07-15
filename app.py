@@ -31,7 +31,7 @@ token = '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'
 owner = 'ChristianLara01'
 repo = 'attenua-1'
 
-MONGO_URI = "mongodb+srv://attenua:agendamento@attenua.qypnplu.mongodb.net/"
+MONGO_URI = "mongodb+srv://riotchristian04:<db_password>@cluster0.zwuw5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 MERCADO_PAGO_ACCESS_TOKEN = "APP_USR-698417925527845-042300-824e07ad45574df479088eebe0fad53c-726883686"
 # Configure sua chave de acesso ao Mercado Pago
 mp = mercadopago.SDK(MERCADO_PAGO_ACCESS_TOKEN)
