@@ -1,10 +1,108 @@
-body { background: #fff; color: #333; font-family: sans-serif; }
-.faixa-superior { text-align:center; padding:10px; background:#f5f5f5; }
-.horizontal-faixa { padding:10px; text-align:center; }
-.time-grid { display:flex; flex-wrap:wrap; gap:8px; padding:10px; }
-.time-grid button { background:#28a745; color:#fff; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; }
-.time-grid button:hover { background:#218838; }
-.product-container { display:flex; flex-wrap:wrap; gap:16px; padding:10px; }
-.produtos { border:1px solid #ddd; padding:12px; border-radius:6px; width:200px; text-align:center; }
-.btn { background:#28a745; color:#fff; padding:6px 10px; text-decoration:none; border-radius:4px; display:inline-block; }
-.btn:hover { background:#218838; }
+/* Estilos gerais */
+body {
+  background: #fff;
+  color: #333;
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Cabeçalho com logo no canto superior direito */
+.faixa-superior {
+  display: flex;
+  justify-content: flex-end;  /* move a logo para a direita */
+  align-items: center;
+  background: #f5f5f5;
+  padding: 10px;
+}
+.faixa-superior img {
+  width: 80px;   /* reduzida 5× (ex: de ~400px para 80px) */
+  height: auto;
+}
+
+/* Seletor de data aumentado 3× */
+.horizontal-faixa {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  background: #f9f9f9;
+}
+.horizontal-faixa label {
+  margin-right: 8px;
+  font-size: 1.2rem;
+}
+.horizontal-faixa input[type="date"] {
+  font-size: 3rem;    /* 3× maior */
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: auto;
+}
+
+/* Grid de horários */
+.time-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px;
+  justify-content: center;
+}
+.time-grid button {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.5rem;       /* aumenta o texto dos botões */
+  padding: 16px 24px;      /* aumenta área clicável */
+  transition: background 0.2s ease;
+}
+.time-grid button:hover {
+  background: #218838;
+}
+
+/* Container de cabines */
+.product-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 10px;
+  justify-content: center;
+}
+
+/* Cartões de cabine */
+.produtos {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  width: 200px;
+  text-align: center;
+  background: #fafafa;
+}
+.produtos h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+}
+.produtos img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+/* Botões de ação */
+.btn {
+  display: inline-block;
+  background: #28a745;
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-top: 8px;
+  transition: background 0.2s ease;
+}
+.btn:hover {
+  background: #218838;
+}
