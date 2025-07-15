@@ -41,23 +41,26 @@ body {
   width: auto;
 }
 
-/* Grid de horários */
+/* Grid de horários: 5 colunas, cada uma com mesma largura */
 .time-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 colunas iguais */
+  gap: 12px;                             /* espaço entre botões */
   padding: 10px;
-  justify-content: center;
+  justify-items: center;                 /* centra cada botão na coluna */
 }
+
+/* Ajuste do estilo dos botões (mantém o que já tinha) */
 .time-grid button {
   background: #28a745;
   color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 1.5rem;       /* aumenta o texto dos botões */
-  padding: 16px 24px;      /* aumenta área clicável */
+  font-size: 1.5rem;
+  padding: 16px 24px;
   transition: background 0.2s ease;
+  width: 100%;    /* botão preenche toda a largura da célula */
 }
 .time-grid button:hover {
   background: #218838;
@@ -107,3 +110,5 @@ body {
 .btn:hover {
   background: #218838;
 }
+
+
