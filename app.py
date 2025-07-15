@@ -23,7 +23,7 @@ MQTT_PORT  = 1883
 MQTT_TOPIC = "estado"
 
 # SMTP — preferencialmente via variáveis de ambiente
-SMTP_HOST = os.getenv("SMTP_HOST", "server51.srvlinux.info")
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.hostinger.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", 465))
 SMTP_USER = os.getenv("SMTP_USER", "christian@atualle.com.br")
 SMTP_PASS = os.getenv("SMTP_PASS", "@12Duda04")
