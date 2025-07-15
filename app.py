@@ -170,10 +170,10 @@ def verificar_senha(senha):
 @app.route('/available/<dia_iso>/<slot>')
 def available(dia_iso, slot):
     """
-    Recebe dia no formato yyyy-mm-dd e slot como “HH:MM”.
-    Reformatamos para dd-mm-yyyy (como está no Mongo) e filtramos.
+    Retorna JSON só com as cabines que NÃO têm agendamento
+    no dia_iso (yyyy‑mm‑dd) e slot (HH:MM) informados.
     """
-    # Converte “2025-07-16” em “16-07-2025”
+    # converte yyyy‑mm‑dd em dd‑mm‑yyyy para comparar com o Mongo
     ano, mes, dia = dia_iso.split('-')
     dia_fmt = f"{dia}-{mes}-{ano}"
 
@@ -183,18 +183,19 @@ def available(dia_iso, slot):
 
     livres = []
     for cabine in reservas:
-        # verifica se já existe agendamento com mesmo dia e hora
-        ocupada = any(
+        # verifica se existe agendamento conflitante
+        conflito = any(
             ag['dia'] == dia_fmt and ag['hora'] == slot
             for ag in cabine.get('agendamentos', [])
         )
-        if not ocupada:
-            # remove campos internos antes de enviar
+        if not conflito:
+            # remove campos que não precisamos no front
             cabine.pop('_id', None)
             cabine.pop('agendamentos', None)
             livres.append(cabine)
 
     return jsonify(livres)
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
