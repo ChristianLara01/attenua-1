@@ -82,7 +82,7 @@
                         </div>
                         <div class="coluna2">
                             <p>R$ ${c.valor_hora}/h</p>
-                            <a href="/reserve/${c.id}?date=${day}&slot=${slot}" class="btn">Reservar</a>
+                            <a href="/reserve/{{ c.id }}/{{ day }}/{{ slot }}" class="btn">Reservar</a>
                         </div>
                     </div>`;
                 cabinsDiv.appendChild(card);
