@@ -167,5 +167,34 @@ def verificar_senha(senha):
             return "Liberado"
     return "Inválido", 404
 
+@app.route('/available/<dia_iso>/<slot>')
+def available(dia_iso, slot):
+    """
+    Recebe dia no formato yyyy-mm-dd e slot como “HH:MM”.
+    Reformatamos para dd-mm-yyyy (como está no Mongo) e filtramos.
+    """
+    # Converte “2025-07-16” em “16-07-2025”
+    ano, mes, dia = dia_iso.split('-')
+    dia_fmt = f"{dia}-{mes}-{ano}"
+
+    client = mongo_connect()
+    db = client.attenua
+    reservas = db.reservas.find({})
+
+    livres = []
+    for cabine in reservas:
+        # verifica se já existe agendamento com mesmo dia e hora
+        ocupada = any(
+            ag['dia'] == dia_fmt and ag['hora'] == slot
+            for ag in cabine.get('agendamentos', [])
+        )
+        if not ocupada:
+            # remove campos internos antes de enviar
+            cabine.pop('_id', None)
+            cabine.pop('agendamentos', None)
+            livres.append(cabine)
+
+    return jsonify(livres)
+
 if __name__ == '__main__':
     app.run(debug=True)
