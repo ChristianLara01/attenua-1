@@ -4,10 +4,10 @@ window.addEventListener('DOMContentLoaded', () => {
   datePicker.value = today;
   datePicker.min   = today;
 
-  const timeGrid  = document.getElementById('timeGrid');
-  const cabinsDiv = document.getElementById('cabinsList');
+  const timeGrid   = document.getElementById('timeGrid');
+  const cabinsList = document.getElementById('cabinsList');
 
-  // Gera slots conforme configuração
+  // Gera os slots de horário com base nas variáveis globais
   const slots = [];
   for (let h = HOUR_START; h <= HOUR_END; h++) {
     for (let m = 0; m < 60; m += INTERVAL) {
@@ -17,37 +17,77 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Cria botões de horário
+  // Cria um botão para cada slot
   slots.forEach(slot => {
     const btn = document.createElement('button');
     btn.textContent = slot;
-    btn.className = 'time-btn';
-    btn.addEventListener('click', () => loadAvailable(datePicker.value, slot));
+    btn.className   = 'time-btn';
+    btn.addEventListener('click', () => {
+      if (!btn.disabled) loadAvailable(datePicker.value, slot);
+    });
     timeGrid.appendChild(btn);
   });
 
-  // Limpa lista ao mudar o dia
-  datePicker.addEventListener('change', () => cabinsDiv.innerHTML = '');
+  // Reexecuta a verificação de disponibilidade quando a data muda
+  datePicker.addEventListener('change', () => {
+    cabinsList.innerHTML = '';
+    checkSlots(datePicker.value);
+  });
 
-  // Busca e renderiza apenas cabines livres
-  async function loadAvailable(dateIso, slot) {
-    cabinsDiv.innerHTML = '<p>Carregando cabines...</p>';
-    const resp = await fetch(`/api/available/${dateIso}/${slot}`);
-    if (!resp.ok) {
-      cabinsDiv.innerHTML = '<p>Erro ao buscar cabines.</p>';
-      return;
+  // Verifica slots na carga inicial
+  checkSlots(today);
+
+  /**
+   * Percorre cada botão de slot e desabilita se não houver cabine livre.
+   */
+  async function checkSlots(dateIso) {
+    const buttons = Array.from(timeGrid.querySelectorAll('button'));
+    for (const btn of buttons) {
+      const slot = btn.textContent;
+      try {
+        const resp = await fetch(`/api/available/${dateIso}/${slot}`);
+        if (resp.ok) {
+          const cabins = await resp.json();
+          btn.disabled = (cabins.length === 0);
+        } else {
+          btn.disabled = true;
+        }
+      } catch (e) {
+        console.error('Erro ao verificar slot', slot, e);
+        btn.disabled = true;
+      }
     }
-    const cabines = await resp.json();
-    renderCabins(cabines, dateIso, slot);
   }
 
-  function renderCabins(cabines, dateIso, slot) {
-    cabinsDiv.innerHTML = '';
-    if (cabines.length === 0) {
-      cabinsDiv.innerHTML = '<p>Nenhuma cabine disponível nesse horário.</p>';
+  /**
+   * Carrega e renderiza cabines disponíveis para um dia+slot selecionados.
+   */
+  async function loadAvailable(dateIso, slot) {
+    cabinsList.innerHTML = '<p>Carregando cabines...</p>';
+    try {
+      const resp = await fetch(`/api/available/${dateIso}/${slot}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        renderCabins(data, dateIso, slot);
+      } else {
+        cabinsList.innerHTML = '<p>Erro ao carregar cabines.</p>';
+      }
+    } catch (e) {
+      console.error('Erro ao carregar cabines disponíveis:', e);
+      cabinsList.innerHTML = '<p>Erro ao carregar cabines.</p>';
+    }
+  }
+
+  /**
+   * Gera os cards de cabine na tela.
+   */
+  function renderCabins(cabins, dateIso, slot) {
+    cabinsList.innerHTML = '';
+    if (cabins.length === 0) {
+      cabinsList.innerHTML = '<p>Nenhuma cabine disponível nesse horário.</p>';
       return;
     }
-    cabines.forEach(c => {
+    cabins.forEach(c => {
       const card = document.createElement('div');
       card.className = 'produtos';
       card.innerHTML = `
@@ -56,7 +96,7 @@ window.addEventListener('DOMContentLoaded', () => {
         <p>R$ ${c.valor_hora}/h</p>
         <a href="/reserve/${c.id}/${dateIso}/${slot}" class="btn">Reservar</a>
       `;
-      cabinsDiv.appendChild(card);
+      cabinsList.appendChild(card);
     });
   }
 });
