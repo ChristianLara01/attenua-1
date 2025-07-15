@@ -182,6 +182,26 @@ def verify_code(code):
     send_mqtt_message(str(doc["id"]))
     return "OK"
 
+@app.route('/api/available_slots/<date_iso>')
+def api_available_slots(date_iso):
+    slots = []
+    for h in range(HOUR_START, HOUR_END+1):
+        for m in range(0, 60, INTERVAL):
+            if h == HOUR_END and m > 30: break
+            slots.append(f"{h:02d}:{m:02d}")
+
+    col = mongo_connect()
+    result = []
+    for slot in slots:
+        # se houver ao menos uma cabine sem conflito, available=True
+        has_free = any(
+            not any(ag['dia'] == date_iso and ag['hora'] == slot
+                    for ag in c.get('agendamentos', []))
+            for c in col.find()
+        )
+        result.append({'slot': slot, 'available': has_free})
+    return jsonify(result)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
