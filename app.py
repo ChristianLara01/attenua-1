@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 import requests
 import json
 from datetime import datetime
+from datetime import date
 import os
 import mercadopago
 import secrets
@@ -326,6 +327,34 @@ def verificar_senha(senha_inserida):
     abrir(senha_inserida)
     return "Senha recebida no servidor"
     
+# 1) Tela de escolha de horário
+@app.route('/schedule')
+def schedule():
+    today = date.today().isoformat()  # '2025-07-15'
+    return render_template('schedule.html', today=today)
 
+# 2) Endpoint para filtrar cabines livres
+@app.route('/available/<day>/<slot>')
+def available_cabins(day, slot):
+    client = mongo_connect()
+    db = client.attenua
+    reservas = db.reservas.find()
+    free = []
+    for doc in reservas:
+        ocupado = any(
+            ag['dia'] == day and ag['hora'] == slot
+            for ag in doc.get('agendamentos', [])
+        )
+        if not ocupado:
+            free.append({
+                'id': doc['id'],
+                'nome': doc['nome'],
+                'imagem': doc['imagem'],
+                'image_class': doc['image_class'],
+                'valor_hora': doc['valor_hora'],
+                # latitude/longitude se quiser mostrar
+            })
+    return jsonify(free)
+    
 if __name__ == '__main__':
     app.run(debug=True)
