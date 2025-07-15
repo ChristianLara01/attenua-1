@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Reserva Concluída</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="faixa-superior">
+    <a class="link-home" href="/"><img src="{{ url_for('static','images/logo.png') }}" alt="Attenua"></a>
+  </div>
+  <h1>Reserva Confirmada!</h1>
+  <p>Cabine: {{ cabin_id }}</p>
+  <p>Dia:    {{ dia }}</p>
+  <p>Hora:   {{ hora }}</p>
+  <p>Código de acesso: <strong>{{ senha }}</strong></p>
+  <p>Verifique seu e‑mail para mais detalhes.</p>
+</body>
+</html>
