@@ -79,6 +79,13 @@ main {
   background: #218838;
 }
 
+/* Disabled slot buttons */
+.time-grid button:disabled {
+  background: #ccc;          /* greyed out */
+  color: #666;               /* darker text */
+  cursor: not-allowed;
+}
+
 /* Lista de cabines (cards) */
 .product-container {
   display: grid;
@@ -170,3 +177,5 @@ form button:hover {
     padding: 14px;
   }
 }
+
+
