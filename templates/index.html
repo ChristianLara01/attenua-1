@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reservas Attenua</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header class="faixa-superior">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo"></a>
+  </header>
+  <main>
+    <div class="horizontal-faixa">
+      <label>Dia:</label>
+      <input type="date" id="datePicker">
+    </div>
+    <div id="timeGrid" class="time-grid"></div>
+    <div id="cabinsList" class="product-container"></div>
+  </main>
+  <script>
+    const HOUR_START = {{ hour_start }};
+    const HOUR_END   = {{ hour_end }};
+    const INTERVAL   = {{ interval }};
+  </script>
+  <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>
