@@ -184,24 +184,31 @@ def verify_code(code):
 
 @app.route('/api/available_slots/<date_iso>')
 def api_available_slots(date_iso):
+    """
+    Retorna JSON com todos os slots (HH:MM) no intervalo configurado
+    e um flag `available` indicando se há ao menos uma cabine livre.
+    """
+    # Gera a lista de slots dinamicamente
     slots = []
-    for h in range(HOUR_START, HOUR_END+1):
-        for m in range(0, 60, INTERVAL):
-            if h == HOUR_END and m > 30: break
+    for h in range(HOUR_START, HOUR_END + 1):
+        for m in range(0, 60, INTERVAL_MIN):
+            if h == HOUR_END and m > 30:
+                break
             slots.append(f"{h:02d}:{m:02d}")
 
     col = mongo_connect()
     result = []
     for slot in slots:
-        # se houver ao menos uma cabine sem conflito, available=True
+        # verifica se existe alguma cabine sem conflito naquele slot
         has_free = any(
-            not any(ag['dia'] == date_iso and ag['hora'] == slot
-                    for ag in c.get('agendamentos', []))
+            not any(
+                ag['dia'] == date_iso and ag['hora'] == slot
+                for ag in c.get('agendamentos', [])
+            )
             for c in col.find()
         )
         result.append({'slot': slot, 'available': has_free})
     return jsonify(result)
-
 
 if __name__ == "__main__":
     app.run(debug=True)
