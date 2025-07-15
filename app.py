@@ -39,17 +39,20 @@ def index():
 # API: cabines livres em um dia+slot
 @app.route('/api/available/<date_iso>/<slot>')
 def api_available(date_iso, slot):
-    # Converte 'YYYY-MM-DD' -> 'DD-MM-YYYY'
+    # Converte 'YYYY-MM-DD' em 'DD-MM-YYYY'
     ano, mes, dia = date_iso.split('-')
     dia_fmt = f"{dia}-{mes}-{ano}"
+
     col = mongo_connect()
     livres = []
     for c in col.find():
+        # Se já existir agendamento para dia_fmt+slot, pula a cabine
         conflito = any(
             ag['dia'] == dia_fmt and ag['hora'] == slot
             for ag in c.get('agendamentos', [])
         )
         if not conflito:
+            # remove campos internos antes de enviar
             c.pop('_id', None)
             c.pop('agendamentos', None)
             livres.append(c)
