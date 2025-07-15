@@ -15,19 +15,19 @@
     </div>
 
     <div class="horizontal-faixa">
-        <!-- Date Selection -->
+        <!-- Seleção de Data -->
         <label for="datePicker">Escolha o dia:</label>
         <input type="date" id="datePicker" required>
     </div>
 
-    <h1>Selecione o Horário (30 min)</h1>
+    <h1>Selecione o Horário (30 min)</h1>
     <div id="timeGrid" class="time-grid"></div>
 
     <h2>Cabines Disponíveis</h2>
     <div id="cabinsList" class="product-container"></div>
 
     <script>
-        // Setup date picker min value
+        // Configura o datePicker
         const datePicker = document.getElementById('datePicker');
         const today = new Date().toISOString().split('T')[0];
         datePicker.setAttribute('min', today);
@@ -35,54 +35,53 @@
         const timeGrid = document.getElementById('timeGrid');
         const cabinsDiv = document.getElementById('cabinsList');
 
-        // Generate half-hour slots from 09:00 to 19:30
+        // Gera slots de 30 min de 09:00 a 19:30
         function pad(n){ return n.toString().padStart(2,'0'); }
-        let slots = [];
-        for(let h = 9; h <= 19; h++){
-            for(let m = 0; m < 60; m += 30){
-                if(h === 19 && m > 30) break; // Stop at 19:30
-                let slot = `${pad(h)}:${m === 0 ? '00' : '30'}`;
-                slots.push(slot);
+        const slots = [];
+        for(let h=9; h<=19; h++){
+            for(let m=0; m<60; m+=30){
+                if(h===19 && m>30) break;
+                slots.push(`${pad(h)}:${m===0?'00':'30'}`);
             }
         }
 
-        // Create buttons
+        // Cria botões de horário
         slots.forEach(slot => {
-            let btn = document.createElement('button');
+            const btn = document.createElement('button');
             btn.textContent = slot;
             btn.className = 'time-btn';
             btn.addEventListener('click', () => loadAvailable(datePicker.value, slot));
             timeGrid.appendChild(btn);
         });
 
-        // Fetch and render cabins available
-        async function loadAvailable(day, slot) {
-            if(!day) { alert('Selecione um dia primeiro.'); return; }
-            // Call backend
-            let resp = await fetch(`/available/${day}/${slot}`);
-            let cabins = await resp.json();
+        // Busca cabines disponíveis e renderiza
+        async function loadAvailable(day, slot){
+            if(!day){ alert('Selecione um dia primeiro.'); return; }
+            const resp = await fetch(`/available/${day}/${slot}`);
+            if(!resp.ok){ console.error('Erro ao buscar disponíveis'); return; }
+            const cabins = await resp.json();
             renderCabins(cabins, day, slot);
         }
 
-        // Render cabin cards
-        function renderCabins(cabins, day, slot) {
+        // Renderiza cards de cabines
+        function renderCabins(cabins, day, slot){
             cabinsDiv.innerHTML = '';
-            if(cabins.length === 0) {
+            if(cabins.length===0){
                 cabinsDiv.innerHTML = '<p>Nenhuma cabine disponível nesse horário.</p>';
                 return;
             }
-            cabins.forEach(c => {
-                let card = document.createElement('div');
+            cabins.forEach(c=>{
+                const card = document.createElement('div');
                 card.className = 'produtos';
                 card.innerHTML = `
                     <h2>${c.nome}</h2>
                     <div class="card">
                         <div class="coluna1">
-                            <img class="custom-image ${c.image_class}" src="${"/static/images/" + c.imagem}" alt="${c.nome}">
+                            <img class="custom-image ${c.image_class}" src="${'/static/images/' + c.imagem}" alt="${c.nome}">
                         </div>
                         <div class="coluna2">
                             <p>R$ ${c.valor_hora}/h</p>
-                            <a href="/reserve/{{ c.id }}/{{ day }}/{{ slot }}" class="btn">Reservar</a>
+                            <a href="/reserve/${c.id}/${day}/${slot}" class="btn">Reservar</a>
                         </div>
                     </div>`;
                 cabinsDiv.appendChild(card);
