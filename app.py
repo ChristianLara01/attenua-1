@@ -68,45 +68,49 @@ def reserve_form(cabin_id, date_iso, slot):
 # Processa a reserva
 @app.route('/reserve', methods=['POST'])
 def reserve_submit():
-    cabin_id   = int(request.form['cabin_id'])
-    date_iso   = request.form['date_iso']
-    slot       = request.form['slot']
-    first      = request.form['first_name']
-    last       = request.form['last_name']
-    email      = request.form['email']
+    # 1) Captura dos dados do form
+    cabin_id = int(request.form['cabin_id'])
+    date_iso = request.form['date_iso']     # já vem em 'YYYY-MM-DD'
+    slot     = request.form['slot']         # 'HH:MM'
+    first    = request.form['first_name']
+    last     = request.form['last_name']
+    email    = request.form['email']
 
-    # gera data no formato 'DD-MM-YYYY'
-    ano, mes, dia = date_iso.split('-')
-    dia_fmt = f"{dia}-{mes}-{ano}"
-
-    # gera código único
+    # 2) Gera código único (hex 3 bytes)
     code = secrets.token_hex(3)
-    col = mongo_connect()
-    # evita duplicação de código
-    while col.find_one({"agendamentos.senha_unica": code}):
+    col  = mongo_connect()
+    # garante que não haja duplicação de código
+    while col.find_one({'agendamentos.senha_unica': code}):
         code = secrets.token_hex(3)
 
+    # 3) Monta o documento do agendamento
     novo = {
-        'dia': dia_fmt,
-        'hora': slot,
-        'qtde_horas': 1,
-        'id_usuario': email,
-        'first_name': first,
-        'last_name': last,
+        'dia'        : date_iso,   # SEM conversão, grava ISO
+        'hora'       : slot,
+        'qtde_horas' : 1,
+        'id_usuario' : email,
+        'first_name' : first,
+        'last_name'  : last,
         'senha_unica': code
     }
 
-    # salva no Mongo
-    col.update_one({'id': cabin_id}, {'$push': {'agendamentos': novo}})
+    # 4) Persiste no Mongo, dentro do array 'agendamentos'
+    col.update_one(
+        {'id': cabin_id},
+        {'$push': {'agendamentos': novo}}
+    )
 
-    # envia e-mail de confirmação
+    # 5) Envia e‑mail de confirmação
     send_email(novo, cabin_id)
 
-    return render_template('reservation_success.html',
-                           cabin_id=cabin_id,
-                           date_iso=date_iso,
-                           slot=slot,
-                           code=code)
+    # 6) Renderiza página de sucesso
+    return render_template(
+        'reservation_success.html',
+        cabin_id = cabin_id,
+        date_iso = date_iso,
+        slot     = slot,
+        code     = code
+    )
 
 # Função de envio de e-mail
 def send_email(res, cabin_id):
