@@ -1,100 +1,66 @@
-document.addEventListener("DOMContentLoaded", () => {
-  // Date picker at top of catalog page
+document.addEventListener('DOMContentLoaded', () => {
+  // Configurações para o seletor de data
   const datePicker = document.getElementById('datePicker');
-  const todayISO = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split('T')[0];
+  datePicker.setAttribute('min', today);
 
-  if (datePicker) {
-    datePicker.setAttribute('min', todayISO);
-    datePicker.value = todayISO;
-    datePicker.addEventListener('change', loadAllSchedules);
+  // Elementos da página
+  const timeGrid = document.getElementById('timeGrid');
+  const cabinsDiv = document.getElementById('cabinsList');
+
+  // Gera slots de 30 min de 09:00 a 19:30
+  function pad(n) { return n.toString().padStart(2, '0'); }
+  const slots = [];
+  for (let h = 9; h <= 19; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      if (h === 19 && m > 30) break;
+      slots.push(`${pad(h)}:${m === 0 ? '00' : '30'}`);
+    }
   }
 
-  loadAllSchedules();
-});
-
-/**
- * Load schedules for all cabins based on selected date
- */
-function loadAllSchedules() {
-  const datePicker = document.getElementById('datePicker');
-  const selectedISO = datePicker ? datePicker.value : new Date().toISOString().split('T')[0];
-  const formattedDate = formatDate(selectedISO);
-
-  document.querySelectorAll('.produtos').forEach(div => {
-    const cabinId = div.getAttribute('data-id');
-    const scheduleContainer = div.querySelector('.schedule');
-    if (scheduleContainer) {
-      scheduleContainer.innerHTML = ''; // Clear previous
-      loadCabinSchedule(cabinId, formattedDate, scheduleContainer);
-    }
+  // Cria botões de horário
+  slots.forEach(slot => {
+    const btn = document.createElement('button');
+    btn.textContent = slot;
+    btn.className = 'time-btn';
+    btn.addEventListener('click', () => loadAvailable(datePicker.value, slot));
+    timeGrid.appendChild(btn);
   });
-}
 
-/**
- * Convert yyyy-mm-dd to dd-mm-yyyy
- */
-function formatDate(isoDate) {
-  const [year, month, day] = isoDate.split('-');
-  return `${day}-${month}-${year}`;
-}
-
-/**
- * Fetch cabin data and render its available slots
- */
-function loadCabinSchedule(cabinId, dia, container) {
-  fetch('/data/cabins')
-    .then(resp => resp.json())
-    .then(data => {
-      const cabin = data.find(c => c.id === parseInt(cabinId));
-      if (!cabin) return;
-
-      // Collect booked hours for this date
-      const booked = (cabin.agendamentos || [])
-        .filter(a => a.dia === dia)
-        .map(a => a.hora);
-
-      renderTable(dia, cabinId, booked, container);
-    })
-    .catch(err => console.error('Erro ao carregar cabines:', err));
-}
-
-/**
- * Render a table of hours from 09:00 to 17:00
- */
-function renderTable(dia, cabinId, bookedHours, container) {
-  const table = document.createElement('table');
-
-  for (let h = 9; h < 18; h++) {
-    const hourStr = String(h).padStart(2, '0') + ':00';
-    const row = document.createElement('tr');
-    const cell = document.createElement('td');
-
-    cell.textContent = hourStr;
-    if (bookedHours.includes(hourStr)) {
-      cell.classList.add('booked');
-    } else {
-      cell.classList.add('clickable');
-      cell.addEventListener('click', () => {
-        window.location.href = `/reserve/${cabinId}/${dia}/${hourStr}`;
-      });
+  // Busca cabines disponíveis e renderiza
+  async function loadAvailable(day, slot) {
+    if (!day) { alert('Selecione um dia primeiro.'); return; }
+    const resp = await fetch(`/available/${day}/${slot}`);
+    if (!resp.ok) {
+      console.error('Erro ao buscar cabines disponíveis');
+      return;
     }
-
-    row.appendChild(cell);
-    table.appendChild(row);
+    const cabins = await resp.json();
+    renderCabins(cabins, day, slot);
   }
 
-  container.appendChild(table);
-}
-
-/**
- * Function for access code verification
- */
-function redirecionar() {
-  const codigo = document.getElementById('codigo').value;
-  fetch(`/verificar_senha/${encodeURIComponent(codigo)}`)
-    .then(res => res.text())
-    .then(msg => {
-      alert(msg === 'Liberado' ? 'Acesso liberado!' : 'Código inválido');
-    })
-    .catch(err => console.error('Erro ao verificar código:', err));
-}
+  // Renderiza cards de cabines
+  function renderCabins(cabins, day, slot) {
+    cabinsDiv.innerHTML = '';
+    if (cabins.length === 0) {
+      cabinsDiv.innerHTML = '<p>Nenhuma cabine disponível nesse horário.</p>';
+      return;
+    }
+    cabins.forEach(c => {
+      const card = document.createElement('div');
+      card.className = 'produtos';
+      card.innerHTML = `
+        <h2>${c.nome}</h2>
+        <div class="card">
+          <div class="coluna1">
+            <img class="custom-image ${c.image_class}" src="/static/images/${c.imagem}" alt="${c.nome}">
+          </div>
+          <div class="coluna2">
+            <p>R$ ${c.valor_hora}/h</p>
+            <a href="/reserve/${c.id}/${day}/${slot}" class="btn">Reservar</a>
+          </div>
+        </div>`;
+      cabinsDiv.appendChild(card);
+    });
+  }
+});
