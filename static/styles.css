@@ -57,29 +57,32 @@ main {
   border-radius: 4px;
 }
 
-/* Grid de horários responsivo */
+/* Grid de horários: sempre 5 colunas */
 .time-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(5, 1fr); /* fixa 5 colunas */
   gap: 8px;
   padding: 12px 16px;
 }
-/* Botões de horário reduzidos em 50% */
+
+/* Botões de horário quadrados */
 .time-grid button {
   width: 100%;
+  aspect-ratio: 1 / 1;     /* altura = largura */
   background: #28a745;
   color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.5rem; /* metade do tamanho */
-  padding: 5px;      /* metade do padding */
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: background 0.2s ease;
 }
 .time-grid button:hover {
   background: #218838;
 }
-/* Botões desabilitados */
 .time-grid button:disabled {
   background: #ccc;
   color: #666;
@@ -160,11 +163,6 @@ form button:hover {
 
 /* Ajustes para telas médias e grandes */
 @media (min-width: 600px) {
-  .time-grid {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-@media (min-width: 768px) {
   main {
     max-width: 600px;
   }
@@ -173,8 +171,7 @@ form button:hover {
     padding: 10px;
   }
   .time-grid button {
-    /* mantém redução em mobile porém ajusta levemente no desktop */
-    font-size: 0.6rem;
-    padding: 6px;
+    font-size: 0.8rem;
+    padding: 10px;
   }
 }
