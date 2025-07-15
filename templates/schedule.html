@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt‑BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Escolha o Horário</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <div class="faixa-superior">
+    <a class="link-home" href="/"><img src="{{ url_for('static','images/logo.png') }}" alt="Attenua"></a>
+  </div>
+
+  <!-- 1) (Opcional) Date picker se você ainda quiser escolher o dia -->
+  <label for="datePicker">Escolha o dia:</label>
+  <input type="date" id="datePicker" value="{{ today }}" min="{{ today }}"/>
+
+  <h1>Selecione o Horário (intervalo de 30 min)</h1>
+  <div id="timeGrid" class="time-grid"></div>
+
+  <h2>Cabines disponíveis em <span id="selectedSlot">—</span></h2>
+  <div id="cabinsList" class="product-container"></div>
+
+  <script>
+    // 1. Gera todos os slots de 09:00 a 19:30
+    const timeGrid = document.getElementById('timeGrid');
+    const slotDisplay = document.getElementById('selectedSlot');
+    const cabinsDiv = document.getElementById('cabinsList');
+    const datePicker = document.getElementById('datePicker');
+
+    function pad(n){ return n.toString().padStart(2,'0'); }
+
+    let slots = [];
+    for(let h=9; h<=19; h++){
+      for(let m=0; m<60; m+=30){
+        let slot = `${pad(h)}:${m===0?'00':'30'}`;
+        slots.push(slot);
+      }
+    }
+
+    // 2. Cria botões e trata clique
+    slots.forEach(slot => {
+      let btn = document.createElement('button');
+      btn.textContent = slot;
+      btn.className = 'time-btn';
+      btn.addEventListener('click', () => fetchCabins(slot));
+      timeGrid.appendChild(btn);
+    });
+
+    async function fetchCabins(slot){
+      let date = datePicker.value;
+      if(!date){ alert('Escolha primeiro um dia.'); return; }
+      slotDisplay.textContent = `${date} ${slot}`;
+      // 3. Pede ao backend cabins livres
+      let resp = await fetch(`/available/${date}/${slot}`);
+      let cabins = await resp.json();
+      renderCabins(cabins);
+    }
+
+    function renderCabins(cabins){
+      cabinsDiv.innerHTML = '';
+      if(!cabins.length){
+        cabinsDiv.innerHTML = '<p>Nenhuma cabine disponível nesse horário.</p>';
+        return;
+      }
+      cabins.forEach(c => {
+        let card = document.createElement('div');
+        card.className = 'produtos';
+        card.innerHTML = `
+          <h2>${c.nome}</h2>
+          <div class="card">
+            <div class="coluna1">
+              <img class="custom-image ${c.image_class}" src="/static/images/${c.imagem}" />
+            </div>
+            <div class="coluna2">
+              <p>R$ ${c.valor_hora}/h</p>
+              <a href="/reserve/${c.id}?date=${encodeURIComponent(datePicker.value)}&slot=${slotDisplay.textContent.split(' ')[1]}" class="btn">Reservar</a>
+            </div>
+          </div>`;
+        cabinsDiv.appendChild(card);
+      });
+    }
+  </script>
+</body>
+</html>
