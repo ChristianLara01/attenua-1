@@ -13,10 +13,10 @@ body {
   justify-content: flex-end;  /* move a logo para a direita */
   align-items: center;
   background: #f5f5f5;
-  padding: 10px;
+  padding: 20px;
 }
 .faixa-superior img {
-  width: 80px;   /* reduzida 5× (ex: de ~400px para 80px) */
+  width: 160px;   /* reduzida 5× (ex: de ~400px para 80px) */
   height: auto;
 }
 
