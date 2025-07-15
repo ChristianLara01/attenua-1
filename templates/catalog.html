@@ -1,70 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/x-icon">
-    <title>Reservas</title>
+    <title>Reservas por Horário</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </head>
 <body>
     <div class="faixa-superior">
         <a class="link-home" href="/">
-            <img src="static/images/logo.png" alt="Attenua">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Attenua">
         </a>
     </div>
+
     <div class="horizontal-faixa">
-        <!-- Código de Acesso -->
-        <label for="codigo">Acessar Cabine:</label>
-        <input type="text" id="codigo" required placeholder="Insira seu código de acesso">
-        <button class="btn" id="liberarButton" onclick="redirecionar()">Liberar</button>
-        <p id="codError" style="color: white;"></p> <!-- Elemento para exibir mensagens de erro -->
+        <!-- Date Selection -->
+        <label for="datePicker">Escolha o dia:</label>
+        <input type="date" id="datePicker" required>
     </div>
 
-    <div >
-        <br>
-    </div>
-    
-    <h1 class="head">Reserve seu horário</h1>
-    <div class="product-container"><abbr title=""></abbr>
-        {% for cabin in cabins %}
-        <div class="produtos">
-            <h2>{{ cabin['nome'] }}</h2>
-            <div class="card">
-            <div class="coluna1">
-                <img class="custom-image {{ cabin['image_class'] }}" src="{{ url_for('static', filename='images/' + cabin['imagem']) }}" alt="{{ cabin['nome'] }}">
-            </div>    
-            <div class="coluna2">
-                <p> R$ {{ cabin['valor_hora'] }}/hora</p>
-                <p></p>
-                <label>Localizar</label>      
-                <a href="https://www.google.com/maps/place/{{ cabin['latitude'] }},{{ cabin['longitude'] }}" target="_blank">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="4em" viewBox="0 0 384 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#00c896}</style><path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg>
-                </a>          
-                <p></p>
-                <a href="{{ url_for('reserve', cabin_id=cabin['id']) }}" class="btn" style="text-decoration: none;">Reservar</a>
-            </div>
-            </div>    
-        </div>
-        {% endfor %}
-    </div>
+    <h1>Selecione o Horário (30 min)</h1>
+    <div id="timeGrid" class="time-grid"></div>
+
+    <h2>Cabines Disponíveis</h2>
+    <div id="cabinsList" class="product-container"></div>
+
     <script>
+        // Setup date picker min value
+        const datePicker = document.getElementById('datePicker');
+        const today = new Date().toISOString().split('T')[0];
+        datePicker.setAttribute('min', today);
 
-    function redirecionar() {
-            var codigo = document.getElementById("codigo").value; // Obtém o valor do campo "codigo"
+        const timeGrid = document.getElementById('timeGrid');
+        const cabinsDiv = document.getElementById('cabinsList');
 
-            // Faça uma solicitação AJAX para a rota do Flask
-            fetch('/verificar_senha/' + codigo, {
-                method: 'GET'
-            })
-            .then(response => response.text())
-            .then(data => {
-                // Exiba a resposta no console (no terminal Flask)
-                console.log(data);
-            })
-            .catch(error => {
-                console.error('Erro:', error);
+        // Generate half-hour slots from 09:00 to 19:30
+        function pad(n){ return n.toString().padStart(2,'0'); }
+        let slots = [];
+        for(let h = 9; h <= 19; h++){
+            for(let m = 0; m < 60; m += 30){
+                if(h === 19 && m > 30) break; // Stop at 19:30
+                let slot = `${pad(h)}:${m === 0 ? '00' : '30'}`;
+                slots.push(slot);
+            }
+        }
+
+        // Create buttons
+        slots.forEach(slot => {
+            let btn = document.createElement('button');
+            btn.textContent = slot;
+            btn.className = 'time-btn';
+            btn.addEventListener('click', () => loadAvailable(datePicker.value, slot));
+            timeGrid.appendChild(btn);
+        });
+
+        // Fetch and render cabins available
+        async function loadAvailable(day, slot) {
+            if(!day) { alert('Selecione um dia primeiro.'); return; }
+            // Call backend
+            let resp = await fetch(`/available/${day}/${slot}`);
+            let cabins = await resp.json();
+            renderCabins(cabins, day, slot);
+        }
+
+        // Render cabin cards
+        function renderCabins(cabins, day, slot) {
+            cabinsDiv.innerHTML = '';
+            if(cabins.length === 0) {
+                cabinsDiv.innerHTML = '<p>Nenhuma cabine disponível nesse horário.</p>';
+                return;
+            }
+            cabins.forEach(c => {
+                let card = document.createElement('div');
+                card.className = 'produtos';
+                card.innerHTML = `
+                    <h2>${c.nome}</h2>
+                    <div class="card">
+                        <div class="coluna1">
+                            <img class="custom-image ${c.image_class}" src="${"/static/images/" + c.imagem}" alt="${c.nome}">
+                        </div>
+                        <div class="coluna2">
+                            <p>R$ ${c.valor_hora}/h</p>
+                            <a href="/reserve/${c.id}?date=${day}&slot=${slot}" class="btn">Reservar</a>
+                        </div>
+                    </div>`;
+                cabinsDiv.appendChild(card);
             });
         }
     </script>
