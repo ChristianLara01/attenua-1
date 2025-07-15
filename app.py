@@ -1,155 +1,187 @@
-from flask import Flask, render_template, jsonify, request
+import os
 import pymongo
 import pytz
-from datetime import datetime
 import secrets
-import paho.mqtt.client as mqtt
 import smtplib
+import paho.mqtt.client as mqtt
+from datetime import datetime
+from flask import Flask, render_template, jsonify, request
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 app = Flask(__name__)
 
-# --- Configuração ---
-MONGO_URI       = "mongodb+srv://riotchristian04:atualle1@cluster0.zwuw5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-INTERVAL_MIN    = 30    # intervalo em minutos (ajuste fácil)
-HOUR_START      = 9     # horário inicial
-HOUR_END        = 19    # horário final (ultima slot: HOUR_END:30)
-MQTT_HOST       = "mqtt.eclipseprojects.io"
-MQTT_PORT       = 1883
-MQTT_TOPIC      = "estado"
-EMAIL_SENDER    = "attenua@atualle.com.br"
-EMAIL_PASS      = "Wwck$22xO4O#8V"
-SMTP_SERVER     = "server51.srvlinux.info"
-SMTP_PORT       = 465
+# --- Configurações ---
+MONGO_URI    = "mongodb+srv://riotchristian04:atualle1@cluster0.zwuw5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+INTERVAL_MIN = 30    # intervalo em minutos (ajuste fácil)
+HOUR_START   = 9     # horário inicial
+HOUR_END     = 19    # horário final (último slot: HOUR_END:30)
 
-# Conexão ao Mongo
+# MQTT
+MQTT_HOST  = "mqtt.eclipseprojects.io"
+MQTT_PORT  = 1883
+MQTT_TOPIC = "estado"
+
+# SMTP — preferencialmente via variáveis de ambiente
+SMTP_HOST = os.getenv("SMTP_HOST", "server51.srvlinux.info")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 465))
+SMTP_USER = os.getenv("SMTP_USER", "christian@atualle.com.br")
+SMTP_PASS = os.getenv("SMTP_PASS", "@12Duda04")
+
+
 def mongo_connect():
+    """Retorna a coleção de reservas no MongoDB."""
     client = pymongo.MongoClient(MONGO_URI)
     return client.attenua.reservas
 
-# Página inicial
-@app.route('/')
-def index():
-    return render_template('index.html',
-                           hour_start=HOUR_START,
-                           hour_end=HOUR_END,
-                           interval=INTERVAL_MIN)
 
-# API: cabines livres em um dia+slot
-@app.route('/api/available/<date_iso>/<slot>')
+def send_mqtt_message(payload: str):
+    """Publica payload no tópico MQTT para abrir a cabine."""
+    client = mqtt.Client()
+    client.connect(MQTT_HOST, MQTT_PORT)
+    client.publish(MQTT_TOPIC, payload)
+    client.disconnect()
+
+
+def send_email(res, cabin_id):
+    """
+    Envia e‑mail de confirmação via SMTP SSL.
+    res: dicionário com campos 'dia','hora','senha_unica','id_usuario'
+    cabin_id: ID da cabine reservada
+    """
+    msg = MIMEMultipart("alternative")
+    msg["From"]    = SMTP_USER
+    msg["To"]      = res["id_usuario"]
+    msg["Subject"] = "Reserva Confirmada - Attenua Cabines"
+
+    html = f"""
+    <html>
+      <body>
+        <h2>Reserva Confirmada!</h2>
+        <p><strong>Cabine:</strong> {cabin_id}</p>
+        <p><strong>Data:</strong>  {res['dia']}</p>
+        <p><strong>Horário:</strong> {res['hora']}</p>
+        <p><strong>Código:</strong> {res['senha_unica']}</p>
+        <p>Apresente este código para liberar sua cabine automaticamente.</p>
+      </body>
+    </html>
+    """
+    msg.attach(MIMEText(html, "html"))
+
+    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
+        server.login(SMTP_USER, SMTP_PASS)
+        server.send_message(msg)
+
+
+# --- Rotas ---
+
+@app.route("/")
+def index():
+    """Página principal: seletor de data e horários."""
+    return render_template(
+        "index.html",
+        hour_start=HOUR_START,
+        hour_end=HOUR_END,
+        interval=INTERVAL_MIN
+    )
+
+
+@app.route("/api/available/<date_iso>/<slot>")
 def api_available(date_iso, slot):
     """
-    date_iso: 'YYYY-MM-DD'
-    slot:     'HH:MM'
+    Retorna JSON com as cabines LIVRES no date_iso (YYYY‑MM‑DD) e slot (HH:MM).
     """
     col = mongo_connect()
     livres = []
-    for cabine in col.find():
-        # Se achar qualquer agendamento com o mesmo dia ISO e slot, pula
-        conflitante = any(
-            ag['dia'] == date_iso and ag['hora'] == slot
-            for ag in cabine.get('agendamentos', [])
+    for c in col.find():
+        conflito = any(
+            ag["dia"] == date_iso and ag["hora"] == slot
+            for ag in c.get("agendamentos", [])
         )
-        if not conflitante:
-            cabine.pop('_id', None)
-            cabine.pop('agendamentos', None)
-            livres.append(cabine)
+        if not conflito:
+            c.pop("_id", None)
+            c.pop("agendamentos", None)
+            livres.append(c)
     return jsonify(livres)
 
-# Página de formulário de reserva
-@app.route('/reserve/<int:cabin_id>/<date_iso>/<slot>')
+
+@app.route("/reserve/<int:cabin_id>/<date_iso>/<slot>")
 def reserve_form(cabin_id, date_iso, slot):
-    return render_template('reservation.html',
-                           cabin_id=cabin_id,
-                           date_iso=date_iso,
-                           slot=slot)
+    """Exibe o formulário para confirmar a reserva."""
+    return render_template(
+        "reservation.html",
+        cabin_id=cabin_id,
+        date_iso=date_iso,
+        slot=slot
+    )
 
-# Processa a reserva
-@app.route('/reserve', methods=['POST'])
+
+@app.route("/reserve", methods=["POST"])
 def reserve_submit():
-    # 1) Captura dos dados do form
-    cabin_id = int(request.form['cabin_id'])
-    date_iso = request.form['date_iso']     # já vem em 'YYYY-MM-DD'
-    slot     = request.form['slot']         # 'HH:MM'
-    first    = request.form['first_name']
-    last     = request.form['last_name']
-    email    = request.form['email']
+    """Processa o formulário de reserva e envia e‑mail de confirmação."""
+    cabin_id = int(request.form["cabin_id"])
+    date_iso = request.form["date_iso"]    # YYYY-MM-DD
+    slot     = request.form["slot"]        # HH:MM
+    first    = request.form["first_name"]
+    last     = request.form["last_name"]
+    email    = request.form["email"]
 
-    # 2) Gera código único (hex 3 bytes)
+    # Gera código único de 3 bytes hex
     code = secrets.token_hex(3)
     col  = mongo_connect()
-    # garante que não haja duplicação de código
-    while col.find_one({'agendamentos.senha_unica': code}):
+    while col.find_one({"agendamentos.senha_unica": code}):
         code = secrets.token_hex(3)
 
-    # 3) Monta o documento do agendamento
     novo = {
-        'dia'        : date_iso,   # SEM conversão, grava ISO
-        'hora'       : slot,
-        'qtde_horas' : 1,
-        'id_usuario' : email,
-        'first_name' : first,
-        'last_name'  : last,
-        'senha_unica': code
+        "dia"        : date_iso,
+        "hora"       : slot,
+        "qtde_horas" : 1,
+        "id_usuario" : email,
+        "first_name" : first,
+        "last_name"  : last,
+        "senha_unica": code
     }
 
-    # 4) Persiste no Mongo, dentro do array 'agendamentos'
     col.update_one(
-        {'id': cabin_id},
-        {'$push': {'agendamentos': novo}}
+        {"id": cabin_id},
+        {"$push": {"agendamentos": novo}}
     )
 
-    # 5) Envia e‑mail de confirmação
     send_email(novo, cabin_id)
 
-    # 6) Renderiza página de sucesso
     return render_template(
-        'reservation_success.html',
-        cabin_id = cabin_id,
-        date_iso = date_iso,
-        slot     = slot,
-        code     = code
+        "reservation_success.html",
+        cabin_id=cabin_id,
+        date_iso=date_iso,
+        slot=slot,
+        code=code
     )
 
-# Função de envio de e-mail
-def send_email(res, cabin_id):
-    msg = MIMEMultipart('alternative')
-    msg['From'] = EMAIL_SENDER
-    msg['To']   = res['id_usuario']
-    msg['Subject'] = 'Reserva Confirmada - Attenua Cabines'
-    body = f"""
-    <h1>Reserva Confirmada!</h1>
-    <p>Cabine: {cabin_id}</p>
-    <p>Data: {res['dia']}</p>
-    <p>Horário: {res['hora']}</p>
-    <p>Código de acesso: {res['senha_unica']}</p>
-    """
-    msg.attach(MIMEText(body, 'html'))
-    s = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT)
-    s.login(EMAIL_SENDER, EMAIL_PASS)
-    s.sendmail(EMAIL_SENDER, res['id_usuario'], msg.as_string())
-    s.quit()
 
-# Rota para ESP32 verificar código
-@app.route('/verify/<code>')
+@app.route("/verify/<code>")
 def verify_code(code):
+    """
+    Rota para ESP32 verificar código:
+    - encontra o agendamento
+    - valida se é o dia+hora atual
+    - publica MQTT para abrir a cabine
+    """
     col = mongo_connect()
-    doc = col.find_one({'agendamentos.senha_unica': code})
+    doc = col.find_one({"agendamentos.senha_unica": code})
     if not doc:
-        return 'INVALID', 404
-    ag = next(a for a in doc['agendamentos'] if a['senha_unica']==code)
-    # valida horário
-    tz = pytz.timezone('America/Sao_Paulo')
-    now = datetime.now(tz).strftime('%d-%m-%Y %H:00')
-    if f"{ag['dia']} {ag['hora']}" != now:
-        return 'EXPIRED', 403
-    # envia MQTT para abrir cabine
-    client = mqtt.Client()
-    client.connect(MQTT_HOST, MQTT_PORT)
-    client.publish(MQTT_TOPIC, str(doc['id']))
-    client.disconnect()
-    return 'OK'
+        return "INVALID", 404
 
-if __name__ == '__main__':
+    ag = next(a for a in doc["agendamentos"] if a["senha_unica"] == code)
+
+    tz  = pytz.timezone("America/Sao_Paulo")
+    now = datetime.now(tz).strftime("%Y-%m-%d %H:%M")
+
+    if f"{ag['dia']} {ag['hora']}" != now:
+        return "EXPIRED", 403
+
+    send_mqtt_message(str(doc["id"]))
+    return "OK"
+
+
+if __name__ == "__main__":
     app.run(debug=True)
