@@ -1,66 +1,56 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // Configurações para o seletor de data
+window.addEventListener('DOMContentLoaded', () => {
   const datePicker = document.getElementById('datePicker');
   const today = new Date().toISOString().split('T')[0];
-  datePicker.setAttribute('min', today);
+  datePicker.value = today;
+  datePicker.min = today;
 
-  // Elementos da página
   const timeGrid = document.getElementById('timeGrid');
-  const cabinsDiv = document.getElementById('cabinsList');
+  const cabinsList = document.getElementById('cabinsList');
 
-  // Gera slots de 30 min de 09:00 a 19:30
-  function pad(n) { return n.toString().padStart(2, '0'); }
+  // Gera slots de INTERVAL em INTERVAL
   const slots = [];
-  for (let h = 9; h <= 19; h++) {
-    for (let m = 0; m < 60; m += 30) {
-      if (h === 19 && m > 30) break;
-      slots.push(`${pad(h)}:${m === 0 ? '00' : '30'}`);
+  for (let h = HOUR_START; h <= HOUR_END; h++) {
+    for (let m = 0; m < 60; m += INTERVAL) {
+      if (h === HOUR_END && m > 30) break;
+      const mm = m === 0 ? '00' : String(m).padStart(2,'0');
+      slots.push(`${String(h).padStart(2,'0')}:${mm}`);
     }
   }
 
-  // Cria botões de horário
+  // Renderiza botões
   slots.forEach(slot => {
     const btn = document.createElement('button');
     btn.textContent = slot;
-    btn.className = 'time-btn';
     btn.addEventListener('click', () => loadAvailable(datePicker.value, slot));
     timeGrid.appendChild(btn);
   });
 
-  // Busca cabines disponíveis e renderiza
-  async function loadAvailable(day, slot) {
-    if (!day) { alert('Selecione um dia primeiro.'); return; }
-    const resp = await fetch(`/available/${day}/${slot}`);
-    if (!resp.ok) {
-      console.error('Erro ao buscar cabines disponíveis');
-      return;
-    }
-    const cabins = await resp.json();
-    renderCabins(cabins, day, slot);
+  // limpa lista ao trocar data
+  datePicker.addEventListener('change', () => cabinsList.innerHTML = '');
+
+  async function loadAvailable(dateIso, slot) {
+    cabinsList.innerHTML = '<p>Carregando...</p>';
+    const resp = await fetch(`/api/available/${dateIso}/${slot}`);
+    const data = resp.ok ? await resp.json() : [];
+    renderCabins(data, dateIso, slot);
   }
 
-  // Renderiza cards de cabines
-  function renderCabins(cabins, day, slot) {
-    cabinsDiv.innerHTML = '';
+  function renderCabins(cabins, dateIso, slot) {
+    cabinsList.innerHTML = '';
     if (cabins.length === 0) {
-      cabinsDiv.innerHTML = '<p>Nenhuma cabine disponível nesse horário.</p>';
+      cabinsList.innerHTML = '<p>Nenhuma cabine disponível.</p>';
       return;
     }
     cabins.forEach(c => {
-      const card = document.createElement('div');
-      card.className = 'produtos';
-      card.innerHTML = `
-        <h2>${c.nome}</h2>
-        <div class="card">
-          <div class="coluna1">
-            <img class="custom-image ${c.image_class}" src="/static/images/${c.imagem}" alt="${c.nome}">
-          </div>
-          <div class="coluna2">
-            <p>R$ ${c.valor_hora}/h</p>
-            <a href="/reserve/${c.id}/${day}/${slot}" class="btn">Reservar</a>
-          </div>
-        </div>`;
-      cabinsDiv.appendChild(card);
+      const div = document.createElement('div');
+      div.className = 'produtos';
+      div.innerHTML = `
+        <h3>${c.nome}</h3>
+        <img src="/static/images/${c.imagem}" alt="${c.nome}" width="100%">
+        <p>R$ ${c.valor_hora}/h</p>
+        <a href="/reserve/${c.id}/${dateIso}/${slot}" class="btn">Reservar</a>
+      `;
+      cabinsList.appendChild(div);
     });
   }
 });
