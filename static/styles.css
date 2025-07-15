@@ -1,103 +1,112 @@
-/* Estilos gerais */
-/* Corpo da página com fundo #F5F5F5 */
+/* Reset e box-sizing */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Corpo da página limitado a 90% e centralizado */
 body {
   background: #F5F5F5;
   color: #333;
   font-family: sans-serif;
-  margin: 0;
-  padding: 0;
   max-width: 90%;
   margin: 0 auto;
 }
 
-/* Cabeçalho com logo no canto superior direito */
+/* Cabeçalho com logo ao centro */
 .faixa-superior {
   display: flex;
-  justify-content: center;  /* move a logo para a direita */
+  justify-content: center;
   align-items: center;
-  background: #f5f5f5;
-  padding: 20px;
+  background: #F5F5F5;
+  padding: 8px 0;
 }
 .faixa-superior img {
-  width: 160px;   /* reduzida 5× (ex: de ~400px para 80px) */
+  width: 80px;  /* logo reduzida em 5× */
   height: auto;
 }
 
-/* Seletor de data aumentado 3× */
+/* Container principal */
+main {
+  width: 100%;
+  max-width: 600px;  /* garante um limite em desktop */
+  margin: 20px auto;
+  padding: 0 16px;   /* padding lateral para mobile */
+}
+
+/* Seletor de data */
 .horizontal-faixa {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px;
-  background: #f9f9f9;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 4px;
+  margin-bottom: 16px;
 }
 .horizontal-faixa label {
   margin-right: 8px;
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 .horizontal-faixa input[type="date"] {
-  font-size: 3rem;    /* 3× maior */
-  padding: 0.5rem;
+  width: 100%;
+  font-size: 1.2rem;  /* 3× maior de forma responsiva */
+  padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: auto;
 }
 
-/* Grid de horários: 5 colunas, cada uma com mesma largura */
+/* Grid de horários responsivo */
 .time-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 5 colunas iguais */
-  gap: 12px;                             /* espaço entre botões */
-  padding: 10px;
-  justify-items: center;                 /* centra cada botão na coluna */
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  padding: 12px 16px;
 }
-
-/* Ajuste do estilo dos botões (mantém o que já tinha) */
 .time-grid button {
+  width: 100%;
   background: #28a745;
   color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 1.5rem;
-  padding: 16px 24px;
+  font-size: 1rem;
+  padding: 10px;
   transition: background 0.2s ease;
-  width: 100%;    /* botão preenche toda a largura da célula */
 }
 .time-grid button:hover {
   background: #218838;
 }
 
-/* Container de cabines */
+/* Lista de cabines (cards) */
 .product-container {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 16px;
-  padding: 10px;
-  justify-content: center;
+  padding: 12px 16px;
 }
-
-/* Cartões de cabine */
 .produtos {
+  background: #fff;
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 12px;
-  width: 200px;
   text-align: center;
-  background: #fafafa;
 }
 .produtos h3 {
-  margin-top: 0;
   margin-bottom: 8px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 .produtos img {
   max-width: 100%;
   height: auto;
   margin-bottom: 8px;
 }
+.produtos p {
+  margin: 4px 0;
+}
 
-/* Botões de ação */
+/* Botões gerais */
 .btn {
   display: inline-block;
   background: #28a745;
@@ -113,4 +122,51 @@ body {
   background: #218838;
 }
 
+/* Formulário de reserva */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: 16px;
+}
+form input[type="text"],
+form input[type="email"] {
+  font-size: 1rem;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+form button {
+  font-size: 1rem;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  background: #28a745;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+form button:hover {
+  background: #218838;
+}
 
+/* Ajustes para telas médias e grandes */
+@media (min-width: 600px) {
+  .time-grid {
+    grid-template-columns: repeat(5, 1fr);  /* 5 colunas fixas */
+  }
+}
+@media (min-width: 768px) {
+  main {
+    max-width: 600px;
+  }
+  .horizontal-faixa input[type="date"] {
+    font-size: 1.5rem;
+    padding: 10px;
+  }
+  .time-grid button {
+    font-size: 1.2rem;
+    padding: 14px;
+  }
+}
