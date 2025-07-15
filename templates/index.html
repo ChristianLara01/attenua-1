@@ -11,9 +11,9 @@
     <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo"></a>
   </header>
   <main>
-    <div class="horizontal-faixa">
-      <label>Dia:</label>
-      <input type="date" id="datePicker">
+   <div class="day-grid-container">
+      <!-- Aqui serão inseridos via JS os botões de dia -->
+      <div id="dayGrid" class="day-grid"></div>
     </div>
     <div id="timeGrid" class="time-grid"></div>
     <div id="cabinsList" class="product-container"></div>
