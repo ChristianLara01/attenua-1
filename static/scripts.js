@@ -1,67 +1,41 @@
 window.addEventListener('DOMContentLoaded', () => {
   const datePicker = document.getElementById('datePicker');
-  const today = new Date().toISOString().split('T')[0];
-
-  // Inicializa o date picker
+  const today      = new Date().toISOString().split('T')[0];
   datePicker.value = today;
   datePicker.min   = today;
 
-  // Ao mudar a data, recarrega os horários
   datePicker.addEventListener('change', () => {
     document.getElementById('cabinsList').innerHTML = '';
     loadSlots(datePicker.value);
   });
 
-  // Carrega slots pela primeira vez
+  // Carrega os botões só UMA vez por data
   loadSlots(today);
 });
 
 async function loadSlots(dateIso) {
-  const timeGrid   = document.getElementById('timeGrid');
-  const cabinsList = document.getElementById('cabinsList');
-
-  // Exibe loading
+  const timeGrid = document.getElementById('timeGrid');
   timeGrid.innerHTML = '<p>Carregando horários…</p>';
 
-  // Gera array de slots no intervalo configurado
-  const slots = [];
-  for (let h = HOUR_START; h <= HOUR_END; h++) {
-    for (let m = 0; m < 60; m += INTERVAL) {
-      if (h === HOUR_END && m > 30) break;
-      const mm = m === 0 ? '00' : String(m).padStart(2, '0');
-      slots.push(`${String(h).padStart(2, '0')}:${mm}`);
-    }
-  }
-
-  // Para cada slot, busca disponibilidade em paralelo
-  const checks = slots.map(async slot => {
-    try {
-      const resp = await fetch(`/api/available/${dateIso}/${slot}`);
-      if (resp.ok) {
-        const cabins = await resp.json();
-        return { slot, available: cabins.length > 0 };
-      }
-    } catch (e) {
-      console.error('Erro ao verificar slot', slot, e);
-    }
-    return { slot, available: false };
-  });
-
-  // Aguarda todas as verificações
-  const results = await Promise.all(checks);
-
-  // Renderiza botões de slot somente depois de tudo pronto
-  timeGrid.innerHTML = '';
-  results.forEach(({ slot, available }) => {
-    const btn = document.createElement('button');
-    btn.textContent  = slot;
-    btn.disabled     = !available;
-    btn.className    = 'time-btn';
-    btn.addEventListener('click', () => {
-      if (available) loadAvailable(dateIso, slot);
+  try {
+    const resp    = await fetch(`/api/available-slots/${dateIso}`);
+    const results = resp.ok ? await resp.json() : [];
+    timeGrid.innerHTML = '';
+    
+    results.forEach(({ slot, available }) => {
+      const btn = document.createElement('button');
+      btn.textContent = slot;
+      btn.disabled   = !available;
+      btn.className  = 'time-btn';
+      btn.addEventListener('click', () => {
+        if (available) loadAvailable(dateIso, slot);
+      });
+      timeGrid.appendChild(btn);
     });
-    timeGrid.appendChild(btn);
-  });
+  } catch (e) {
+    console.error('Erro ao carregar slots:', e);
+    timeGrid.innerHTML = '<p>Erro ao carregar horários.</p>';
+  }
 }
 
 async function loadAvailable(dateIso, slot) {
@@ -69,16 +43,13 @@ async function loadAvailable(dateIso, slot) {
   cabinsList.innerHTML = '<p>Carregando cabines…</p>';
 
   try {
-    const resp = await fetch(`/api/available/${dateIso}/${slot}`);
-    if (resp.ok) {
-      const cabins = await resp.json();
-      renderCabins(cabins, dateIso, slot);
-      return;
-    }
+    const resp    = await fetch(`/api/available/${dateIso}/${slot}`);
+    const cabins  = resp.ok ? await resp.json() : [];
+    renderCabins(cabins, dateIso, slot);
   } catch (e) {
-    console.error('Erro ao carregar cabines disponíveis:', e);
+    console.error('Erro ao carregar cabines:', e);
+    cabinsList.innerHTML = '<p>Erro ao carregar cabines.</p>';
   }
-  cabinsList.innerHTML = '<p>Erro ao carregar cabines.</p>';
 }
 
 function renderCabins(cabins, dateIso, slot) {
