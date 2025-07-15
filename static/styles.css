@@ -11,7 +11,7 @@ body {
 /* Cabeçalho com logo no canto superior direito */
 .faixa-superior {
   display: flex;
-  justify-content: flex-end;  /* move a logo para a direita */
+  justify-content: center;  /* move a logo para a direita */
   align-items: center;
   background: #f5f5f5;
   padding: 20px;
