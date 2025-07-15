@@ -1,58 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/x-icon">
-    <title>Reservas</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reservar Cabine</title>
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/x-icon">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <div class="faixa-superior">
-        <a class="link-home" href="/">
-            <label>attenua</label>            
-        </a>
-    </div>
-    <h1>Reservar Cabine</h1>
-    
-    <!-- Date Selection Button -->
-    <label for="data">Escolha a Data:</label>
-    <br><input class="data" type="date" id="datePicker" required></br>
-    
-    <!-- E-mail -->
-    <label for="email">E-mail:</label>
-    <br><input type="email" id="email" required></br>
-    <p id="emailError" style="color: rgb(255, 255, 255);"></p> <!-- Element to display error message -->
+  <div class="faixa-superior">
+    <a class="link-home" href="/">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Attenua">
+    </a>
+  </div>
 
+  <main style="padding: 20px;">
+    <h1>Confirmar Reserva</h1>
+    <p><strong>Cabine:</strong> {{ cabin_id }}</p>
+    <p><strong>Data:</strong> {{ dia }}</p>
+    <p><strong>Horário:</strong> {{ hora }}</p>
 
-    <!-- Confirmation Button -->
-    <button class="btn" id="confirmButton">Verificar disponibilidade</button>
+    <form action="{{ url_for('handle_reservation') }}" method="post">
+      <input type="hidden" name="cabin_id" value="{{ cabin_id }}">
+      <input type="hidden" name="dia" value="{{ dia }}">
+      <input type="hidden" name="hora" value="{{ hora }}">
 
-    <!-- Display Area for Agendamentos -->
-    <div id="agendamentos"></div>
-    <div id="cabinsContent"></div>
+      <label for="first_name">Nome:</label><br>
+      <input type="text" id="first_name" name="first_name" required><br><br>
 
-    <script>
-        // Get the date picker element
-        const datePicker = document.getElementById("datePicker");
-        const emailInput = document.getElementById("email");
-        const emailError = document.getElementById("emailError");
+      <label for="last_name">Sobrenome:</label><br>
+      <input type="text" id="last_name" name="last_name" required><br><br>
 
-        // Get the current date in ISO format (yyyy-mm-dd)
-        const today = new Date().toISOString().split("T")[0];
+      <label for="email">E‑mail:</label><br>
+      <input type="email" id="email" name="email" required><br><br>
 
-        // Set the min attribute of the date picker to the current date
-        datePicker.setAttribute("min", today);
-
-        // Function to click the "Verificar disponibilidade" button
-        function autoClickConfirmButton() {
-            const confirmButton = document.getElementById("confirmButton");
-            confirmButton.click();
-        }
-
-        // Automatically click the button every 30 seconds
-        setInterval(autoClickConfirmButton, 30000); // 30000 milliseconds = 30 seconds
-    </script>
+      <button class="btn" type="submit">Reservar</button>
+    </form>
+  </main>
 </body>
 </html>
