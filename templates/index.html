@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Reservas Attenua - Escolha sua cabine{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Reserve sua cabine ideal no Attenua. Interface rápida e intuitiva para agendamentos.">
+{% endblock %}
+
+{% block body_class %}page-index{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">
+            Reserve sua <span class="highlight">cabine ideal</span>
+        </h1>
+        <p class="hero-subtitle">
+            Escolha o dia, horário e cabine perfeita para suas necessidades
+        </p>
+    </div>
+</section>
+
+<!-- Date Selection -->
+<section class="date-selection" aria-label="Seleção de data">
+    <div class="section-header">
+        <h2>📅 Escolha a data</h2>
+        <p>Selecione quando você precisa da cabine</p>
+    </div>
+    
+    <div class="date-picker-container">
+        <label for="datePicker" class="sr-only">Selecione a data da reserva</label>
+        <input type="date" 
+               id="datePicker" 
+               class="date-input"
+               aria-describedby="date-help">
+        <div id="date-help" class="input-help">
+            Escolha uma data a partir de hoje
+        </div>
+    </div>
+</section>
+
+<!-- Time Selection -->
+<section class="time-selection" aria-label="Seleção de horário">
+    <div class="section-header">
+        <h2>🕐 Escolha o horário</h2>
+        <p>Clique no horário desejado para ver as cabines disponíveis</p>
+    </div>
+    
+    <div class="time-grid" id="timeGrid" role="grid" aria-label="Grade de horários">
+        <!-- Horários serão gerados dinamicamente -->
+    </div>
+    
+    <div class="time-legend">
+        <div class="legend-item">
+            <span class="legend-color available"></span>
+            <span>Disponível</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color unavailable"></span>
+            <span>Indisponível</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color selected"></span>
+            <span>Selecionado</span>
+        </div>
+    </div>
+</section>
+
+<!-- Cabins Selection -->
+<section class="cabins-selection" aria-label="Seleção de cabine">
+    <div class="section-header">
+        <h2>🏢 Cabines disponíveis</h2>
+        <p id="cabins-subtitle">Selecione uma data e horário para ver as opções</p>
+    </div>
+    
+    <div class="cabins-grid" id="cabinsList" role="grid" aria-label="Grade de cabines">
+        <!-- Estado inicial -->
+        <div class="empty-state">
+            <div class="empty-icon">🕐</div>
+            <h3>Escolha um horário</h3>
+            <p>Selecione uma data e horário acima para ver as cabines disponíveis</p>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Info -->
+<section class="quick-info">
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="info-icon">⚡</div>
+            <h3>Reserva Instantânea</h3>
+            <p>Confirme sua reserva em segundos</p>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-icon">📱</div>
+            <h3>Acesso Digital</h3>
+            <p>Receba seu código por email</p>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-icon">🔒</div>
+            <h3>Seguro e Confiável</h3>
+            <p>Sistema automatizado de acesso</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Configurações globais para o JavaScript
+    window.ATTENUA_CONFIG = {
+        HOUR_START: {{ hour_start }},
+        HOUR_END: {{ hour_end }},
+        INTERVAL: {{ interval }},
+        API_BASE: '/api',
+        ENDPOINTS: {
+            AVAILABLE: '/api/available',
+            SLOTS: '/api/slots',
+            CABINS: '/api/cabins'
+        }
+    };
+</script>
+{% endblock %}
+

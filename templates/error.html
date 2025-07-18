@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Erro ' + code|string if code else 'Erro' }} - Attenua{% endblock %}
+
+{% block body_class %}page-error{% endblock %}
+
+{% block content %}
+<section class="error-section">
+    <div class="error-container">
+        <!-- Error Icon -->
+        <div class="error-icon">
+            {% if code == 404 %}
+                🔍
+            {% elif code == 500 %}
+                ⚠️
+            {% else %}
+                ❌
+            {% endif %}
+        </div>
+        
+        <!-- Error Content -->
+        <div class="error-content">
+            <h1 class="error-title">
+                {% if code == 404 %}
+                    Página não encontrada
+                {% elif code == 500 %}
+                    Erro interno do servidor
+                {% else %}
+                    Ops! Algo deu errado
+                {% endif %}
+            </h1>
+            
+            <p class="error-message">
+                {{ message or 'Ocorreu um erro inesperado. Tente novamente em alguns instantes.' }}
+            </p>
+            
+            {% if code == 404 %}
+                <p class="error-description">
+                    A página que você está procurando não existe ou foi movida.
+                </p>
+            {% elif code == 500 %}
+                <p class="error-description">
+                    Nossos servidores estão enfrentando problemas temporários.
+                </p>
+            {% endif %}
+        </div>
+        
+        <!-- Error Actions -->
+        <div class="error-actions">
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                🏠 Voltar ao Início
+            </a>
+            
+            <button onclick="history.back()" class="btn btn-secondary">
+                ← Página Anterior
+            </button>
+            
+            <button onclick="location.reload()" class="btn btn-secondary">
+                🔄 Tentar Novamente
+            </button>
+        </div>
+        
+        <!-- Help Section -->
+        <div class="error-help">
+            <h3>Precisa de ajuda?</h3>
+            <p>Se o problema persistir, entre em contato conosco:</p>
+            
+            <div class="help-contacts">
+                <a href="mailto:suporte@attenua.com" class="help-link">
+                    📧 suporte@attenua.com
+                </a>
+                
+                <a href="tel:+5511999999999" class="help-link">
+                    📞 (11) 9999-9999
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
