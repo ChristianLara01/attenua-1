@@ -1,68 +1,40 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const dateSelector = document.getElementById('dateSelector');
-  const timeGrid = document.getElementById('timeGrid');
-  const modal = document.getElementById('cabinsModal');
-  const cabinsContent = document.getElementById('cabinsContent');
+  const dayContainer = document.getElementById("dayButtons");
+  const timeGrid = document.getElementById("timeGrid");
 
-  const diasExibidos = 5;
-  const horarios = ["15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00"];
+  if (!dayContainer || !timeGrid) return;
 
-  let dataSelecionada = null;
+  const today = new Date();
+  const dias = 5; // altere para mais/menos dias
+  let diasGerados = [];
 
-  function gerarDatas() {
-    const hoje = new Date();
-    for (let i = 0; i < diasExibidos; i++) {
-      const d = new Date(hoje);
-      d.setDate(hoje.getDate() + i);
-      const dia = d.toISOString().split('T')[0];
+  for (let i = 0; i < dias; i++) {
+    const data = new Date(today);
+    data.setDate(today.getDate() + i);
+    const diaISO = data.toISOString().split("T")[0];
+    diasGerados.push(diaISO);
 
-      const btn = document.createElement("button");
-      btn.textContent = `${d.getDate()}/${d.getMonth()+1}`;
-      btn.addEventListener("click", () => {
-        dataSelecionada = dia;
-        carregarHorarios();
-      });
-      dateSelector.appendChild(btn);
-    }
+    const btn = document.createElement("button");
+    btn.textContent = diaISO;
+    btn.className = "day-btn";
+    btn.addEventListener("click", () => carregarHorarios(diaISO));
+    dayContainer.appendChild(btn);
   }
 
-  function carregarHorarios() {
+  async function carregarHorarios(dia) {
+    const resp = await fetch(`/horarios_disponiveis/${dia}`);
+    const horarios = await resp.json();
     timeGrid.innerHTML = '';
-    horarios.forEach(horario => {
+
+    horarios.forEach(h => {
       const btn = document.createElement("button");
-      btn.textContent = horario;
-      btn.addEventListener("click", () => carregarCabines(horario));
+      btn.textContent = h.hora;
+      btn.disabled = !h.disponivel;
+      btn.addEventListener("click", () => window.location.href = `/reservation/${dia}/${h.hora}`);
       timeGrid.appendChild(btn);
     });
   }
 
-  async function carregarCabines(horario) {
-    if (!dataSelecionada) return alert("Selecione uma data");
-
-    const resp = await fetch(`/available/${dataSelecionada}/${horario}`);
-    const cabines = await resp.json();
-
-    cabinsContent.innerHTML = '';
-    cabines.forEach(cabine => {
-      const div = document.createElement("div");
-      div.className = "produto";
-      div.innerHTML = `
-        <h3>${cabine.nome}</h3>
-        <img src="/static/images/${cabine.imagem}" alt="${cabine.nome}" style="max-width:100%">
-        <p>R$ ${cabine.valor_hora}/h</p>
-        <a class="btn" href="/reserve/${cabine.id}?date=${dataSelecionada}&slot=${horario}">Reservar</a>
-      `;
-      cabinsContent.appendChild(div);
-    });
-
-    modal.style.display = "flex";
-  }
-
-  gerarDatas();
-
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) {
-      modal.style.display = "none";
-    }
-  });
+  // carregar o primeiro dia por padrão
+  carregarHorarios(diasGerados[0]);
 });
