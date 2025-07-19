@@ -72,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
           card.innerHTML = `
             <h4>${c.nome}</h4>
             <img src="/static/images/${c.imagem}" alt="${c.nome}">
-            <p>R$ ${c.valor_hora}/h</p>
             <a class="btn"
                href="/reserve/${c.id}/${selectedDate}/${slot}">
               Reservar
