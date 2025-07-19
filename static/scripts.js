@@ -27,9 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
     clockContainer.innerHTML = '';
     try {
       const resp = await fetch(`/api/available_slots/${selectedDate}`);
-      const slotsData = await resp.ok ? await resp.json() : [];
+      const slotsData = resp.ok ? await resp.json() : [];
       const n = slotsData.length;
-      const radius = 45; // %
+      const radius = 45; // permanece percentual
 
       slotsData.forEach(({ slot, available }, i) => {
         const btn = document.createElement('button');
@@ -43,7 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.style.top  = `${y}%`;
 
         btn.addEventListener('click', () => {
-          clockContainer.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+          clockContainer.querySelectorAll('button')
+            .forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');
           openModal(slot);
         });
@@ -60,8 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
   async function openModal(slot) {
     cabinsList.innerHTML = '';
     try {
-      const resp = await fetch(`/available/${selectedDate}/${encodeURIComponent(slot)}`);
-      const cabins = await resp.ok ? await resp.json() : [];
+      const resp = await fetch(`/available/${selectedDate}/${slot}`);
+      const cabins = resp.ok ? await resp.json() : [];
       if (!cabins.length) {
         cabinsList.innerHTML = '<p>Nenhuma cabine disponível.</p>';
       } else {
@@ -73,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <img src="/static/images/${c.imagem}" alt="${c.nome}">
             <p>R$ ${c.valor_hora}/h</p>
             <a class="btn"
-               href="/reserve/${c.id}/${selectedDate}/${encodeURIComponent(slot)}">
+               href="/reserve/${c.id}/${selectedDate}/${slot}">
               Reservar
             </a>
           `;
