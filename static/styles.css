@@ -5,7 +5,7 @@
   padding: 0;
 }
 
-/* Body limitado a 90% da largura e centralizado */
+/* Corpo da aplicação */
 body {
   font-family: sans-serif;
   background: #F5F5F5;
@@ -14,36 +14,36 @@ body {
   margin: 0 auto;
 }
 
-/* Cabeçalho com logo centralizada */
+/* Cabeçalho com logo */
 .logo-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 500px;
+  height: 500px; /* altura da logo */
 }
 .logo-container .logo {
-  width: 100%;
+  width: 100%;      /* ocupa toda a largura do container (90% da viewport) */
   height: auto;
   max-height: 500px;
 }
 
-/* Botão oblongo “Acessar minha reserva” */
+/* Botão de acesso à reserva */
 .access-button {
   display: flex;
   justify-content: center;
   margin: 20px 0;
 }
 .btn-circular {
-  width: 400px;
-  height: 400px;
-  max-width: 100%;
-  border-radius: 200px;
-  background: #28a745;
-  color: #fff;
-  font-size: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 400px;       /* “diâmetro” */
+  width: 1200px;       /* 3× o diâmetro */
+  max-width: 100%;     /* nunca ultrapassar o container */
+  border-radius: 200px;/* metade da altura */
+  background: #28a745;
+  color: #fff;
+  font-size: 2rem;
   text-decoration: none;
   transition: background 0.2s ease;
 }
@@ -58,23 +58,23 @@ body {
   margin: 20px 0;
 }
 
-/* Seleção de dias */
+/* Seletor de dias */
 .date-selector {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 20px;           /* espaço maior entre botões */
   flex-wrap: wrap;
   margin-bottom: 30px;
 }
 .date-selector .day-btn {
-  padding: 1rem 1.5rem;
-  font-size: 2.4rem;
+  padding: 1rem 1.5rem; /* maior área clicável */
+  font-size: 2.4rem;    /* 3× o tamanho original */
   border: 2px solid #28a745;
   background: #fff;
   color: #28a745;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background 0.2s, color 0.2s;
 }
 .date-selector .day-btn.active,
 .date-selector .day-btn:hover {
@@ -82,15 +82,17 @@ body {
   color: #fff;
 }
 
-/* Grade de horários */
+/* Grade de horários (flex, alinha últimas linhas centralizadas) */
 .time-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;           /* permite múltiplas linhas */
+  justify-content: center;   /* sempre centraliza cada linha */
+  gap: 12px;                 /* espaçamento entre botões */
   padding: 0 20px 20px;
 }
 .time-grid button {
-  aspect-ratio: 1;
+  width: 80px;
+  height: 80px;
   background: #28a745;
   color: #fff;
   border: none;
@@ -111,7 +113,7 @@ body {
   background: #218838;
 }
 
-/* Modal de cabines */
+/* Modal de exibição de cabines */
 .modal {
   position: fixed;
   inset: 0;
@@ -126,22 +128,22 @@ body {
   visibility: visible;
 }
 .modal-content {
+  position: relative;
   background: #fff;
   border-radius: 8px;
   padding: 20px;
   width: 90%;
   max-width: 500px;
-  position: relative;
 }
 .close-btn {
   position: absolute;
-  right: 12px;
   top: 8px;
+  right: 12px;
   font-size: 1.5rem;
   cursor: pointer;
 }
 
-/* Grid de cabines no modal */
+/* Grid de cabines dentro do modal */
 .cabin-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -171,7 +173,7 @@ body {
   background: #218838;
 }
 
-/* Contêiner genérico para formulários */
+/* Container genérico para formulários e mensagens */
 .container {
   max-width: 400px;
   margin: 20px auto;
@@ -182,25 +184,10 @@ body {
   text-align: center;
 }
 
-/* Botão padrão */
-.btn {
-  background: #28a745;
-  color: #fff;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 6px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-.btn:hover {
-  background: #218838;
-}
-
-/* Link de retorno */
+/* Link de voltar */
 .link-voltar {
   display: inline-block;
-  margin-top: 16px;
+  margin-top: 20px;
   color: #28a745;
   text-decoration: none;
 }
