@@ -110,16 +110,17 @@ body {
   color: #fff;
 }
 
-/* Clock face para horários (dobrado responsivo) */
+/* Clock face responsivo sem overflow */
 .clock-container {
   position: relative;
-  width: 90vw;
-  max-width: 600px;
-  aspect-ratio: 1 / 1;
+  width: 100%;          /* ocupa 100% da largura do pai */
+  max-width: 600px;     /* limite máximo igual ao diâmetro desejado */
+  aspect-ratio: 1 / 1;  /* mantém proporção circular */
   margin: 0 auto 1.5rem;
   border: 4px solid #28a745;
   border-radius: 50%;
   background: #fff;
+  box-sizing: border-box; /* inclui bordas no cálculo de largura */
 }
 .clock-container button {
   position: absolute;
