@@ -1,73 +1,185 @@
-* { box-sizing: border-box; margin:0; padding:0; }
+/* Reset e box‑sizing */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: sans-serif;
   background: #F5F5F5;
   color: #333;
+
+  /* 1) Limita toda a aplicação a 90% da largura e centraliza */
+  max-width: 90%;
+  margin: 0 auto;
 }
+
+/* Cabeçalho com logo centralizada */
 .logo-container {
-  display:flex; justify-content:center; align-items:center;
-  height:500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 500px;           /*  Logo com 500px de altura */
 }
-.logo-container .logo { max-height:100%; }
+.logo-container .logo {
+  /* 2) Logo ocupa 100% (ou seja, todos os 90% do container) */
+  width: 100%;
+  height: auto;
+}
+
+/* Botão circular “Acessar minha reserva” */
 .access-button {
-  display:flex; justify-content:center; margin:20px 0;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
 }
 .btn-circular {
-  width:200px; height:200px;
-  border-radius:50%;
-  background:#28a745; color:#fff;
-  display:flex; justify-content:center; align-items:center;
-  text-decoration:none; font-size:1.2rem;
+  /* 3) Dobra o tamanho atual */
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: #28a745;
+  color: #fff;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background 0.2s ease;
 }
-.container {
-  max-width:400px; margin:20px auto;
-  background:#fff; padding:20px; border-radius:8px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.1); text-align:center;
+.btn-circular:hover {
+  background: #218838;
 }
+
+/* Seleção de dias */
 .date-selector {
-  display:flex; justify-content:center; gap:8px; flex-wrap:wrap;
-  margin:20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
-.day-btn {
-  padding:8px 12px; border:1px solid #28a745;
-  background:#fff; border-radius:6px; cursor:pointer;
+/* 4) Dia atual + próximos 4: 3× o tamanho */
+.date-selector .day-btn {
+  padding: 1rem 1.5rem;      /* espaçamento maior */
+  font-size: 2.4rem;         /* 3× aproximadamente */
+  border: 2px solid #28a745;
+  background: #fff;
+  color: #28a745;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
 }
+/* Destaque para o dia selecionado (active) ou hover */
+.date-selector .day-btn.active,
+.date-selector .day-btn:hover {
+  background: #28a745;
+  color: #fff;
+}
+
+/* Grade de horários (15:00–20:00) */
 .time-grid {
-  display:grid; grid-template-columns:repeat(5,1fr);
-  gap:8px; padding:0 20px 20px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 0 20px 20px;
 }
 .time-grid button {
-  aspect-ratio:1; background:#28a745; color:#fff;
-  border:none; border-radius:6px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
+  aspect-ratio: 1;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
 }
 .time-grid button:disabled {
-  background:#ccc; color:#666; cursor:not-allowed;
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
 }
+.time-grid button:hover:not(:disabled) {
+  background: #218838;
+}
+
+/* Modal de cabines */
 .modal {
-  position:fixed; inset:0; background:rgba(0,0,0,0.5);
-  display:flex; justify-content:center; align-items:flex-start;
-  padding-top:60px; visibility:hidden;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 60px;
+  visibility: hidden;
 }
-.modal.visible { visibility:visible; }
+.modal.visible {
+  visibility: visible;
+}
 .modal-content {
-  background:#fff; border-radius:8px; padding:20px;
-  width:90%; max-width:500px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
 }
 .close-btn {
-  float:right; font-size:1.5rem; cursor:pointer;
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  font-size: 1.5rem;
+  cursor: pointer;
 }
+
+/* Grid de cabines no modal (2 por linha) */
 .cabin-grid {
-  display:grid; grid-template-columns:1fr 1fr; gap:16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
 }
 .cabin-card {
-  background:#f9f9f9; padding:12px; border-radius:6px;
-  text-align:center;
+  background: #f9f9f9;
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
 }
-.cabin-card img { max-width:100%; margin-bottom:8px; }
-.btn { background:#28a745; color:#fff; padding:10px 16px;
-  border:none; border-radius:6px; text-decoration:none; }
+.cabin-card img {
+  max-width: 100%;
+  margin-bottom: 8px;
+}
+.cabin-card .btn {
+  display: inline-block;
+  background: #28a745;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  margin-top: 8px;
+}
+.cabin-card .btn:hover {
+  background: #218838;
+}
+
+/* Links de volta e containers genéricos */
 .link-voltar {
-  display:inline-block; margin-top:16px;
-  color:#28a745; text-decoration:none;
+  display: inline-block;
+  margin-top: 20px;
+  color: #28a745;
+  text-decoration: none;
+}
+.container {
+  max-width: 400px;
+  margin: 20px auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
 }
