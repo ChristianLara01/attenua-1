@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const resp = await fetch(`/api/available_slots/${selectedDate}`);
       const slotsData = resp.ok ? await resp.json() : [];
       const n = slotsData.length;
-      const radius = 45; // permanece percentual
+      const radius = 40; // permanece percentual
 
       slotsData.forEach(({ slot, available }, i) => {
         const btn = document.createElement('button');
