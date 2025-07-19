@@ -1,32 +1,47 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Attenua Reservas</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attenua Reservas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='scripts.js') }}" defer></script>
 </head>
 <body>
-  <header class="logo-container">
-    <a href="https://attenua.com.br/" target="_blank">
-      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Attenua">
-    </a>
-  </header>
-
-  <main>
-    <div class="access-button">
-      <a href="/acessar" class="btn-circular">Acessar minha reserva</a>
+    <div class="header">
+        <a href="https://attenua.com.br/">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Attenua Logo" class="logo">
+        </a>
     </div>
 
-    <section class="date-selector" id="dateSelector"></section>
+    <main>
+        <div class="access-button-container">
+            <a href="/activate" class="big-round-button">Acessar minha reserva</a>
+        </div>
 
-    <section class="time-grid" id="timeGrid"></section>
+        <section class="date-selector">
+            <h2>Escolha o dia:</h2>
+            <div class="days-container">
+                {% for dia in dias %}
+                    <button class="day-btn" onclick="loadTimes('{{ dia }}', this)">
+                        {{ dia.split('-')[2] }}/{{ dia.split('-')[1] }}
+                    </button>
+                {% endfor %}
+            </div>
+        </section>
 
-    <div class="modal" id="cabinsModal">
-      <div class="modal-content" id="cabinsContent"></div>
-    </div>
-  </main>
+        <section class="time-selector">
+            <h2>Escolha o horário:</h2>
+            <div id="timeGrid" class="time-grid"></div>
+        </section>
 
-  <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+        <div id="cabinsModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+                <h2>Cabines Disponíveis</h2>
+                <div id="cabinsList" class="product-container"></div>
+            </div>
+        </div>
+    </main>
 </body>
 </html>
