@@ -4,15 +4,24 @@
   <meta charset="UTF-8">
   <title>Reserva Confirmada</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="{{ url_for('static','styles.css') }}">
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-  <div class="container">
-    <h2>Reserva Confirmada!</h2>
-    <p>Data: {{ date_iso }}</p>
-    <p>Horário: {{ slot }}</p>
-    <p>Código de Acesso: <strong>{{ code }}</strong></p>
-    <a href="/" class="btn">Voltar ao Início</a>
+<body class="form-page">
+  <div class="form-card">
+    <div class="form-header">
+      <h2>Reserva Confirmada!</h2>
+      <p>Obrigado! Você receberá um e‑mail com o código de acesso.</p>
+    </div>
+
+    <p><strong>Cabine:</strong> {{ cabin_id }}</p>
+    <p><strong>Data:</strong> {{ dia }}</p>
+    <p><strong>Horário:</strong> {{ hora }}</p>
+    <p><strong>Código de acesso:</strong> {{ senha }}</p>
+
+    <a href="{{ url_for('catalog') }}" class="submit-btn" style="text-decoration:none;">
+      Voltar ao Início
+    </a>
   </div>
 </body>
 </html>
