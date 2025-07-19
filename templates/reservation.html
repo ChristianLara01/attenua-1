@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>Confirmar Reserva</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body class="form-page">
   <div class="form-card">
@@ -14,7 +15,10 @@
     </div>
 
     <form method="POST"
-          action="{{ url_for('reserve', cabin_id=cabin_id, date_iso=date_iso, slot=slot) }}">
+          action="{{ url_for('reserve',
+                             cabin_id=cabin_id,
+                             date_iso=date_iso,
+                             slot=slot) }}">
       <input type="hidden" name="cabin_id" value="{{ cabin_id }}">
       <input type="hidden" name="date_iso"  value="{{ date_iso }}">
       <input type="hidden" name="slot"      value="{{ slot }}">
@@ -45,9 +49,8 @@
       </button>
     </form>
 
-    <a href="{{ url_for('catalog') }}" class="link-voltar">
-      ← Voltar ao Início
-    </a>
+    <a href="{{ url_for('catalog') }}"
+       class="link-voltar">← Voltar ao Início</a>
   </div>
 </body>
 </html>
