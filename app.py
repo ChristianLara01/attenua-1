@@ -34,22 +34,102 @@ def send_email(reserv):
     msg["To"]      = reserv["id_usuario"]
     msg["Subject"] = "Reserva Confirmada – ATTENUA CABINES ACÚSTICAS"
 
-    html = f"""
-    <html><body>
+    html = f"""\
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {{
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }}
+    .container {{
+      max-width: 600px;
+      margin: 20px auto;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }}
+    .header {{
+      background: #28a745;
+      color: #ffffff;
+      text-align: center;
+      padding: 20px;
+    }}
+    .header h1 {{
+      margin: 0;
+      font-size: 1.8rem;
+    }}
+    .content {{
+      padding: 20px;
+      color: #333333;
+      line-height: 1.5;
+    }}
+    .content p {{
+      margin: 0.5rem 0;
+    }}
+    .content .highlight {{
+      font-weight: bold;
+      color: #28a745;
+    }}
+    .links {{
+      padding: 20px;
+      text-align: center;
+      background: #f0f0f0;
+    }}
+    .links a {{
+      display: inline-block;
+      margin: 0.5rem;
+      padding: 10px 20px;
+      background: #28a745;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 0.95rem;
+    }}
+    .footer {{
+      padding: 20px;
+      font-size: 0.9rem;
+      color: #555555;
+      text-align: center;
+    }}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
       <h1>Reserva Confirmada!</h1>
-      <p><strong>Cabine:</strong> {reserv['cabin_id']}</p>
-      <p><strong>Data:</strong> {reserv['dia']}</p>
-      <p><strong>Hora:</strong> {reserv['hora']}</p>
-      <p><strong>Código de acesso:</strong> {reserv['senha_unica']}</p>
-    </body></html>
-    """
-    msg.attach(MIMEText(html, "html"))
+    </div>
+    <div class="content">
+      <p>Olá <span class="highlight">{reserv['first_name']} {reserv['last_name']}</span>,</p>
+      <p>Sua reserva foi confirmada com sucesso:</p>
+      <p><span class="highlight">Data e Horário:</span> {reserv['dia']} às {reserv['hora']}</p>
+      <p><span class="highlight">Código de Acesso:</span> {reserv['senha_unica']}</p>
+    </div>
+    <div class="links">
+      <a href="https://attenua.com.br" target="_blank">Visitar Attenua</a>
+      <a href="https://atualle.com.br" target="_blank">Visitar Atualle</a>
+    </div>
+    <div class="footer">
+      <p>A Atualle é uma empresa referência em soluções acústicas, oferecendo cabines de alta qualidade para ambientes corporativos e residenciais.</p>
+      <p>Obrigado por escolher a ATTENUA Cabines Acústicas!</p>
+    </div>
+  </div>
+</body>
+</html>
+"""
 
-    app.logger.info(f"Conectando ao SMTP {SMTP_HOST}:{SMTP_PORT} como {EMAIL_SENDER}")
+    part = MIMEText(html, "html")
+    msg.attach(part)
+
     with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
         server.login(EMAIL_SENDER, EMAIL_PASSWORD)
         server.send_message(msg)
-    app.logger.info(f"E‑mail enviado para {reserv['id_usuario']}")
+
 
 # ——— Rotas ———
 
