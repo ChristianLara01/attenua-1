@@ -27,20 +27,30 @@ body {
   max-height: 500px;
 }
 
-/* Botão oblongo */
-.access-button { display: flex; justify-content: center; margin: 20px 0; }
+/* Botão oblongo de acesso à reserva */
+.access-button {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
 .btn-circular {
-  display: flex; align-items: center; justify-content: center;
-  height: 266px;    /* inalterado */
-  width: 800px;     /* inalterado */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 266px;       /* 2/3 do diâmetro anterior */
+  width: 800px;        /* 2/3 da largura anterior */
   max-width: 100%;
-  border-radius: 133px;
-  background: #28a745; color: #fff;
-  font-size: 2.8rem; text-decoration: none;
-  transition: background 0.2s;
+  border-radius: 133px;/* metade da altura */
+  background: #28a745;
+  color: #fff;
+  font-size: 2.8rem;   /* texto maior */
+  text-decoration: none;
+  transition: background 0.2s ease;
   margin: 40px auto 20px;
 }
-.btn-circular:hover { background: #218838; }
+.btn-circular:hover {
+  background: #218838;
+}
 
 /* Texto de instrução */
 .instruction-text {
@@ -51,27 +61,33 @@ body {
 
 /* Seletor de dias */
 .date-selector {
-  display: flex; justify-content: center; gap: 20px;
-  flex-wrap: wrap; margin-bottom: 30px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
 }
 .date-selector .day-btn {
   padding: 1rem 1.5rem;
   font-size: 2.4rem;
   border: 2px solid #28a745;
-  background: #fff; color: #28a745;
-  border-radius: 6px; cursor: pointer;
+  background: #fff;
+  color: #28a745;
+  border-radius: 6px;
+  cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
 .date-selector .day-btn.active,
 .date-selector .day-btn:hover {
-  background: #28a745; color: #fff;
+  background: #28a745;
+  color: #fff;
 }
 
-/* 🎯 Clock face dobrado (600px × 600px) */
+/* Clock face para horários (dobrado) */
 .clock-container {
   position: relative;
-  width: 600px;         /* dobro de 300px */
-  height: 600px;        /* dobro de 300px */
+  width: 600px;        /* dobro de 300px */
+  height: 600px;       /* dobro de 300px */
   margin: 0 auto 20px;
   border: 4px solid #28a745;
   border-radius: 50%;
@@ -79,19 +95,27 @@ body {
 }
 .clock-container button {
   position: absolute;
-  width: 50px; height: 50px;
-  border-radius: 50%; border: none;
-  background: #28a745; color: #fff;
-  font-size: 0.9rem; display: flex;
-  align-items: center; justify-content: center;
-  cursor: pointer; transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: #28a745;
+  color: #fff;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
   transition: transform 0.3s, background 0.2s;
 }
 .clock-container button:hover:not(:disabled) {
   background: #218838;
 }
 .clock-container button:disabled {
-  background: #ccc; color: #666; cursor: not-allowed;
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
 }
 @keyframes pulse {
   0%   { transform: translate(-50%, -50%) scale(1); }
@@ -102,46 +126,147 @@ body {
   animation: pulse 1s infinite;
 }
 
-/* Modal de cabines */
+/* Modal de exibição de cabines */
 .modal {
-  position: fixed; inset: 0;
+  position: fixed;
+  inset: 0;
   background: rgba(0,0,0,0.5);
-  display: flex; justify-content: center; align-items: flex-start;
-  padding-top: 60px; visibility: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 60px;
+  visibility: hidden;
 }
-.modal.visible { visibility: visible; }
+.modal.visible {
+  visibility: visible;
+}
 .modal-content {
-  position: relative; background: #fff;
-  border-radius: 8px; padding: 20px;
-  width: 90%; max-width: 500px;
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
 }
-.close-btn { position: absolute; top:8px; right:12px; font-size:1.5rem; cursor:pointer; }
+.modal-content h2 {
+  margin-top: 0;
+  color: #28a745;
+}
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
 
-/* Grid de cabines */
+/* Grid de cabines dentro do modal */
 .cabin-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
 }
 .cabin-card {
-  background:#f9f9f9; padding:12px;
-  border-radius:6px; text-align:center;
+  background: #f9f9f9;
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
 }
-.cabin-card h4 { margin:8px 0; }
-.cabin-card img { max-width:100%; margin-bottom:8px; }
+.cabin-card h4 {
+  margin: 8px 0;
+}
+.cabin-card img {
+  max-width: 100%;
+  margin-bottom: 8px;
+}
 .cabin-card .btn {
-  display:inline-block; background:#28a745; color:#fff;
-  padding:8px 12px; border-radius:4px;
-  text-decoration:none; margin-top:8px;
+  display: inline-block;
+  background: #28a745;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  margin-top: 8px;
 }
-.cabin-card .btn:hover { background:#218838; }
+.cabin-card .btn:hover {
+  background: #218838;
+}
 
-/* Container genérico */
-.container {
-  max-width:400px; margin:20px auto;
-  background:#fff; padding:20px;
-  border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);
-  text-align:center;
+/* Página de formulário de reserva */
+.form-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #eaeff3;
 }
+.form-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+.form-header h2 {
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  color: #28a745;
+}
+.form-header p {
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  color: #555;
+}
+form label {
+  display: block;
+  text-align: left;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+  color: #333;
+}
+form input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.2rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.2s;
+}
+form input:focus {
+  outline: none;
+  border-color: #28a745;
+}
+.submit-btn {
+  width: 100%;
+  padding: 0.9rem;
+  font-size: 1.1rem;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.submit-btn:hover {
+  background: #218838;
+}
+.submit-btn:active {
+  transform: scale(0.98);
+}
+
+/* Link de voltar */
 .link-voltar {
-  display:inline-block; margin-top:20px;
-  color:#28a745; text-decoration:none;
+  display: inline-block;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #28a745;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.link-voltar:hover {
+  color: #1e7e34;
 }
