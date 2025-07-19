@@ -37,30 +37,43 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  height: 266px;       /* 2/3 do diâmetro original */
-  width: 800px;        /* 2/3 da largura original */
-  max-width: 100%;     /* não ultrapassa o container */
-
-  border-radius: 133px;/* metade da altura */
+  height: 266px;
+  width: 800px;
+  max-width: 100%;
+  border-radius: 133px;
   background: #28a745;
   color: #fff;
-
-  font-size: 2.8rem;    /* texto maior */
+  font-size: 2.8rem;
   text-decoration: none;
   transition: background 0.2s ease;
-
-  margin: 40px auto 0;  /* remove margin inferior para espaçar via .instruction-text */
+  margin: 40px auto 0;
 }
 .btn-circular:hover {
   background: #218838;
 }
 
-/* Texto de instrução */
+/* Cartão de seleção */
+.selection-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  margin-bottom: 40px;
+}
+
+/* Cabeçalho dentro do cartão */
+.selection-header {
+  font-size: 2rem;
+  color: #28a745;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Texto de instrução — 30% menor que antes */
 .instruction-text {
   text-align: center;
-  font-size: 4.2rem;    /* aproximadamente 3× maior */
-  margin: 60px 0 40px;  /* 60px acima do texto para espaçar do botão */
+  font-size: 2.94rem;  /* 70% de 4.2rem */
+  margin: 60px 0 40px;
   color: #555;
 }
 
@@ -100,13 +113,13 @@ body {
 }
 .clock-container button {
   position: absolute;
-  width: 100px;          /* dobro do tamanho anterior */
+  width: 100px;       /* dobro do anterior */
   height: 100px;
-  border-radius: 50px;   /* metade do tamanho do botão */
+  border-radius: 50px;
   border: none;
   background: #28a745;
   color: #fff;
-  font-size: 1.1rem;     /* um pouquinho maior para caber no botão */
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -131,7 +144,7 @@ body {
   animation: pulse 1s infinite;
 }
 
-/* Modal de exibição de cabines */
+/* Modal de exibição de cabines — 50% mais largo */
 .modal {
   position: fixed;
   inset: 0;
@@ -151,7 +164,7 @@ body {
   border-radius: 8px;
   padding: 20px;
   width: 90%;
-  max-width: 500px;
+  max-width: 750px;   /* 1.5× 500px */
 }
 .modal-content h2 {
   margin-top: 0;
@@ -198,72 +211,7 @@ body {
   background: #218838;
 }
 
-/* Página de formulário de reserva */
-.form-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: #eaeff3;
-}
-.form-card {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 420px;
-  text-align: center;
-}
-.form-header h2 {
-  margin-bottom: 0.5rem;
-  font-size: 2rem;
-  color: #28a745;
-}
-.form-header p {
-  margin-bottom: 1.5rem;
-  font-size: 1rem;
-  color: #555;
-}
-form label {
-  display: block;
-  text-align: left;
-  margin-bottom: 0.3rem;
-  font-weight: 600;
-  color: #333;
-}
-form input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1.2rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  transition: border-color 0.2s;
-}
-form input:focus {
-  outline: none;
-  border-color: #28a745;
-}
-.submit-btn {
-  width: 100%;
-  padding: 0.9rem;
-  font-size: 1.1rem;
-  background: #28a745;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-}
-.submit-btn:hover {
-  background: #218838;
-}
-.submit-btn:active {
-  transform: scale(0.98);
-}
-
-/* Link de voltar */
+/* Link de voltar (se usado dentro do cartão) */
 .link-voltar {
   display: inline-block;
   margin-top: 1.5rem;
