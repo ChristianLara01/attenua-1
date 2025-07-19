@@ -301,6 +301,13 @@ form input:focus {
   text-decoration: none;
   transition: color 0.2s;
 }
+/* Mensagem de erro no formulário */
+.error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 1rem;
+}
+
 .link-voltar:hover {
   color: #1e7e34;
 }
