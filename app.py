@@ -137,9 +137,9 @@ def reserve(cabin_id, date_iso, slot):
         return render_template(
             'reservation_success.html',
             cabin_id=cabin_id,
-            date_iso=date_iso,
-            slot=slot,
-            code=code
+            dia=date_iso,
+            hora=slot,
+            senha=code
         )
 
     app.logger.info(f"GET /reserve → cabine={cabin_id} em {date_iso} às {slot}")
