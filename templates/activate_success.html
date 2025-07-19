@@ -3,15 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>Cabine Ativada</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static','styles.css') }}">
 </head>
 <body>
   <div class="container">
-    <h2>Cabine Ativada com Sucesso!</h2>
-    <p>Cabine {{ cabin.nome }} ativada para {{ reserva.dia }} às {{ reserva.hora }}.</p>
-    <p>Esperamos que aproveite sua experiência.</p>
-    <a href="/" class="link-voltar">← Voltar para o início</a>
+    <h2>Cabine Ativada!</h2>
+    <p>Seu código <strong>{{ code }}</strong> foi validado com sucesso.</p>
+    <a href="/" class="btn">Voltar ao Início</a>
   </div>
 </body>
 </html>
