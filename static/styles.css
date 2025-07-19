@@ -313,3 +313,12 @@ form input:focus {
   .selection-header { font-size: 1.5rem; }
   .modal-content h2 { font-size: 1.25rem; }
 }
+/* 🖼️ Reduce logo-container height by 15% top and bottom (70% of original 30vh) */
+.logo-container {
+  height: 21vh; /* antes: 30vh */
+}
+
+/* 🔼 Pull everything abaixo do logo-container pra cima em 15% da altura original */
+main {
+  margin-top: -4.5vh; /* 30vh × 15% = 4.5vh */
+}
