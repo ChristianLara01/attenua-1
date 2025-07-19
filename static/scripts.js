@@ -1,5 +1,3 @@
-// static/scripts.js
-
 document.addEventListener('DOMContentLoaded', () => {
   const dayButtons     = document.querySelectorAll('.day-btn');
   const clockContainer = document.getElementById('timeGrid');
@@ -9,12 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedDate     = null;
 
   // Preseleciona o primeiro dia
-  if (dayButtons.length > 0) {
+  if (dayButtons.length) {
     selectedDate = dayButtons[0].dataset.iso;
     dayButtons[0].classList.add('active');
   }
 
-  // Ao clicar em um dia, marca e recarrega horários
+  // Clique em um dia
   dayButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       dayButtons.forEach(b => b.classList.remove('active'));
@@ -24,32 +22,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Busca e posiciona os botões de horário no “clock face”
+  // Carrega slots e posiciona em círculo
   async function loadSlots() {
-    clockContainer.innerHTML = ''; // limpa o relógio
-
+    clockContainer.innerHTML = '';
     try {
       const resp = await fetch(`/api/available_slots/${selectedDate}`);
-      if (!resp.ok) throw new Error('Falha ao buscar horários');
-      const slotsData = await resp.json();
-
+      const slotsData = await resp.ok ? await resp.json() : [];
       const n = slotsData.length;
-      const radiusPercent = 45; // percentual do raio interno do círculo
+      const radius = 45; // %
 
       slotsData.forEach(({ slot, available }, i) => {
         const btn = document.createElement('button');
         btn.textContent = slot;
         if (!available) btn.disabled = true;
 
-        // calcula ângulo em radianos (0º no topo)
         const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
-        const x = 50 + Math.cos(angle) * radiusPercent;
-        const y = 50 + Math.sin(angle) * radiusPercent;
+        const x = 50 + Math.cos(angle) * radius;
+        const y = 50 + Math.sin(angle) * radius;
         btn.style.left = `${x}%`;
         btn.style.top  = `${y}%`;
 
         btn.addEventListener('click', () => {
-          // destaca o selecionado
           clockContainer.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');
           openModal(slot);
@@ -57,22 +50,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         clockContainer.appendChild(btn);
       });
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
       clockContainer.innerHTML = '<p>Erro ao carregar horários.</p>';
     }
   }
 
-  // Abre modal com as cabines para o slot escolhido
+  // Abre modal de cabines
   async function openModal(slot) {
-    cabinsList.innerHTML = ''; // limpa lista
-
+    cabinsList.innerHTML = '';
     try {
-      const resp = await fetch(`/available/${selectedDate}/${slot}`);
-      if (!resp.ok) throw new Error('Falha ao buscar cabines');
-      const cabins = await resp.json();
-
-      if (cabins.length === 0) {
+      const resp = await fetch(`/available/${selectedDate}/${encodeURIComponent(slot)}`);
+      const cabins = await resp.ok ? await resp.json() : [];
+      if (!cabins.length) {
         cabinsList.innerHTML = '<p>Nenhuma cabine disponível.</p>';
       } else {
         cabins.forEach(c => {
@@ -82,27 +72,27 @@ document.addEventListener('DOMContentLoaded', () => {
             <h4>${c.nome}</h4>
             <img src="/static/images/${c.imagem}" alt="${c.nome}">
             <p>R$ ${c.valor_hora}/h</p>
-            <a class="btn" href="/reserve/${c.id}/${selectedDate}/${slot}">
+            <a class="btn"
+               href="/reserve/${c.id}/${selectedDate}/${encodeURIComponent(slot)}">
               Reservar
             </a>
           `;
           cabinsList.appendChild(card);
         });
       }
-
       modal.classList.add('visible');
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
       cabinsList.innerHTML = '<p>Erro ao carregar cabines.</p>';
       modal.classList.add('visible');
     }
   }
 
-  // Fecha o modal
+  // Fecha modal
   closeBtn.addEventListener('click', () => {
     modal.classList.remove('visible');
   });
 
-  // Primeira carga
+  // Carrega slots iniciais
   if (selectedDate) loadSlots();
 });
