@@ -55,17 +55,18 @@ def catalog():
 @app.route('/api/available_slots/<date_iso>')
 def available_slots(date_iso):
     slots = []
-    for h in range(START_HOUR, END_HOUR+1):
+    for h in range(START_HOUR, END_HOUR + 1):
         for m in range(0, 60, INTERVAL_MIN):
-            if h == END_HOUR and m > 0: break
+            if h == END_HOUR and m > 0:
+                break
             slots.append(f"{h:02d}:{m:02d}")
     col = mongo_connect()
     result = []
     for slot in slots:
-        # existe conflito?
         conflict = any(
             ag["dia"] == date_iso and ag["hora"] == slot
-            for doc in col.find() for ag in doc.get("agendamentos", [])
+            for doc in col.find()
+            for ag in doc.get("agendamentos", [])
         )
         result.append({"slot": slot, "available": not conflict})
     return jsonify(result)
@@ -88,50 +89,52 @@ def available(date_iso, slot):
             })
     return jsonify(livres)
 
-@app.route('/reserve/<int:cabin_id>/<date_iso>/<slot>')
-def show_reservation_form(cabin_id, date_iso, slot):
-    return render_template(
-      'reservation.html',
-      cabin_id=cabin_id,
-      date_iso=date_iso,
-      slot=slot
-    )
+@app.route('/reserve/<int:cabin_id>/<date_iso>/<slot>', methods=["GET", "POST"])
+def reserve(cabin_id, date_iso, slot):
+    col = mongo_connect()
 
-@app.route('/reserve', methods=["POST"])
-def handle_reservation():
-    form    = request.form
-    cabin_id = int(form["cabin_id"])
-    date_iso = form["date_iso"]
-    slot     = form["slot"]
-    first    = form["first_name"]
-    last     = form["last_name"]
-    email    = form["email"]
+    if request.method == "POST":
+        form  = request.form
+        first = form["first_name"]
+        last  = form["last_name"]
+        email = form["email"]
 
-    # Gera código único
-    code = secrets.token_hex(3)
-    col  = mongo_connect()
-    while col.find_one({"agendamentos.senha_unica": code}):
+        # Gera código único
         code = secrets.token_hex(3)
+        while col.find_one({"agendamentos.senha_unica": code}):
+            code = secrets.token_hex(3)
 
-    reserva = {
-      "dia": date_iso,
-      "hora": slot,
-      "qtde_horas": 1,
-      "id_usuario": email,
-      "first_name": first,
-      "last_name": last,
-      "senha_unica": code,
-      "cabin_id": cabin_id
-    }
+        reserva = {
+            "dia":         date_iso,
+            "hora":        slot,
+            "qtde_horas":  1,
+            "id_usuario":  email,
+            "first_name":  first,
+            "last_name":   last,
+            "senha_unica": code,
+            "cabin_id":    cabin_id
+        }
 
-    col.update_one({"id": cabin_id}, {"$push": {"agendamentos": reserva}})
-    sendEmail(reserva)
+        col.update_one({"id": cabin_id}, {"$push": {"agendamentos": reserva}})
+        try:
+            sendEmail(reserva)
+        except Exception as e:
+            app.logger.error(f"Falha ao enviar e‑mail: {e}")
 
+        return render_template(
+            'reservation_success.html',
+            cabin_id=cabin_id,
+            dia=date_iso,
+            hora=slot,
+            senha=code
+        )
+
+    # GET → exibe form
     return render_template(
-      'reservation_success.html',
-      date_iso=date_iso,
-      slot=slot,
-      code=code
+        'reservation.html',
+        cabin_id=cabin_id,
+        date_iso=date_iso,
+        slot=slot
     )
 
 @app.route('/acessar', methods=["GET", "POST"])
