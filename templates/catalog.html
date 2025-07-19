@@ -9,7 +9,7 @@
 <body>
   <header class="logo-container">
     <a href="https://attenua.com.br/" target="_blank">
-      <img src="{{ url_for('static','images/logo.png') }}" alt="Attenua" class="logo">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Attenua" class="logo">
     </a>
   </header>
 
@@ -20,7 +20,9 @@
 
     <section class="date-selector">
       {% for dia in dias %}
-        <button class="day-btn" data-iso="{{ dia }}">{{ dia.split('-')[2] }}/{{ dia.split('-')[1] }}</button>
+        <button class="day-btn" data-iso="{{ dia }}">
+          {{ dia.split('-')[2] }}/{{ dia.split('-')[1] }}
+        </button>
       {% endfor %}
     </section>
 
@@ -36,6 +38,6 @@
     </div>
   </main>
 
-  <script src="{{ url_for('static','scripts.js') }}"></script>
+  <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
 </html>
