@@ -5,13 +5,19 @@
   padding: 0;
 }
 
+/* Fonte base */
+html {
+  font-size: 16px;
+}
+
 /* Corpo da aplicação */
 body {
   font-family: sans-serif;
   background: #F5F5F5;
   color: #333;
-  max-width: 90%;
+  max-width: 100%;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 /* Cabeçalho com logo */
@@ -19,34 +25,37 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 500px;
+  height: 30vh;           /* altura proporcional */
+  min-height: 120px;
 }
 .logo-container .logo {
-  width: 100%;
+  max-width: 90%;
+  max-height: 100%;
+  width: auto;
   height: auto;
-  max-height: 500px;
 }
 
 /* Botão oblongo de acesso à reserva */
 .access-button {
   display: flex;
   justify-content: center;
-  margin: 20px 0;
+  margin: 2rem 0 1rem;
 }
 .btn-circular {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 266px;
-  width: 800px;
-  max-width: 100%;
-  border-radius: 133px;
+
+  width: 90vw;
+  max-width: 800px;
+  aspect-ratio: 3 / 1;      /* largura : altura = 3:1 */
+
+  border-radius: 1.5rem;    /* arredonda conforme o tamanho */
   background: #28a745;
   color: #fff;
-  font-size: 2.8rem;
+  font-size: 1.8rem;        /* responsivo */
   text-decoration: none;
   transition: background 0.2s ease;
-  margin: 40px auto 0;
 }
 .btn-circular:hover {
   background: #218838;
@@ -55,25 +64,25 @@ body {
 /* Cartão de seleção */
 .selection-card {
   background: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  margin-bottom: 40px;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
 }
 
 /* Cabeçalho dentro do cartão */
 .selection-header {
-  font-size: 2rem;
+  font-size: 1.75rem;
   color: #28a745;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   text-align: center;
 }
 
-/* Texto de instrução — 30% menor que antes */
+/* Texto de instrução — 30% menor */
 .instruction-text {
   text-align: center;
-  font-size: 2.94rem;  /* 70% de 4.2rem */
-  margin: 60px 0 40px;
+  font-size: 2rem;           /* já responsivo */
+  margin: 1.5rem 0;
   color: #555;
 }
 
@@ -81,17 +90,17 @@ body {
 .date-selector {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  margin-bottom: 30px;
+  margin-bottom: 1.5rem;
 }
 .date-selector .day-btn {
-  padding: 1rem 1.5rem;
-  font-size: 2.4rem;
+  padding: 0.75rem 1rem;
+  font-size: 1.25rem;
   border: 2px solid #28a745;
   background: #fff;
   color: #28a745;
-  border-radius: 6px;
+  border-radius: 0.5rem;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
@@ -101,25 +110,27 @@ body {
   color: #fff;
 }
 
-/* Clock face para horários (600px × 600px) */
+/* Clock face para horários (dobrado responsivo) */
 .clock-container {
   position: relative;
-  width: 600px;
-  height: 600px;
-  margin: 0 auto 20px;
+  width: 90vw;
+  max-width: 600px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto 1.5rem;
   border: 4px solid #28a745;
   border-radius: 50%;
   background: #fff;
 }
 .clock-container button {
   position: absolute;
-  width: 100px;       /* dobro do anterior */
-  height: 100px;
-  border-radius: 50px;
+  width: 15vw;
+  max-width: 100px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
   border: none;
   background: #28a745;
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -144,7 +155,7 @@ body {
   animation: pulse 1s infinite;
 }
 
-/* Modal de exibição de cabines — 50% mais largo */
+/* Modal de exibição de cabines — 50% mais largo, responsivo */
 .modal {
   position: fixed;
   inset: 0;
@@ -152,7 +163,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding-top: 60px;
+  padding-top: 2rem;
   visibility: hidden;
 }
 .modal.visible {
@@ -161,19 +172,20 @@ body {
 .modal-content {
   position: relative;
   background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  width: 90%;
-  max-width: 750px;   /* 1.5× 500px */
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  width: 90vw;
+  max-width: 750px;
 }
 .modal-content h2 {
   margin-top: 0;
   color: #28a745;
+  font-size: 1.5rem;
 }
 .close-btn {
   position: absolute;
-  top: 8px;
-  right: 12px;
+  top: 0.5rem;
+  right: 0.75rem;
   font-size: 1.5rem;
   cursor: pointer;
 }
@@ -181,40 +193,108 @@ body {
 /* Grid de cabines dentro do modal */
 .cabin-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
 }
 .cabin-card {
   background: #f9f9f9;
-  padding: 12px;
-  border-radius: 6px;
+  padding: 1rem;
+  border-radius: 0.5rem;
   text-align: center;
 }
 .cabin-card h4 {
-  margin: 8px 0;
+  margin: 0.5rem 0;
+  font-size: 1rem;
 }
 .cabin-card img {
   max-width: 100%;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 .cabin-card .btn {
   display: inline-block;
   background: #28a745;
   color: #fff;
-  padding: 8px 12px;
-  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
   text-decoration: none;
-  margin-top: 8px;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
 }
 .cabin-card .btn:hover {
   background: #218838;
 }
 
-/* Link de voltar (se usado dentro do cartão) */
+/* Página de formulário de reserva */
+.form-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #eaeff3;
+  padding: 1rem;
+}
+.form-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+.form-header h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.75rem;
+  color: #28a745;
+}
+.form-header p {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: #555;
+}
+form label {
+  display: block;
+  text-align: left;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  color: #333;
+}
+form input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  transition: border-color 0.2s;
+}
+form input:focus {
+  outline: none;
+  border-color: #28a745;
+}
+.submit-btn {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.submit-btn:hover {
+  background: #218838;
+}
+.submit-btn:active {
+  transform: scale(0.98);
+}
+
+/* Link de voltar */
 .link-voltar {
   display: inline-block;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   font-size: 0.9rem;
   color: #28a745;
   text-decoration: none;
@@ -222,4 +302,14 @@ body {
 }
 .link-voltar:hover {
   color: #1e7e34;
+}
+
+/* Pequenas adaptações para mobile */
+@media (max-width: 400px) {
+  .btn-circular { font-size: 1.5rem; }
+  .instruction-text { font-size: 1.5rem; }
+  .date-selector .day-btn { font-size: 1rem; padding: 0.5rem; }
+  .clock-container button { font-size: 0.8rem; width: 12vw; max-width: 60px; }
+  .selection-header { font-size: 1.5rem; }
+  .modal-content h2 { font-size: 1.25rem; }
 }
