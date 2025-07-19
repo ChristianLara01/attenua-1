@@ -6,31 +6,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-  <div class="container">
-    <h2>Confirmar Reserva</h2>
-    <p><strong>Cabine:</strong> {{ cabin_id }}</p>
-    <p><strong>Data:</strong> {{ date_iso }}</p>
-    <p><strong>Horário:</strong> {{ slot }}</p>
+<body class="form-page">
+  <div class="form-card">
+    <div class="form-header">
+      <h2>Finalize sua Reserva</h2>
+      <p>Preencha seus dados para receber o código de acesso</p>
+    </div>
 
     <form method="POST">
       <input type="hidden" name="cabin_id" value="{{ cabin_id }}">
       <input type="hidden" name="date_iso"  value="{{ date_iso }}">
       <input type="hidden" name="slot"      value="{{ slot }}">
 
-      <label for="first_name">Nome:</label>
-      <input type="text" id="first_name" name="first_name" placeholder="Nome" required>
+      <label for="first_name">Nome</label>
+      <input type="text" id="first_name" name="first_name" placeholder="Seu primeiro nome" required>
 
-      <label for="last_name">Sobrenome:</label>
-      <input type="text" id="last_name" name="last_name" placeholder="Sobrenome" required>
+      <label for="last_name">Sobrenome</label>
+      <input type="text" id="last_name" name="last_name" placeholder="Seu sobrenome" required>
 
-      <label for="email">E‑mail:</label>
-      <input type="email" id="email" name="email" placeholder="E‑mail" required>
+      <label for="email">E‑mail</label>
+      <input type="email" id="email" name="email" placeholder="seu@exemplo.com" required>
 
-      <button type="submit" class="btn">Confirmar Reserva</button>
+      <button type="submit" class="btn submit-btn">Enviar e Receber Código</button>
     </form>
 
-    <a href="{{ url_for('catalog') }}" class="link-voltar">← Voltar</a>
+    <a href="{{ url_for('catalog') }}" class="link-voltar">← Voltar ao Início</a>
   </div>
 </body>
 </html>
