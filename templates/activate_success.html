@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cabine Ativada</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h2>Cabine Ativada com Sucesso!</h2>
+    <p>Cabine {{ cabin.nome }} ativada para {{ reserva.dia }} às {{ reserva.hora }}.</p>
+    <p>Esperamos que aproveite sua experiência.</p>
+    <a href="/" class="link-voltar">← Voltar para o início</a>
+  </div>
+</body>
+</html>
