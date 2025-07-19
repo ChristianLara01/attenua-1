@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Attenua Reservas</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header class="logo-container">
+    <a href="https://attenua.com.br/" target="_blank">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Attenua">
+    </a>
+  </header>
+
+  <main>
+    <div class="access-button">
+      <a href="/acessar" class="btn-circular">Acessar minha reserva</a>
+    </div>
+
+    <section class="date-selector" id="dateSelector"></section>
+
+    <section class="time-grid" id="timeGrid"></section>
+
+    <div class="modal" id="cabinsModal">
+      <div class="modal-content" id="cabinsContent"></div>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>
