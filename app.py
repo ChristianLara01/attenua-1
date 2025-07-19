@@ -1,115 +1,129 @@
-from flask import Flask, render_template, request, jsonify, redirect
-from flask_mail import Mail, Message
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import pymongo
 import secrets
-import datetime
-from bson.objectid import ObjectId
+import smtplib
+from email.mime.text import MIMEText
+from datetime import datetime, timedelta
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
-# Configurações de e-mail (Hostinger)
-app.config['MAIL_SERVER'] = 'smtp.hostinger.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USERNAME'] = 'christian@atualle.com.br'
-app.config['MAIL_PASSWORD'] = '@12Duda04'
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_DEFAULT_SENDER'] = ('Attenua', 'christian@atualle.com.br')
-mail = Mail(app)
-
-# Conexão com MongoDB
+# MongoDB Connection
 def mongo_connect():
-    client = pymongo.MongoClient("mongodb+srv://attenua:agendamento@attenua.qypnpl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-    return client['attenua']['cabines']
+    client = pymongo.MongoClient("mongodb+srv://attenua:agendamento@attenua.qypnpl.mongodb.net/?retryWrites=true&w=majority&appName=attenua")
+    db = client["attenua"]
+    return db["cabines"]
 
+# Home page
 @app.route('/')
-def home():
-    today = datetime.date.today()
-    dias = [(today + datetime.timedelta(days=i)).isoformat() for i in range(5)]
-    return render_template('index.html', dias=dias)
+def index():
+    today = datetime.now()
+    dias = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]
+    return render_template("index.html", dias=dias)
 
-@app.route('/available/<date>/<hora>')
-def available(date, hora):
+# Cabines disponíveis para determinado dia e hora
+@app.route('/available/<date>/<slot>')
+def available(date, slot):
     col = mongo_connect()
-    cabines = list(col.find({}, {'_id': 0}))
-    for c in cabines:
-        ags = c.get('agendamentos', [])
-        for a in ags:
-            if a['dia'] == date and a['hora'] == hora:
-                c['disponivel'] = False
-                break
-        else:
-            c['disponivel'] = True
-    cabines_disponiveis = [c for c in cabines if c['disponivel']]
-    return jsonify(cabines_disponiveis)
+    cabines = list(col.find({}))
+    disponiveis = []
 
-@app.route('/reserve/<int:cabin_id>/<date>/<hora>')
-def reserve(cabin_id, date, hora):
-    return render_template('reserve.html', cabin_id=cabin_id, date=date, hora=hora)
+    for cabine in cabines:
+        conflitos = [
+            ag for ag in cabine.get("agendamentos", [])
+            if ag["dia"] == date and ag["hora"] == slot
+        ]
+        if not conflitos:
+            disponiveis.append({
+                "id": cabine["id"],
+                "nome": cabine["nome"],
+                "imagem": cabine["imagem"],
+                "image_class": cabine.get("image_class", ""),
+                "valor_hora": cabine["valor_hora"]
+            })
+    return jsonify(disponiveis)
 
-@app.route('/submit', methods=['POST'])
-def reserve_submit():
-    cabin_id = int(request.form['cabin_id'])
-    date = request.form['date']
-    hora = request.form['hora']
-    email = request.form['email']
-    first = request.form['first_name']
-    last = request.form['last_name']
-    code = secrets.token_hex(3)
+# Página de reserva por cabine
+@app.route('/reserve/<int:cabin_id>/<date>/<slot>')
+def reserve_form(cabin_id, date, slot):
+    return render_template("reservation.html", cabin_id=cabin_id, date=date, slot=slot)
 
-    col = mongo_connect()
-    while col.find_one({"agendamentos.senha_unica": code}):
-        code = secrets.token_hex(3)
+# Envio de e-mail
+def send_email(dados, cabine_nome):
+    msg = MIMEText(f"""
+Olá {dados['first_name']} {dados['last_name']},
 
-    novo = {
-        'dia': date,
-        'hora': hora,
-        'qtde_horas': 1,
-        'id_usuario': email,
-        'first_name': first,
-        'last_name': last,
-        'senha_unica': code,
-        'cabin_id': cabin_id
-    }
+Sua reserva na {cabine_nome} foi confirmada.
 
-    col.update_one({'id': cabin_id}, {'$push': {'agendamentos': novo}})
-    
-    # Envia e-mail
-    try:
-        msg = Message("Confirmação de Reserva - Attenua", recipients=[email])
-        msg.body = f"""
-Olá, {first} {last}!
-
-Sua reserva foi confirmada:
-- Data: {date}
-- Horário: {hora}
-- Cabine ID: {cabin_id}
-- Código de Acesso: {code}
-
-Use esse código para ativar sua cabine no horário reservado.
+Dia: {dados['dia']}
+Horário: {dados['hora']}
+Código de acesso: {dados['senha_unica']}
 
 Atenciosamente,
 Equipe Attenua
-"""
-        mail.send(msg)
+""")
+    msg["Subject"] = "Confirmação de Reserva - Attenua"
+    msg["From"] = "christian@atualle.com.br"
+    msg["To"] = dados["id_usuario"]
+
+    try:
+        server = smtplib.SMTP_SSL('smtp.hostinger.com', 465)
+        server.login("christian@atualle.com.br", "@12Duda04")
+        server.send_message(msg)
+        server.quit()
+        print("Email enviado.")
     except Exception as e:
-        print("Erro ao enviar e-mail:", e)
+        print(f"Erro ao enviar e-mail: {e}")
 
-    return render_template('success.html', code=code)
-
-@app.route('/acesso')
-def acesso():
-    return render_template('acesso.html')
-
-@app.route('/ativar', methods=['POST'])
-def ativar():
-    codigo = request.form['codigo']
+# Submissão da reserva
+@app.route('/reserve/submit', methods=["POST"])
+def reserve_submit():
     col = mongo_connect()
-    cabine = col.find_one({"agendamentos.senha_unica": codigo})
+    data = request.form
+    cabine_id = int(data["cabin_id"])
+    date = data["date"]
+    slot = data["slot"]
+    first = data["first_name"]
+    last = data["last_name"]
+    email = data["email"]
+
+    code = secrets.token_hex(3)
+    while col.find_one({"agendamentos.senha_unica": code}):
+        code = secrets.token_hex(3)
+
+    reserva = {
+        "dia": date,
+        "hora": slot,
+        "qtde_horas": 1,
+        "id_usuario": email,
+        "first_name": first,
+        "last_name": last,
+        "senha_unica": code,
+        "cabin_id": cabine_id
+    }
+
+    col.update_one({"id": cabine_id}, {"$push": {"agendamentos": reserva}})
+    cabine = col.find_one({"id": cabine_id})
+    send_email(reserva, cabine["nome"])
+
+    return render_template("reservation_success.html", code=code, cabine=cabine["nome"], date=date, slot=slot)
+
+# Página para ativar cabine
+@app.route('/activate')
+def activate():
+    return render_template("activate.html")
+
+# Submissão do código para ativar a cabine
+@app.route('/activate/submit', methods=["POST"])
+def activate_submit():
+    code = request.form["access_code"]
+    col = mongo_connect()
+    cabine = col.find_one({"agendamentos.senha_unica": code})
     if cabine:
-        return render_template('ativada.html', cabine=cabine, codigo=codigo)
+        return render_template("activate_success.html", cabine=cabine["nome"])
     else:
-        return render_template('erro.html', mensagem="Código inválido ou inexistente.")
+        return render_template("activate.html", error="Código inválido.")
 
 if __name__ == '__main__':
     app.run(debug=True)
