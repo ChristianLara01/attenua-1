@@ -113,14 +113,15 @@ body {
 /* Clock face responsivo sem overflow */
 .clock-container {
   position: relative;
-  width: 100%;          /* ocupa 100% da largura do pai */
-  max-width: 600px;     /* limite máximo igual ao diâmetro desejado */
-  aspect-ratio: 1 / 1;  /* mantém proporção circular */
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 1 / 1;
   margin: 0 auto 1.5rem;
   border: 4px solid #28a745;
   border-radius: 50%;
   background: #fff;
-  box-sizing: border-box; /* inclui bordas no cálculo de largura */
+  box-sizing: border-box;
+  overflow: hidden; /* esconde qualquer parte que exceda */
 }
 .clock-container button {
   position: absolute;
