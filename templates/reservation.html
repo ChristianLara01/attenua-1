@@ -2,25 +2,32 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Confirmar Reserva</title>
-  <link rel="stylesheet" href="{{ url_for('static','styles.css') }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
   <div class="container">
     <h2>Confirmar Reserva</h2>
-    <p>Cabine: {{ cabin_id }}</p>
-    <p>Data: {{ date_iso }}</p>
-    <p>Horário: {{ slot }}</p>
-    <form method="POST" action="/reserve">
+    <p><strong>Cabine:</strong> {{ cabin_id }}</p>
+    <p><strong>Data:</strong> {{ date_iso }}</p>
+    <p><strong>Horário:</strong> {{ slot }}</p>
+
+    <form method="POST" action="{{ url_for('handle_reservation') }}">
+      <!-- campos escondidos para manter o contexto -->
       <input type="hidden" name="cabin_id" value="{{ cabin_id }}">
       <input type="hidden" name="date_iso"  value="{{ date_iso }}">
       <input type="hidden" name="slot"      value="{{ slot }}">
-      <input type="text"   name="first_name" placeholder="Nome" required>
+
+      <!-- dados do usuário -->
+      <input type="text"   name="first_name" placeholder="Nome"      required>
       <input type="text"   name="last_name"  placeholder="Sobrenome" required>
-      <input type="email"  name="email"      placeholder="E‑mail" required>
-      <button type="submit" class="btn">Reservar</button>
+      <input type="email"  name="email"      placeholder="E‑mail"    required>
+
+      <button type="submit" class="btn">Confirmar Reserva</button>
     </form>
+
+    <a href="{{ url_for('catalog') }}" class="link-voltar">← Voltar</a>
   </div>
 </body>
 </html>
