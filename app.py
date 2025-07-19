@@ -10,7 +10,6 @@ from email.mime.text import MIMEText
 app = Flask(__name__)
 CORS(app)
 
-# ——— Configurações ———
 MONGO_URI      = "mongodb+srv://riotchristian04:atualle1@cluster0.zwuw5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 EMAIL_SENDER   = "attenua@atualle.com.br"
 EMAIL_PASSWORD = "Wwck$22xO4O#8V"
@@ -52,32 +51,24 @@ def catalog():
 
 @app.route('/api/available_slots/<date_iso>')
 def available_slots(date_iso):
-    # gera lista de slots
     slots = []
     for h in range(START_HOUR, END_HOUR + 1):
         for m in range(0, 60, INTERVAL_MIN):
             if h == END_HOUR and m > 0:
                 break
             slots.append(f"{h:02d}:{m:02d}")
-
     col = mongo_connect()
     cabins = list(col.find())
-
     result = []
     for slot in slots:
-        # verifica se há ao menos uma cabine livre nesse slot
-        any_free = False
-        for cabine in cabins:
-            # procura conflito nessa cabine
-            conflito = any(
-                ag["dia"] == date_iso and ag["hora"] == slot
+        any_free = any(
+            all(
+                ag["dia"] != date_iso or ag["hora"] != slot
                 for ag in cabine.get("agendamentos", [])
             )
-            if not conflito:
-                any_free = True
-                break
+            for cabine in cabins
+        )
         result.append({"slot": slot, "available": any_free})
-
     return jsonify(result)
 
 @app.route('/available/<date_iso>/<slot>')
@@ -103,12 +94,12 @@ def reserve(cabin_id, date_iso, slot):
     col = mongo_connect()
 
     if request.method == "POST":
+        app.logger.info(f"POST /reserve para cabine {cabin_id} em {date_iso} {slot}")
         form  = request.form
-        first = form["first_name"]
-        last  = form["last_name"]
-        email = form["email"]
+        first = form.get("first_name")
+        last  = form.get("last_name")
+        email = form.get("email")
 
-        # Gera código único
         code = secrets.token_hex(3)
         while col.find_one({"agendamentos.senha_unica": code}):
             code = secrets.token_hex(3)
@@ -127,18 +118,19 @@ def reserve(cabin_id, date_iso, slot):
         col.update_one({"id": cabin_id}, {"$push": {"agendamentos": reserva}})
         try:
             sendEmail(reserva)
+            app.logger.info(f"E‑mail enviado para {email}")
         except Exception as e:
-            app.logger.error(f"Falha ao enviar e‑mail: {e}")
+            app.logger.error(f"Erro ao enviar e‑mail: {e}")
 
         return render_template(
             'reservation_success.html',
             cabin_id=cabin_id,
-            date_iso=date_iso,
-            slot=slot,
-            code=code
+            dia=date_iso,
+            hora=slot,
+            senha=code
         )
 
-    # GET → exibe o formulário de reserva
+    app.logger.info(f"GET  /reserve para cabine {cabin_id} em {date_iso} {slot}")
     return render_template(
         'reservation.html',
         cabin_id=cabin_id,
@@ -150,7 +142,7 @@ def reserve(cabin_id, date_iso, slot):
 def acessar():
     error = None
     if request.method == "POST":
-        code = request.form["code"]
+        code = request.form.get("code")
         col  = mongo_connect()
         doc  = col.find_one({"agendamentos.senha_unica": code})
         if doc:
