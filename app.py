@@ -44,8 +44,6 @@ def sendEmail(reserv):
         server.login(EMAIL_SENDER, EMAIL_PASSWORD)
         server.send_message(msg)
 
-# ——— Rotas ———
-
 @app.route('/')
 def catalog():
     today = datetime.now()
@@ -54,21 +52,32 @@ def catalog():
 
 @app.route('/api/available_slots/<date_iso>')
 def available_slots(date_iso):
+    # gera lista de slots
     slots = []
     for h in range(START_HOUR, END_HOUR + 1):
         for m in range(0, 60, INTERVAL_MIN):
             if h == END_HOUR and m > 0:
                 break
             slots.append(f"{h:02d}:{m:02d}")
+
     col = mongo_connect()
+    cabins = list(col.find())
+
     result = []
     for slot in slots:
-        conflict = any(
-            ag["dia"] == date_iso and ag["hora"] == slot
-            for doc in col.find()
-            for ag in doc.get("agendamentos", [])
-        )
-        result.append({"slot": slot, "available": not conflict})
+        # verifica se há ao menos uma cabine livre nesse slot
+        any_free = False
+        for cabine in cabins:
+            # procura conflito nessa cabine
+            conflito = any(
+                ag["dia"] == date_iso and ag["hora"] == slot
+                for ag in cabine.get("agendamentos", [])
+            )
+            if not conflito:
+                any_free = True
+                break
+        result.append({"slot": slot, "available": any_free})
+
     return jsonify(result)
 
 @app.route('/available/<date_iso>/<slot>')
@@ -76,11 +85,11 @@ def available(date_iso, slot):
     col = mongo_connect()
     livres = []
     for cabine in col.find():
-        conflict = any(
+        conflito = any(
             ag["dia"] == date_iso and ag["hora"] == slot
             for ag in cabine.get("agendamentos", [])
         )
-        if not conflict:
+        if not conflito:
             livres.append({
                 "id": cabine["id"],
                 "nome": cabine["nome"],
@@ -124,12 +133,12 @@ def reserve(cabin_id, date_iso, slot):
         return render_template(
             'reservation_success.html',
             cabin_id=cabin_id,
-            dia=date_iso,
-            hora=slot,
-            senha=code
+            date_iso=date_iso,
+            slot=slot,
+            code=code
         )
 
-    # GET → exibe form
+    # GET → exibe o formulário de reserva
     return render_template(
         'reservation.html',
         cabin_id=cabin_id,
