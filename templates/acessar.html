@@ -2,19 +2,36 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Acessar Reserva</title>
+  <title>Acessar Cabine</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="{{ url_for('static','styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-  <div class="container">
-    <h2>Acessar minha reserva</h2>
-    {% if error %}<p class="error">{{ error }}</p>{% endif %}
-    <form method="POST">
-      <input type="text" name="code" placeholder="Digite seu código" required>
-      <button type="submit" class="btn">Ativar Cabine</button>
+<body class="form-page">
+  <div class="form-card">
+    <div class="form-header">
+      <h2>Acessar Cabine</h2>
+      <p>Insira seu código de acesso para liberar a cabine</p>
+      {% if error %}
+        <p class="error">{{ error }}</p>
+      {% endif %}
+    </div>
+
+    <form method="POST" action="{{ url_for('acessar') }}">
+      <label for="code">Código de acesso</label>
+      <input type="text"
+             id="code"
+             name="code"
+             placeholder="Digite seu código"
+             required>
+
+      <button type="submit" class="submit-btn">
+        Acessar Cabine
+      </button>
     </form>
-    <a href="/" class="link-voltar">← Voltar</a>
+
+    <a href="{{ url_for('catalog') }}" class="link-voltar">
+      ← Voltar ao Início
+    </a>
   </div>
 </body>
 </html>
