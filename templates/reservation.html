@@ -13,21 +13,22 @@
       <p>Preencha seus dados para receber o código de acesso</p>
     </div>
 
-    <form method="POST">
+    <form method="POST"
+          action="{{ url_for('reserve', cabin_id=cabin_id, date_iso=date_iso, slot=slot) }}">
       <input type="hidden" name="cabin_id" value="{{ cabin_id }}">
       <input type="hidden" name="date_iso"  value="{{ date_iso }}">
       <input type="hidden" name="slot"      value="{{ slot }}">
 
       <label for="first_name">Nome</label>
-      <input type="text" id="first_name" name="first_name" placeholder="Seu primeiro nome" required>
+      <input type="text"   id="first_name" name="first_name" placeholder="Seu primeiro nome" required>
 
       <label for="last_name">Sobrenome</label>
-      <input type="text" id="last_name" name="last_name" placeholder="Seu sobrenome" required>
+      <input type="text"   id="last_name"  name="last_name"  placeholder="Seu sobrenome"    required>
 
       <label for="email">E‑mail</label>
-      <input type="email" id="email" name="email" placeholder="seu@exemplo.com" required>
+      <input type="email"  id="email"      name="email"       placeholder="seu@exemplo.com" required>
 
-      <button type="submit" class="btn submit-btn">Enviar e Receber Código</button>
+      <button type="submit" class="submit-btn">Enviar e Receber Código</button>
     </form>
 
     <a href="{{ url_for('catalog') }}" class="link-voltar">← Voltar ao Início</a>
