@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Acessar Reserva</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static','styles.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h2>Acessar minha reserva</h2>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <form method="POST">
+      <input type="text" name="code" placeholder="Digite seu código" required>
+      <button type="submit" class="btn">Ativar Cabine</button>
+    </form>
+    <a href="/" class="link-voltar">← Voltar</a>
+  </div>
+</body>
+</html>
