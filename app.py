@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify
-from flask_cors import CORS
 import pymongo
 import secrets
 import smtplib
@@ -8,8 +7,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 app = Flask(__name__)
-CORS(app)
 
+# ——— Configurações ———
 MONGO_URI      = "mongodb+srv://riotchristian04:atualle1@cluster0.zwuw5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 EMAIL_SENDER   = "attenua@atualle.com.br"
 EMAIL_PASSWORD = "Wwck$22xO4O#8V"
@@ -94,15 +93,17 @@ def reserve(cabin_id, date_iso, slot):
     col = mongo_connect()
 
     if request.method == "POST":
-        app.logger.info(f"POST /reserve para cabine {cabin_id} em {date_iso} {slot}")
+        app.logger.info(f"POST /reserve called for cabin={cabin_id}, date={date_iso}, slot={slot}")
         form  = request.form
         first = form.get("first_name")
         last  = form.get("last_name")
         email = form.get("email")
+        app.logger.info(f"Form data: first={first}, last={last}, email={email}")
 
         code = secrets.token_hex(3)
         while col.find_one({"agendamentos.senha_unica": code}):
             code = secrets.token_hex(3)
+        app.logger.info(f"Generated code: {code}")
 
         reserva = {
             "dia":         date_iso,
@@ -114,23 +115,24 @@ def reserve(cabin_id, date_iso, slot):
             "senha_unica": code,
             "cabin_id":    cabin_id
         }
-
         col.update_one({"id": cabin_id}, {"$push": {"agendamentos": reserva}})
+        app.logger.info("Reservation persisted to Mongo")
+
         try:
             sendEmail(reserva)
-            app.logger.info(f"E‑mail enviado para {email}")
+            app.logger.info(f"Email successfully sent to {email}")
         except Exception as e:
-            app.logger.error(f"Erro ao enviar e‑mail: {e}")
+            app.logger.error(f"Failed to send email: {e}")
 
         return render_template(
             'reservation_success.html',
             cabin_id=cabin_id,
-            dia=date_iso,
-            hora=slot,
-            senha=code
+            date_iso=date_iso,
+            slot=slot,
+            code=code
         )
 
-    app.logger.info(f"GET  /reserve para cabine {cabin_id} em {date_iso} {slot}")
+    app.logger.info(f"GET /reserve page for cabin={cabin_id}, date={date_iso}, slot={slot}")
     return render_template(
         'reservation.html',
         cabin_id=cabin_id,
