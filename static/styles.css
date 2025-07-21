@@ -170,6 +170,7 @@ body {
   align-items: flex-start;
   padding-top: 2rem;
   visibility: hidden;
+  overflow-y: auto;  /* permite rolar o modal inteiro */
 }
 .modal.visible {
   visibility: visible;
@@ -182,6 +183,8 @@ body {
   padding: 1.5rem;
   width: 90vw;
   max-width: 750px;
+  max-height: 80vh;  /* limita altura e permite scroll interno */
+  overflow-y: auto;
 }
 .modal-content h2 {
   margin-top: 0;
@@ -307,19 +310,6 @@ form input:focus {
 }
 
 /* Link de voltar */
-.link-voltar {
-  display: inline-block;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  color: var(--btn-bg) !important;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.link-voltar:hover {
-  color: var(--btn-bg-hover) !important;
-}
-
-/* Evita sobreposição do botão Voltar ao Início */
 .form-card p:last-of-type {
   margin-bottom: 2rem;
 }
@@ -328,6 +318,12 @@ form input:focus {
   margin-top: 2rem !important;
   position: relative;
   z-index: 1;
+  color: var(--btn-bg) !important;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.link-voltar:hover {
+  color: var(--btn-bg-hover) !important;
 }
 
 /* Ajustes para dispositivos muito pequenos */
