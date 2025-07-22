@@ -51,8 +51,8 @@ body {
   justify-content: center;
   width: 90vw;
   max-width: 800px;
-  aspect-ratio: 3 / 1;
-  border-radius: 1.5rem;
+  aspect-ratio: 4 / 1;
+  border-radius: 2rem;
   background: var(--btn-bg) !important;
   color: var(--btn-fg) !important;
   font-size: 1.8rem;
@@ -157,7 +157,7 @@ body {
   100% { transform: translate(-50%, -50%) scale(1); }
 }
 .clock-container button.selected {
-  animation: pulse 1s infinite;
+  animation: pulse 2s;
 }
 
 /* Modal de exibição de cabines */
