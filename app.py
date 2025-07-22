@@ -1,8 +1,8 @@
 import logging
+from flask import Flask, render_template, request, jsonify
+import pymongo
 import secrets
 import smtplib
-import pymongo
-from flask import Flask, render_template, request, jsonify
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -29,21 +29,9 @@ SMTP_HOST      = "smtp.hostinger.com"
 SMTP_PORT      = 465
 
 def send_email(reserv):
-    """
-    Envia email formatado:
-      - Sua cabine: nome (sem "CABINE "), capitalizado
-      - Data: dd/mm/aaaa
-      - Código de acesso: nomecabine + código de 6 hex dígitos (minúsculo, sem espaços)
-      - Links e propaganda para Attenua e Atualle
-    """
-    # extrai nome da cabine, remove prefixo "CABINE "
-    raw_name    = reserv.get("nome", "")
-    nome_cabine = raw_name.replace("CABINE ", "").strip().lower()
-    # formata data yyyy-mm-dd → dd/mm/aaaa
-    data_iso    = reserv["dia"]
-    data_fmt    = datetime.strptime(data_iso, "%Y-%m-%d").strftime("%d/%m/%Y")
-    # monta código completo
-    codigo_full = f"{nome_cabine}{reserv['senha_unica']}".lower()
+    # formata data de YYYY-MM-DD para DD/MM/YYYY
+    year, month, day = reserv["dia"].split('-')
+    date_fmt = f"{day}/{month}/{year}"
 
     msg = MIMEMultipart("alternative")
     msg["From"]    = EMAIL_SENDER
@@ -56,18 +44,62 @@ def send_email(reserv):
 <head>
   <meta charset="UTF-8">
   <style>
-    body {{ margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif }}
-    .container {{ max-width:600px;margin:20px auto;background:#fff;border-radius:8px;
-                  box-shadow:0 4px 12px rgba(0,0,0,0.1);overflow:hidden }}
-    .header {{ background:#28a745;color:#fff;text-align:center;padding:20px }}
-    .header h1 {{ margin:0;font-size:1.8rem }}
-    .content {{ padding:20px;color:#333;line-height:1.5 }}
-    .content p {{ margin:.5rem 0 }}
-    .content .highlight {{ font-weight:bold;color:#28a745 }}
-    .links {{ padding:20px;text-align:center;background:#f0f0f0 }}
-    .links a {{ margin:.5rem;padding:10px 20px;background:#28a745;color:#fff;
-               text-decoration:none;border-radius:4px;font-size:.95rem }}
-    .footer {{ padding:20px;font-size:.9rem;color:#555;text-align:center }}
+    body {{
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0; padding: 0;
+    }}
+    .container {{
+      max-width: 600px;
+      margin: 20px auto;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }}
+    .header {{
+      background: #28a745;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }}
+    .header h1 {{
+      margin: 0;
+      font-size: 1.8rem;
+    }}
+    .content {{
+      padding: 20px;
+      color: #333;
+      line-height: 1.5;
+    }}
+    .content p {{
+      margin: .5rem 0;
+    }}
+    .content .highlight {{
+      font-weight: bold;
+      color: #28a745;
+    }}
+    .links {{
+      padding: 20px;
+      text-align: center;
+      background: #f0f0f0;
+    }}
+    .links a {{
+      display: inline-block;
+      margin: .5rem;
+      padding: 10px 20px;
+      background: #28a745;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: .95rem;
+    }}
+    .footer {{
+      padding: 20px;
+      font-size: .9rem;
+      color: #555;
+      text-align: center;
+    }}
   </style>
 </head>
 <body>
@@ -76,11 +108,10 @@ def send_email(reserv):
       <h1>Reserva Confirmada!</h1>
     </div>
     <div class="content">
-      <p>Olá <span class="highlight">{reserv['first_name']} {reserv['last_name']}</span>,</p>
-      <p>Sua reserva foi realizada com sucesso:</p>
-      <p><strong>Sua cabine:</strong> <span class="highlight">{nome_cabine.title()}</span></p>
-      <p><strong>Data:</strong> <span class="highlight">{data_fmt}</span></p>
-      <p><strong>Código de Acesso:</strong> <span class="highlight">{codigo_full}</span></p>
+      <p><span class="highlight">Sua cabine:</span> {reserv['nome']}</p>
+      <p><span class="highlight">Data:</span> {date_fmt}</p>
+      <p><span class="highlight">Horário:</span> {reserv['hora']}</p>
+      <p><span class="highlight">Código de Acesso:</span> {reserv['senha_unica']}</p>
     </div>
     <div class="links">
       <a href="https://attenua.com.br" target="_blank">Visitar Attenua</a>
@@ -101,21 +132,39 @@ def send_email(reserv):
         server.login(EMAIL_SENDER, EMAIL_PASSWORD)
         server.send_message(msg)
 
-
 # ——— Rotas ———
 
 @app.route('/')
 def catalog():
-    """Página inicial: próximos 5 dias."""
     today = datetime.now()
     dias = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]
     return render_template('catalog.html', dias=dias)
 
+@app.route('/api/available_slots/<date_iso>')
+def available_slots(date_iso):
+    START_HOUR, END_HOUR, INTERVAL = 15, 20, 30
+    slots = []
+    for h in range(START_HOUR, END_HOUR + 1):
+        for m in range(0, 60, INTERVAL):
+            if h == END_HOUR and m > 0: break
+            slots.append(f"{h:02d}:{m:02d}")
+
+    col = mongo_connect()
+    cabins = list(col.find())
+    result = []
+    for slot in slots:
+        free = any(
+            all(
+                ag["dia"] != date_iso or ag["hora"] != slot
+                for ag in cabine.get("agendamentos", [])
+            )
+            for cabine in cabins
+        )
+        result.append({"slot": slot, "available": free})
+    return jsonify(result)
+
 @app.route('/available/<date_iso>/<slot>')
 def available(date_iso, slot):
-    """
-    Retorna JSON das cabines disponíveis no dia (yyyy-mm-dd) e horário (HH:MM).
-    """
     col = mongo_connect()
     livres = []
     for cabine in col.find():
@@ -134,66 +183,54 @@ def available(date_iso, slot):
 
 @app.route('/reserve/<int:cabin_id>/<date_iso>/<slot>', methods=["GET","POST"])
 def reserve(cabin_id, date_iso, slot):
-    """
-    GET: exibe formulário de dados.
-    POST: persiste reserva, envia e-mail e mostra página de sucesso.
-    """
     col = mongo_connect()
     cabine = col.find_one({"id": cabin_id})
-    if not cabine:
-        return "Cabine não encontrada", 404
 
     if request.method == "POST":
         first = request.form["first_name"]
         last  = request.form["last_name"]
         email = request.form["email"]
 
+        # gera hex de 6 dígitos e compõe código completo
         code = secrets.token_hex(3)
-        while col.find_one({"agendamentos.senha_unica": code}):
-            code = secrets.token_hex(3)
+        nome_simple = cabine["nome"].replace("CABINE ", "").strip().lower()
+        full_code = f"{nome_simple}{code}"
 
         reserva = {
-            "dia":          date_iso,
-            "hora":         slot,
-            "qtde_horas":   1,
-            "id_usuario":   email,
-            "first_name":   first,
-            "last_name":    last,
-            "senha_unica":  code,
-            "nome":         cabine["nome"]
+            "dia":         date_iso,
+            "hora":        slot,
+            "qtde_horas":  1,
+            "id_usuario":  email,
+            "first_name":  first,
+            "last_name":   last,
+            "senha_unica": full_code,
+            "cabin_id":    cabin_id,
+            "nome":        cabine["nome"]
         }
         col.update_one({"id": cabin_id}, {"$push": {"agendamentos": reserva}})
-
         try:
             send_email(reserva)
         except Exception as e:
-            app.logger.error(f"Erro no envio de email: {e}")
-
-        # passa para template sucesso formatado
-        nome_simples = cabine["nome"].replace("CABINE ", "").title()
-        data_fmt     = datetime.strptime(date_iso, "%Y-%m-%d").strftime("%d/%m/%Y")
-        codigo_full  = f"{cabine['nome'].replace('CABINE ', '').lower()}{code}"
+            app.logger.error(f"Erro SMTP: {e}")
 
         return render_template(
             'reservation_success.html',
-            cabine=nome_simples,
-            dia=data_fmt,
+            cabin_name=cabine["nome"],
+            dia=date_iso,
             hora=slot,
-            codigo=codigo_full
+            senha=full_code
         )
 
     return render_template(
         'reservation.html',
         cabin_id=cabin_id,
+        cabin_name=cabine["nome"],
         date_iso=date_iso,
         slot=slot
     )
 
 @app.route('/acessar', methods=["GET","POST"])
 def acessar():
-    """
-    Tela para usuário inserir código e ativar cabine.
-    """
     error = None
     if request.method == "POST":
         code = request.form["code"]
