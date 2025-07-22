@@ -4,7 +4,6 @@ import pymongo
 import secrets
 import smtplib
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import paho.mqtt.client as mqtt
@@ -30,6 +29,7 @@ SMTP_HOST      = "smtp.hostinger.com"
 SMTP_PORT      = 465
 
 def send_email(reserv):
+    # formata data de YYYY-MM-DD para DD/MM/YYYY
     year, month, day = reserv["dia"].split('-')
     date_fmt = f"{day}/{month}/{year}"
 
@@ -94,7 +94,7 @@ MQTT_TOPIC = "cabine/01/open"
 
 def mqtt_publish_open():
     client = mqtt.Client()
-    client.tls_set()  # usa certificados padrão do sistema
+    client.tls_set()  # usa certificados padrão
     client.username_pw_set(MQTT_USER, MQTT_PASS)
     client.connect(MQTT_HOST, MQTT_PORT, keepalive=60)
     client.publish(MQTT_TOPIC, "abrir")
@@ -104,7 +104,8 @@ def mqtt_publish_open():
 
 @app.route('/')
 def catalog():
-    today = datetime.now(ZoneInfo("America/Sao_Paulo"))
+    today = datetime.now()
+    # apenas hoje + 2 dias seguintes
     dias = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(3)]
     return render_template('catalog.html', dias=dias)
 
@@ -156,7 +157,7 @@ def reserve(cabin_id, date_iso, slot):
         first = request.form["first_name"]
         last  = request.form["last_name"]
         email = request.form["email"]
-        # gera código: nomecabine em lowercase + 6 hex chars
+        # cria código: nomecabine (minusculo sem espaços) + 6 hex chars
         code = secrets.token_hex(3)
         nome_simple = cabine["nome"].replace("CABINE ", "").strip().lower()
         full_code = f"{nome_simple}{code}"
@@ -196,17 +197,16 @@ def acessar():
     error = None
     if request.method == "POST":
         code = request.form["code"].strip().lower()
-        # busca documento que contenha esse código
+        # busca o agendamento pelo código
         doc = mongo_connect().find_one({"agendamentos.senha_unica": code})
         if not doc:
             error = "Código inválido."
         else:
-            # extrai o agendamento correto
+            # encontra o agendamento exato
             ag = next(a for a in doc["agendamentos"] if a["senha_unica"] == code)
-            tz = ZoneInfo("America/Sao_Paulo")
-            dt_inicio = datetime.fromisoformat(f"{ag['dia']}T{ag['hora']}").replace(tzinfo=tz)
+            dt_inicio = datetime.strptime(f"{ag['dia']} {ag['hora']}", "%Y-%m-%d %H:%M")
             dt_fim    = dt_inicio + timedelta(minutes=30)
-            now       = datetime.now(tz)
+            now       = datetime.now()
             if dt_inicio <= now <= dt_fim:
                 mqtt_publish_open()
                 return render_template('activate_success.html', code=code)
