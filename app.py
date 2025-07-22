@@ -1,5 +1,5 @@
 import logging
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import pymongo
 import secrets
 import smtplib
@@ -8,11 +8,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import paho.mqtt.publish as publish
 
-# ——— Setup e logging —————————————
+# ——— Setup e logging —————————————————
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
 
-# ——— Configurações de MongoDB —————————————
+# ——— Configurações de MongoDB —————————————————
 MONGO_URI = (
     "mongodb+srv://riotchristian04:atualle1"
     "@cluster0.zwuw5.mongodb.net/"
@@ -22,26 +22,24 @@ def mongo_connect():
     client = pymongo.MongoClient(MONGO_URI)
     return client.attenua.reservas
 
-# ——— Configurações de SMTP —————————————
+# ——— Configurações de SMTP —————————————————
 EMAIL_SENDER   = "christian@atualle.com.br"
 EMAIL_PASSWORD = "@12Duda04"
 SMTP_HOST      = "smtp.hostinger.com"
 SMTP_PORT      = 465
 
-# ——— Configurações de MQTT —————————————
-MQTT_HOST        = "917a3939272f48c09215df8a39c82c46.s1.eu.hivemq.cloud"
-MQTT_PORT        = 8883
-MQTT_USER        = "attenua"
-MQTT_PASS        = "Atualle1"
-MQTT_TOPIC_OPEN  = "cabine/01/open"
+# ——— Configurações de MQTT —————————————————
+MQTT_HOST       = "917a3939272f48c09215df8a39c82c46.s1.eu.hivemq.cloud"
+MQTT_PORT       = 8883
+MQTT_USER       = "attenua"
+MQTT_PASS       = "Atualle1"
+MQTT_TOPIC_OPEN = "cabine/01/open"
 
-# ——— Timezone local (UTC–3) —————————————
+# ——— Offset fuso horário local (UTC–3) —————————————————
 LOCAL_TZ_OFFSET = -3
 
 def mqtt_publish_open():
-    """Publica a mensagem 'abrir' no tópico MQTT para liberar a cabine."""
     auth = {'username': MQTT_USER, 'password': MQTT_PASS}
-    # Publish sem validação de certificado (insecure)
     publish.single(
         topic=MQTT_TOPIC_OPEN,
         payload="abrir",
@@ -53,11 +51,8 @@ def mqtt_publish_open():
     app.logger.info(f"MQTT → publicado 'abrir' em {MQTT_TOPIC_OPEN}")
 
 def send_email(reserv):
-    """Envia e-mail de confirmação de reserva."""
-    # formata data de YYYY-MM-DD para DD/MM/YYYY
     year, month, day = reserv["dia"].split('-')
     date_fmt = f"{day}/{month}/{year}"
-
     msg = MIMEMultipart("alternative")
     msg["From"]    = EMAIL_SENDER
     msg["To"]      = reserv["id_usuario"]
@@ -65,27 +60,23 @@ def send_email(reserv):
 
     html = f"""\
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
+<html lang="pt-BR"><head><meta charset="UTF-8">
   <style>
-    body {{ font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }}
-    .container {{ max-width: 600px; margin: 20px auto; background: #fff;
-                  border-radius: 8px; overflow: hidden;
-                  box-shadow: 0 4px 12px rgba(0,0,0,0.1); }}
-    .header {{ background: #28a745; color: #fff; text-align: center; padding: 20px; }}
-    .header h1 {{ margin: 0; font-size: 1.8rem; }}
-    .content {{ padding: 20px; color: #333; line-height: 1.5; }}
-    .content p {{ margin: .5rem 0; }}
-    .content .highlight {{ font-weight: bold; color: #28a745; }}
-    .links {{ padding: 20px; text-align: center; background: #f0f0f0; }}
-    .links a {{ display: inline-block; margin: .5rem; padding: 10px 20px;
-                background: #28a745; color: #fff; text-decoration: none;
-                border-radius: 4px; font-size: .95rem; }}
-    .footer {{ padding: 20px; font-size: .9rem; color: #555; text-align: center; }}
+    body {{font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0}}
+    .container {{max-width:600px;margin:20px auto;background:#fff;border-radius:8px;
+                 overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1)}}
+    .header {{background:#28a745;color:#fff;text-align:center;padding:20px}}
+    .header h1 {{margin:0;font-size:1.8rem}}
+    .content {{padding:20px;color:#333;line-height:1.5}}
+    .content p {{margin:.5rem 0}}
+    .content .highlight {{font-weight:bold;color:#28a745}}
+    .links {{padding:20px;text-align:center;background:#f0f0f0}}
+    .links a {{display:inline-block;margin:.5rem;padding:10px 20px;
+               background:#28a745;color:#fff;text-decoration:none;
+               border-radius:4px;font-size:.95rem}}
+    .footer {{padding:20px;font-size:.9rem;color:#555;text-align:center}}
   </style>
-</head>
-<body>
+</head><body>
   <div class="container">
     <div class="header"><h1>Reserva Confirmada!</h1></div>
     <div class="content">
@@ -99,7 +90,7 @@ def send_email(reserv):
       <a href="https://atualle.com.br" target="_blank">Visitar Atualle</a>
     </div>
     <div class="footer">
-      <p>A Atualle é referência em soluções acústicas, oferecendo cabines de alta qualidade para ambientes corporativos e residenciais.</p>
+      <p>A Atualle é referência em soluções acústicas, oferecendo cabines de alta qualidade.</p>
       <p>Obrigado por escolher a ATTENUA Cabines Acústicas!</p>
     </div>
   </div>
@@ -113,7 +104,7 @@ def send_email(reserv):
         server.send_message(msg)
     app.logger.info(f"E-mail enviado para {reserv['id_usuario']}")
 
-# ——— Rotas —————————————
+# ——— Rotas ——————————————————
 
 @app.route('/')
 def catalog():
@@ -124,13 +115,10 @@ def catalog():
 @app.route('/api/available_slots/<date_iso>')
 def available_slots(date_iso):
     START_HOUR, END_HOUR, INTERVAL = 15, 20, 30
-    slots = []
-    for h in range(START_HOUR, END_HOUR + 1):
-        for m in range(0, 60, INTERVAL):
-            if h == END_HOUR and m > 0:
-                break
-            slots.append(f"{h:02d}:{m:02d}")
-
+    slots = [f"{h:02d}:{m:02d}"
+             for h in range(START_HOUR, END_HOUR+1)
+             for m in range(0, 60, INTERVAL)
+             if not (h==END_HOUR and m>0)]
     col    = mongo_connect()
     cabins = list(col.find())
     result = []
@@ -165,38 +153,32 @@ def available(date_iso, slot):
 
 @app.route('/reserve/<int:cabin_id>/<date_iso>/<slot>', methods=["GET","POST"])
 def reserve(cabin_id, date_iso, slot):
-    col     = mongo_connect()
-    cabine  = col.find_one({"id": cabin_id})
-
+    col    = mongo_connect()
+    cabine = col.find_one({"id": cabin_id})
     if request.method == "POST":
         first = request.form["first_name"]
         last  = request.form["last_name"]
         email = request.form["email"]
-
-        # gera hex de 6 dígitos e compõe código completo
         code_simple = secrets.token_hex(3)
-        nome_simple = cabine["nome"].replace("CABINE ", "").strip().lower()
+        nome_simple = cabine["nome"].replace("CABINE ", "").lower()
         full_code   = f"{nome_simple}{code_simple}"
-
         reserva = {
             "dia":         date_iso,
             "hora":        slot,
-            "qtde_horas":  1,
-            "id_usuario":  email,
-            "first_name":  first,
-            "last_name":   last,
+            "qtde_horas": 1,
+            "id_usuario": email,
+            "first_name": first,
+            "last_name":  last,
             "senha_unica": full_code,
-            "cabin_id":    cabin_id,
-            "nome":        cabine["nome"]
+            "cabin_id":   cabin_id,
+            "nome":       cabine["nome"]
         }
         col.update_one({"id": cabin_id}, {"$push": {"agendamentos": reserva}})
         app.logger.info("Reserva salva no MongoDB")
-
         try:
             send_email(reserva)
         except Exception as e:
             app.logger.error(f"Erro SMTP: {e}")
-
         return render_template(
             'reservation_success.html',
             cabin_name=cabine["nome"],
@@ -204,7 +186,6 @@ def reserve(cabin_id, date_iso, slot):
             hora=slot,
             senha=full_code
         )
-
     return render_template(
         'reservation.html',
         cabin_id=cabin_id,
@@ -213,33 +194,33 @@ def reserve(cabin_id, date_iso, slot):
         slot=slot
     )
 
+@app.route('/activate_success/<code>')
+def activate_success(code):
+    return render_template('activate_success.html', code=code)
+
 @app.route('/acessar', methods=["GET","POST"])
 def acessar():
     error = None
     if request.method == "POST":
         code = request.form["code"].strip().lower()
         doc  = mongo_connect().find_one({"agendamentos.senha_unica": code})
-
         if not doc:
             error = "Código inválido."
         else:
-            # encontra o agendamento correspondente
             ag = next(a for a in doc["agendamentos"] if a["senha_unica"] == code)
-
-            # datetime de início e fim (janela de 30 min)
             dt_inicio = datetime.strptime(f"{ag['dia']} {ag['hora']}", "%Y-%m-%d %H:%M")
             dt_fim    = dt_inicio + timedelta(minutes=30)
-
-            # usa agora em UTC–3
-            now = datetime.utcnow() + timedelta(hours=LOCAL_TZ_OFFSET)
-
+            now       = datetime.utcnow() + timedelta(hours=LOCAL_TZ_OFFSET)
             if dt_inicio <= now <= dt_fim:
-                mqtt_publish_open()
-                return render_template('activate_success.html', code=code)
+                try:
+                    mqtt_publish_open()
+                except Exception as e:
+                    app.logger.error(f"Erro MQTT: {e}")
+                    error = "Falha ao liberar a cabine. Tente novamente."
+                else:
+                    return redirect(url_for('activate_success', code=code))
             else:
-                error = (f"Fora do horário de agendamento. "
-                         f"Sua reserva é em {ag['dia']} às {ag['hora']}.")
-
+                error = f"Fora do horário de agendamento. Sua reserva é em {ag['dia']} às {ag['hora']}."
     return render_template('acessar.html', error=error)
 
 if __name__ == '__main__':
