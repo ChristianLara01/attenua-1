@@ -8,52 +8,49 @@
   <script src="{{ url_for('static', filename='scripts.js') }}" defer></script>
 </head>
 <body>
-  <div class="wrapper">
+  <!-- Logo -->
+  <header class="logo-container">
+    <a href="https://attenua.com.br/" target="_blank">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Attenua" class="logo">
+    </a>
+  </header>
 
-    <!-- cabeçalho / logo -->
-    <header>
-      <a href="https://attenua.com.br/" target="_blank">
-        <img src="{{ url_for('static', filename='images/logo.png') }}"
-             alt="Attenua"
-             class="logo">
-      </a>
-    </header>
-
-    <!-- botão “Acessar minha reserva” -->
-    <div class="access-button">
-      <a href="{{ url_for('acessar') }}" class="btn-access">
+  <main>
+    <!-- Botão Oblongo -->
+   <div class="access-button">
+      <a href="{{ url_for('acessar') }}" class="btn-circular">
         Acessar minha reserva
       </a>
     </div>
 
-    <!-- cartão de seleção de dia + horário -->
+    <!-- Toda a seleção fica agora dentro deste cartão -->
     <div class="selection-card">
       <h2 class="selection-header">Escolha abaixo um dia e horário disponível</h2>
-      <p class="instruction-text">Selecione o dia e em seguida o horário no relógio.</p>
+      <p class="instruction-text"></p>
 
-      <!-- dias (somente 3 primeiros) -->
+      <!-- Dias -->
       <section class="date-selector">
-        {% for dia in dias[:3] %}
-          <button class="day-btn"
-                  data-iso="{{ dia }}">
+        {% for dia in dias %}
+          <button class="day-btn" data-iso="{{ dia }}">
             {{ dia.split('-')[2] }}/{{ dia.split('-')[1] }}
           </button>
         {% endfor %}
       </section>
 
       <!-- Relógio circular -->
-      <div id="timeGrid" class="clock-container"></div>
+      <section>
+        <div id="timeGrid" class="clock-container"></div>
+      </section>
     </div>
 
     <!-- Modal suspenso de cabines -->
     <div id="cabinsModal" class="modal">
       <div class="modal-content">
         <span class="close-btn">&times;</span>
-        <h3>Cabines disponíveis</h3>
+        <h2>Cabines Disponíveis</h2>
         <div id="cabinsList" class="cabin-grid"></div>
       </div>
     </div>
-
-  </div><!-- /.wrapper -->
+  </main>
 </body>
 </html>
