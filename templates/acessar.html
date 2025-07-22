@@ -2,61 +2,36 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Acesso à Cabine</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    .box {
-      background: white;
-      padding: 40px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-    }
-    h1 {
-      color: #28a745;
-      margin-bottom: 20px;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      background: #28a745;
-      color: white;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      width: 100%;
-    }
-    .error {
-      color: red;
-      margin-top: 15px;
-    }
-  </style>
+  <title>Acessar Cabine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-  <div class="box">
-    <h1>🔓 Acessar Cabine</h1>
-    <form method="POST">
-      <input type="text" name="code" placeholder="Digite seu código de acesso" required>
-      <button type="submit">Acessar</button>
+<body class="form-page">
+  <div class="form-card">
+    <div class="form-header">
+      <h2>Acessar Cabine</h2>
+      <p>Insira seu código de acesso para liberar a cabine</p>
+      {% if error %}
+        <p class="error">{{ error }}</p>
+      {% endif %}
+    </div>
+
+    <form method="POST" action="{{ url_for('acessar') }}">
+      <label for="code">Código de acesso</label>
+      <input type="text"
+             id="code"
+             name="code"
+             placeholder="Digite seu código"
+             required>
+
+      <button type="submit" class="submit-btn">
+        Acessar Cabine
+      </button>
     </form>
-    {% if error %}
-      <p class="error">{{ error }}</p>
-    {% endif %}
+
+    <a href="{{ url_for('catalog') }}" class="link-voltar">
+      ← Voltar ao Início
+    </a>
   </div>
 </body>
 </html>
