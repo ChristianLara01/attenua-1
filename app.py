@@ -1,11 +1,13 @@
 import logging
-from flask import Flask, render_template, request, jsonify
-import pymongo
 import secrets
 import smtplib
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+import pymongo
+import paho.mqtt.client as mqtt
+from flask import Flask, render_template, request, jsonify
 
 # ——— Setup e logging ———
 app = Flask(__name__)
@@ -17,7 +19,6 @@ MONGO_URI = (
     "@cluster0.zwuw5.mongodb.net/"
     "?retryWrites=true&w=majority&appName=Cluster0"
 )
-
 def mongo_connect():
     client = pymongo.MongoClient(MONGO_URI)
     return client.attenua.reservas
@@ -28,7 +29,32 @@ EMAIL_PASSWORD = "@12Duda04"
 SMTP_HOST      = "smtp.hostinger.com"
 SMTP_PORT      = 465
 
-def send_email(reserv):
+# ——— Configurações MQTT ———
+MQTT_BROKER_HOST = "mqtt.eclipseprojects.io"
+MQTT_BROKER_PORT = 1883
+MQTT_TOPIC       = "cabine/01/open"
+
+def send_mqtt_message(payload: str):
+    client = mqtt.Client()
+    client.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT)
+    client.publish(MQTT_TOPIC, payload)
+    client.disconnect()
+
+def dentro_do_periodo(agendamento: dict) -> bool:
+    """
+    Retorna True se o momento atual estiver entre
+    agendamento['dia'] + ' ' + agendamento['hora']
+    e +30 minutos.
+    """
+    inicio = datetime.strptime(
+        f"{agendamento['dia']} {agendamento['hora']}",
+        "%Y-%m-%d %H:%M"
+    )
+    fim = inicio + timedelta(minutes=30)
+    agora = datetime.now()
+    return inicio <= agora <= fim
+
+def send_email(reserv: dict):
     # formata data de YYYY-MM-DD para DD/MM/YYYY
     year, month, day = reserv["dia"].split('-')
     date_fmt = f"{day}/{month}/{year}"
@@ -44,69 +70,25 @@ def send_email(reserv):
 <head>
   <meta charset="UTF-8">
   <style>
-    body {{
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      margin: 0; padding: 0;
-    }}
-    .container {{
-      max-width: 600px;
-      margin: 20px auto;
-      background: #fff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }}
-    .header {{
-      background: #28a745;
-      color: #fff;
-      text-align: center;
-      padding: 20px;
-    }}
-    .header h1 {{
-      margin: 0;
-      font-size: 1.8rem;
-    }}
-    .content {{
-      padding: 20px;
-      color: #333;
-      line-height: 1.5;
-    }}
-    .content p {{
-      margin: .5rem 0;
-    }}
-    .content .highlight {{
-      font-weight: bold;
-      color: #28a745;
-    }}
-    .links {{
-      padding: 20px;
-      text-align: center;
-      background: #f0f0f0;
-    }}
-    .links a {{
-      display: inline-block;
-      margin: .5rem;
-      padding: 10px 20px;
-      background: #28a745;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 4px;
-      font-size: .95rem;
-    }}
-    .footer {{
-      padding: 20px;
-      font-size: .9rem;
-      color: #555;
-      text-align: center;
-    }}
+    body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; margin:0; padding:0; }}
+    .container {{ max-width:600px; margin:20px auto; background:#fff;
+                  border-radius:8px; overflow:hidden;
+                  box-shadow:0 4px 12px rgba(0,0,0,0.1); }}
+    .header {{ background:#28a745; color:#fff; text-align:center; padding:20px; }}
+    .header h1 {{ margin:0; font-size:1.8rem; }}
+    .content {{ padding:20px; color:#333; line-height:1.5; }}
+    .content p {{ margin:.5rem 0; }}
+    .content .highlight {{ font-weight:bold; color:#28a745; }}
+    .links {{ padding:20px; text-align:center; background:#f0f0f0; }}
+    .links a {{ display:inline-block; margin:.5rem; padding:10px 20px;
+                 background:#28a745; color:#fff; text-decoration:none;
+                 border-radius:4px; font-size:.95rem; }}
+    .footer {{ padding:20px; font-size:.9rem; color:#555; text-align:center; }}
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <h1>Reserva Confirmada!</h1>
-    </div>
+    <div class="header"><h1>Reserva Confirmada!</h1></div>
     <div class="content">
       <p><span class="highlight">Sua cabine:</span> {reserv['nome']}</p>
       <p><span class="highlight">Data:</span> {date_fmt}</p>
@@ -137,6 +119,7 @@ def send_email(reserv):
 @app.route('/')
 def catalog():
     today = datetime.now()
+    # só hoje + próximos 2 dias
     dias = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(3)]
     return render_template('catalog.html', dias=dias)
 
@@ -146,7 +129,8 @@ def available_slots(date_iso):
     slots = []
     for h in range(START_HOUR, END_HOUR + 1):
         for m in range(0, 60, INTERVAL):
-            if h == END_HOUR and m > 0: break
+            if h == END_HOUR and m > 0:
+                break
             slots.append(f"{h:02d}:{m:02d}")
 
     col = mongo_connect()
@@ -232,12 +216,26 @@ def reserve(cabin_id, date_iso, slot):
 @app.route('/acessar', methods=["GET","POST"])
 def acessar():
     error = None
+
     if request.method == "POST":
-        code = request.form["code"]
-        doc  = mongo_connect().find_one({"agendamentos.senha_unica": code})
-        if doc:
-            return render_template('activate_success.html', code=code)
-        error = "Código inválido."
+        code = request.form["code"].strip().lower()
+        col  = mongo_connect()
+        doc  = col.find_one({"agendamentos.senha_unica": code})
+
+        if not doc:
+            error = "Código inválido."
+        else:
+            # localiza o agendamento certo
+            ag = next((a for a in doc["agendamentos"] if a["senha_unica"] == code), None)
+            if not ag:
+                error = "Código inválido."
+            elif not dentro_do_periodo(ag):
+                error = "Fora do horário da sua reserva."
+            else:
+                # tudo OK → envia MQTT e mostra success
+                send_mqtt_message(str(doc["id"]))
+                return render_template('activate_success.html', code=code)
+
     return render_template('acessar.html', error=error)
 
 if __name__ == '__main__':
