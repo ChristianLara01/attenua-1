@@ -28,11 +28,14 @@ EMAIL_PASSWORD = "@12Duda04"
 SMTP_HOST      = "smtp.hostinger.com"
 SMTP_PORT      = 465
 
-def send_email(reserv):
+def send_email(reserv, nome_cabine):
     msg = MIMEMultipart("alternative")
     msg["From"]    = EMAIL_SENDER
     msg["To"]      = reserv["id_usuario"]
     msg["Subject"] = "Reserva Confirmada – ATTENUA CABINES ACÚSTICAS"
+
+    data_formatada = datetime.strptime(reserv['dia'], "%Y-%m-%d").strftime("%d/%m/%Y")
+    codigo_completo = f"{nome_cabine} {reserv['senha_unica']}"
 
     html = f"""\
 <!DOCTYPE html>
@@ -107,8 +110,8 @@ def send_email(reserv):
     <div class="content">
       <p>Olá <span class="highlight">{reserv['first_name']} {reserv['last_name']}</span>,</p>
       <p>Sua reserva foi confirmada com sucesso:</p>
-      <p><span class="highlight">Data e Horário:</span> {reserv['dia']} às {reserv['hora']}</p>
-      <p><span class="highlight">Código de Acesso:</span> {reserv['senha_unica']}</p>
+      <p><span class="highlight">Data e Horário:</span> {data_formatada} às {reserv['hora']}</p>
+      <p><span class="highlight">Código de Acesso:</span> {codigo_completo}</p>
     </div>
     <div class="links">
       <a href="https://attenua.com.br" target="_blank">Visitar Attenua</a>
@@ -122,14 +125,12 @@ def send_email(reserv):
 </body>
 </html>
 """
-
     part = MIMEText(html, "html")
     msg.attach(part)
 
     with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
         server.login(EMAIL_SENDER, EMAIL_PASSWORD)
         server.send_message(msg)
-
 
 # ——— Rotas ———
 
@@ -180,21 +181,23 @@ def available(date_iso, slot):
             })
     return jsonify(livres)
 
-@app.route('/reserve/<int:cabin_id>/<date_iso>/<slot>', methods=["GET","POST"])
+@app.route('/reserve/<int:cabin_id>/<date_iso>/<slot>', methods=["GET", "POST"])
 def reserve(cabin_id, date_iso, slot):
     col = mongo_connect()
 
     if request.method == "POST":
-        app.logger.info(f"POST /reserve → cabin={cabin_id}, date={date_iso}, slot={slot}")
         first = request.form["first_name"]
         last  = request.form["last_name"]
         email = request.form["email"]
-        app.logger.info(f"Dados do form: {first} {last} {email}")
 
         code = secrets.token_hex(3)
         while col.find_one({"agendamentos.senha_unica": code}):
             code = secrets.token_hex(3)
-        app.logger.info(f"Código gerado: {code}")
+
+        cabine_doc = col.find_one({"id": cabin_id})
+        nome_cabine = cabine_doc["nome"].replace("CABINE ", "").strip()
+
+        senha_final = f"{nome_cabine} {code}"
 
         reserva = {
             "dia":         date_iso,
@@ -206,11 +209,10 @@ def reserve(cabin_id, date_iso, slot):
             "senha_unica": code,
             "cabin_id":    cabin_id
         }
-        col.update_one({"id": cabin_id}, {"$push": {"agendamentos": reserva}})
-        app.logger.info("Reserva salva no MongoDB")
 
+        col.update_one({"id": cabin_id}, {"$push": {"agendamentos": reserva}})
         try:
-            send_email(reserva)
+            send_email(reserva, nome_cabine)
         except Exception as e:
             app.logger.error(f"Erro SMTP: {e}")
 
@@ -219,10 +221,9 @@ def reserve(cabin_id, date_iso, slot):
             cabin_id=cabin_id,
             dia=date_iso,
             hora=slot,
-            senha=code
+            senha=senha_final
         )
 
-    app.logger.info(f"GET /reserve → cabine={cabin_id} em {date_iso} às {slot}")
     return render_template(
         'reservation.html',
         cabin_id=cabin_id,
@@ -230,7 +231,7 @@ def reserve(cabin_id, date_iso, slot):
         slot=slot
     )
 
-@app.route('/acessar', methods=["GET","POST"])
+@app.route('/acessar', methods=["GET", "POST"])
 def acessar():
     error = None
     if request.method == "POST":
