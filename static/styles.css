@@ -1,38 +1,37 @@
-/* Reset e box-sizing */
+/* Reset básico */
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-/* Força dark mode */
-:root {
-  color-scheme: dark;
 }
 
 /* Corpo da página */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #151829;
+  background: #151829;
   color: #2fb191;
+  font-family: Arial, sans-serif;
   max-width: 90%;
   margin: 0 auto;
+  padding-bottom: 40px;
 }
 
-/* Header com logo */
+/* Cabeçalho com logo centralizado */
 .logo-container {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 10px 0;
+  background: #151829;
 }
 .logo-container .logo {
   max-width: 90%;
   height: auto;
+  margin: 15px 0; /* cortou 15% acima/abaixo */
 }
 
-/* Botão principal “Acessar minha reserva” */
+/* Botão “Acessar minha reserva” */
 .access-button {
-  display: flex;
-  justify-content: center;
+  text-align: center;
   margin: 20px 0;
 }
 .btn-circular {
@@ -41,109 +40,103 @@ body {
   color: #151829;
   text-decoration: none;
   font-size: 1.2rem;
-  padding: 10px 30px;
+  padding: 13px 30px;    /* +30% de altura */
   border-radius: 30px;
-  transition: transform 0.2s;
+  transition: transform 0.2s ease;
 }
 .btn-circular:hover {
   transform: scale(1.05);
 }
 
-/* Card de seleção */
+/* Cartão de seleção de dias e horários */
 .selection-card {
   background: #22253a;
   border-radius: 8px;
   padding: 20px;
+  margin: 0 10px;
 }
 .selection-header {
+  font-size: 1.2rem;
+  font-weight: normal;   /* sem negrito */
   color: #ffffff;
   text-align: center;
   margin-bottom: 10px;
-  font-size: 1.5rem;
-}
-
-/* Indicativo de instrução (caso use) */
-.instruction-text {
-  text-align: center;
-  margin-bottom: 10px;
-  color: #ccc;
 }
 
 /* Seleção de dias */
 .date-selector {
   display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;             /* espaço maior entre botões */
   margin-bottom: 20px;
 }
 .day-btn {
   background: #2fb191;
   color: #151829;
   border: none;
-  padding: 10px;
-  margin: 5px;
   border-radius: 6px;
-  font-size: 1rem;
+  padding: 10px 14px;
   cursor: pointer;
-  transition: background 0.2s;
-}
-.day-btn:hover {
-  background: #218838;
+  transition: background 0.2s ease;
 }
 .day-btn.active {
   background: #ffffff;
   color: #151829;
 }
+.day-btn:hover {
+  background: #218838;
+}
 
-/* Relógio circular */
+/* Relógio circular de horários */
 .clock-container {
   position: relative;
   width: 100%;
-  padding-bottom: 100%;
+  max-width: 400px;      /* evita estourar na direita */
+  padding-bottom: 100%;   /* mantém proporção 1:1 */
+  margin: 0 auto 20px;    /* centraliza horizontalmente */
   background: #22253a;
   border-radius: 50%;
-  margin: 0 auto 20px;
-  max-width: 400px;
 }
 .clock-container button {
   position: absolute;
   width: 60px;
   height: 60px;
-  background: #2fb191;
   border: none;
   border-radius: 50%;
+  background: #2fb191;
   color: #151829;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s, transform 0.2s;
   font-weight: bold;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: background 0.2s ease, color 0.2s ease;
 }
-.clock-container button:hover {
+.clock-container button:hover:not(:disabled) {
   background: #218838;
-  transform: scale(1.1);
+  color: #ffffff;
+}
+.clock-container button:disabled {
+  background: #666;
+  color: #333;
+  cursor: not-allowed;
 }
 .clock-container button.selected {
-  box-shadow: 0 0 0 3px #ffffff;
-}
-/* Horários indisponíveis em cinza */
-.clock-container button:disabled {
-  background-color: #ccc !important;
-  color: #666 !important;
-  border: 1px solid #999 !important;
-  cursor: not-allowed;
+  background: #ffffff;
+  color: #151829;
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
 }
 
 /* Modal de cabines */
 .modal {
-  display: none;
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: none;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 .modal.visible {
   display: flex;
@@ -151,128 +144,111 @@ body {
 .modal-content {
   background: #ffffff;
   color: #333333;
+  width: 100%;
+  max-width: 600px;
   border-radius: 8px;
   padding: 20px;
-  max-width: 600px;
-  width: 90%;
-  max-height: 80%;
-  overflow-y: auto;
   position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 .close-btn {
   position: absolute;
-  top: 10px; right: 10px;
+  top: 12px;
+  right: 16px;
   font-size: 1.5rem;
   cursor: pointer;
+  color: #333333;
 }
 
-/* Grid de cabines */
+/* Grid de cabines: 2 por linha */
 .cabin-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   margin-top: 10px;
 }
 .cabin-card {
-  background: #ffffff;
-  color: #333333;
+  background: #151829;
+  color: #2fb191;
   padding: 15px;
-  border-radius: 8px;
+  border-radius: 16px;    /* bordas mais arredondadas */
   text-align: center;
 }
 .cabin-card img {
   max-width: 100%;
-  border-radius: 8px;
+  border-radius: 16px;    /* imagem arredondada */
   margin: 10px 0;
 }
-
-/* Botões genéricos */
-.btn {
+.cabin-card .btn {
+  display: inline-block;
   background: #2fb191;
   color: #151829;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
   text-decoration: none;
-  display: inline-block;
-  transition: background 0.2s;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
 }
-.btn:hover {
+.cabin-card .btn:hover {
   background: #218838;
+  color: #ffffff;
 }
 
 /* Formulários de reserva */
 .form-page {
   display: flex;
-  align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: #151829;
+  align-items: center;
+  padding: 20px 10px;
 }
 .form-card {
   background: #22253a;
-  padding: 20px;
-  border-radius: 8px;
-  width: 90%;
+  color: #ffffff;
+  width: 100%;
   max-width: 400px;
+  border-radius: 8px;
+  padding: 20px;
 }
 .form-header h2 {
-  color: #2fb191;
-  text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 .form-header p {
-  color: #ccc;
-  text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
-form label {
-  color: #fff;
-  font-size: 1rem;
+.form-card label {
+  display: block;
+  margin-top: 10px;
 }
-form input {
+.form-card input {
   width: 100%;
   padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #2fb191;
+  margin-top: 4px;
+  border: none;
   border-radius: 4px;
-  background: #151829;
-  color: #fff;
 }
 .submit-btn {
   width: 100%;
   background: #2fb191;
   color: #151829;
-  padding: 12px;
-  margin-top: 10px;
   border: none;
+  padding: 12px;
   border-radius: 4px;
-  font-size: 1rem;
-  transition: background 0.2s;
-  text-align: center;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 .submit-btn:hover {
   background: #218838;
-  color: #fff;
+  color: #ffffff;
 }
 .link-voltar {
   display: block;
   text-align: center;
-  margin-top: 15px;
+  margin-top: 16px;
   color: #2fb191;
   text-decoration: none;
 }
-
-/* Responsividade */
-@media (min-width: 600px) {
-  .clock-container {
-    max-width: 500px;
-  }
-  .btn-circular {
-    font-size: 1.5rem;
-    padding: 15px 40px;
-  }
-  .selection-header {
-    font-size: 2rem;
-  }
+.link-voltar:hover {
+  text-decoration: underline;
 }
+```0
