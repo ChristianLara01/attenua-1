@@ -2,66 +2,15 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Cabine Liberada</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #eafaf1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .card {
-      background-color: white;
-      padding: 40px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      max-width: 400px;
-      width: 100%;
-    }
-    h1 {
-      color: #28a745;
-      font-size: 1.8rem;
-      margin-bottom: 20px;
-    }
-    p {
-      font-size: 1.1rem;
-      color: #333;
-    }
-    .code {
-      background: #f0f0f0;
-      border-radius: 5px;
-      padding: 10px;
-      font-weight: bold;
-      margin-top: 20px;
-      display: inline-block;
-    }
-    .success-icon {
-      font-size: 3rem;
-      color: #28a745;
-      margin-bottom: 20px;
-    }
-    .back {
-      margin-top: 30px;
-      display: inline-block;
-      background: #28a745;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 5px;
-      text-decoration: none;
-    }
-  </style>
+  <title>Cabine Ativada</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static','styles.css') }}">
 </head>
 <body>
-  <div class="card">
-    <div class="success-icon">✅</div>
-    <h1>Cabine Liberada</h1>
-    <p>O código <span class="code">{{ code }}</span> foi validado com sucesso.</p>
-    <p>Sua cabine está agora aberta! Aproveite sua reserva.</p>
-    <a href="/" class="back">Voltar ao início</a>
+  <div class="container">
+    <h2>Cabine Ativada!</h2>
+    <p>Seu código <strong>{{ code }}</strong> foi validado com sucesso.</p>
+    <a href="/" class="btn">Voltar ao Início</a>
   </div>
 </body>
 </html>
