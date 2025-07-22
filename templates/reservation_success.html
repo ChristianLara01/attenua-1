@@ -3,25 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <title>Reserva Confirmada</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet"
-        href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    body {
+      background-color: #f5f8ff;
+      font-family: Arial, sans-serif;
+      color: #333;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2e6fce;
+    }
+    .info {
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    .info strong {
+      color: #555;
+    }
+  </style>
 </head>
-<body class="form-page">
-  <div class="form-card">
-    <div class="form-header">
-      <h2>Reserva Confirmada!</h2>
-      <p>Obrigado! Você receberá um e‑mail com o código de acesso.</p>
-    </div>
-
-    <p><strong>Cabine:</strong> {{ cabin_id }}</p>
-    <p><strong>Data:</strong> {{ dia }}</p>
-    <p><strong>Horário:</strong> {{ hora }}</p>
-    <p><strong>Código de acesso:</strong> {{ senha }}</p>
-
-    <a href="{{ url_for('catalog') }}" class="submit-btn" style="text-decoration:none;">
-      Voltar ao Início
-    </a>
+<body>
+  <div class="card">
+    <h1>Reserva Confirmada ✅</h1>
+    <p class="info"><strong>Sua cabine:</strong> {{cabine_nome_formatado}}</p>
+    <p class="info"><strong>Data:</strong> {{data_formatada_ddmmaaaa}}</p>
+    <p class="info"><strong>Código de acesso:</strong> {{codigo_de_acesso}}</p>
   </div>
 </body>
 </html>
