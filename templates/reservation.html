@@ -11,6 +11,12 @@
   <div class="form-card">
     <div class="form-header">
       <h2>Finalize sua Reserva</h2>
+      <p>
+        <strong>Cabine:</strong> {{ cabin_name }}<br>
+        <strong>Data:</strong>
+        {{ date_iso.split('-')[2] }}/{{ date_iso.split('-')[1] }}/{{ date_iso.split('-')[0] }}<br>
+        <strong>Horário:</strong> {{ slot }}
+      </p>
       <p>Preencha seus dados para receber o código de acesso</p>
     </div>
 
@@ -37,7 +43,7 @@
              placeholder="Seu sobrenome"
              required>
 
-      <label for="email">E‑mail</label>
+      <label for="email">E-mail</label>
       <input type="email"
              id="email"
              name="email"
