@@ -1,13 +1,13 @@
 import logging
+from flask import Flask, render_template, request, jsonify
+import pymongo
 import secrets
 import smtplib
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
-import pymongo
 import paho.mqtt.client as mqtt
-from flask import Flask, render_template, request, jsonify
+import ssl
 
 # ——— Setup e logging ———
 app = Flask(__name__)
@@ -29,35 +29,27 @@ EMAIL_PASSWORD = "@12Duda04"
 SMTP_HOST      = "smtp.hostinger.com"
 SMTP_PORT      = 465
 
-# ——— Configurações MQTT ———
-MQTT_BROKER_HOST = "mqtt.eclipseprojects.io"
-MQTT_BROKER_PORT = 1883
-MQTT_TOPIC       = "cabine/01/open"
+# ——— Configurações de MQTT ———
+MQTT_HOST   = "917a3939272f48c09215df8a39c82c46.s1.eu.hivemq.cloud"
+MQTT_PORT   = 8883
+MQTT_USER   = "attenua"
+MQTT_PASS   = "Atualle1"
+MQTT_TOPIC  = "cabine/01/open"
 
-def send_mqtt_message(payload: str):
+def send_mqtt_message(msg: str):
     client = mqtt.Client()
-    client.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT)
-    client.publish(MQTT_TOPIC, payload)
+    # Cria contexto TLS sem validar o certificado do broker
+    client.tls_set_context(ssl.create_default_context())
+    client.tls_insecure_set(True)
+    client.username_pw_set(MQTT_USER, MQTT_PASS)
+    client.connect(MQTT_HOST, MQTT_PORT)
+    client.publish(MQTT_TOPIC, msg)
     client.disconnect()
 
-def dentro_do_periodo(agendamento: dict) -> bool:
-    """
-    Retorna True se o momento atual estiver entre
-    agendamento['dia'] + ' ' + agendamento['hora']
-    e +30 minutos.
-    """
-    inicio = datetime.strptime(
-        f"{agendamento['dia']} {agendamento['hora']}",
-        "%Y-%m-%d %H:%M"
-    )
-    fim = inicio + timedelta(minutes=30)
-    agora = datetime.now()
-    return inicio <= agora <= fim
-
-def send_email(reserv: dict):
+def send_email(reserv):
     # formata data de YYYY-MM-DD para DD/MM/YYYY
-    year, month, day = reserv["dia"].split('-')
-    date_fmt = f"{day}/{month}/{year}"
+    y, m, d = reserv["dia"].split("-")
+    date_fmt = f"{d}/{m}/{y}"
 
     msg = MIMEMultipart("alternative")
     msg["From"]    = EMAIL_SENDER
@@ -67,10 +59,9 @@ def send_email(reserv: dict):
     html = f"""\
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
+<head><meta charset="UTF-8">
   <style>
-    body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; margin:0; padding:0; }}
+    body {{ font-family:Arial,sans-serif; background:#f5f5f5; margin:0; }}
     .container {{ max-width:600px; margin:20px auto; background:#fff;
                   border-radius:8px; overflow:hidden;
                   box-shadow:0 4px 12px rgba(0,0,0,0.1); }}
@@ -100,7 +91,8 @@ def send_email(reserv: dict):
       <a href="https://atualle.com.br" target="_blank">Visitar Atualle</a>
     </div>
     <div class="footer">
-      <p>A Atualle é referência em soluções acústicas, oferecendo cabines de alta qualidade para ambientes corporativos e residenciais.</p>
+      <p>A Atualle é referência em soluções acústicas, oferecendo cabines
+         de alta qualidade para ambientes corporativos e residenciais.</p>
       <p>Obrigado por escolher a ATTENUA Cabines Acústicas!</p>
     </div>
   </div>
@@ -109,7 +101,6 @@ def send_email(reserv: dict):
 """
     part = MIMEText(html, "html")
     msg.attach(part)
-
     with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
         server.login(EMAIL_SENDER, EMAIL_PASSWORD)
         server.send_message(msg)
@@ -126,12 +117,10 @@ def catalog():
 @app.route('/api/available_slots/<date_iso>')
 def available_slots(date_iso):
     START_HOUR, END_HOUR, INTERVAL = 15, 20, 30
-    slots = []
-    for h in range(START_HOUR, END_HOUR + 1):
-        for m in range(0, 60, INTERVAL):
-            if h == END_HOUR and m > 0:
-                break
-            slots.append(f"{h:02d}:{m:02d}")
+    slots = [f"{h:02d}:{m:02d}"
+             for h in range(START_HOUR, END_HOUR + 1)
+             for m in range(0, 60, INTERVAL)
+             if not (h == END_HOUR and m > 0)]
 
     col = mongo_connect()
     cabins = list(col.find())
@@ -167,7 +156,7 @@ def available(date_iso, slot):
 
 @app.route('/reserve/<int:cabin_id>/<date_iso>/<slot>', methods=["GET","POST"])
 def reserve(cabin_id, date_iso, slot):
-    col = mongo_connect()
+    col    = mongo_connect()
     cabine = col.find_one({"id": cabin_id})
 
     if request.method == "POST":
@@ -175,10 +164,10 @@ def reserve(cabin_id, date_iso, slot):
         last  = request.form["last_name"]
         email = request.form["email"]
 
-        # gera código: nomecabine + 6 hex
-        code = secrets.token_hex(3)
+        # gera hex de 6 dígitos e prefixa com nome simples da cabine
+        hex6        = secrets.token_hex(3)
         nome_simple = cabine["nome"].replace("CABINE ", "").strip().lower()
-        full_code = f"{nome_simple}{code}"
+        full_code   = f"{nome_simple}{hex6}"
 
         reserva = {
             "dia":         date_iso,
@@ -216,24 +205,26 @@ def reserve(cabin_id, date_iso, slot):
 @app.route('/acessar', methods=["GET","POST"])
 def acessar():
     error = None
-
     if request.method == "POST":
         code = request.form["code"].strip().lower()
-        col  = mongo_connect()
-        doc  = col.find_one({"agendamentos.senha_unica": code})
-
+        # 1) encontra documento que contenha esse código
+        doc = mongo_connect().find_one({"agendamentos.senha_unica": code})
         if not doc:
             error = "Código inválido."
         else:
-            ag = next((a for a in doc["agendamentos"] if a["senha_unica"] == code), None)
-            if not ag:
-                error = "Código inválido."
-            elif not dentro_do_periodo(ag):
-                error = "Fora do horário da sua reserva."
-            else:
-                # tudo OK → abre a porta via MQTT
-                send_mqtt_message(str(doc["id"]))
+            # 2) extrai o agendamento exato
+            ag = next(a for a in doc["agendamentos"] if a["senha_unica"] == code)
+            # monta datetime de início
+            dt_inicio = datetime.strptime(f"{ag['dia']} {ag['hora']}", "%Y-%m-%d %H:%M")
+            dt_fim    = dt_inicio + timedelta(minutes=30)
+            now       = datetime.now()
+            if dt_inicio <= now <= dt_fim:
+                # publica no MQTT
+                send_mqtt_message("abrir")
                 return render_template('activate_success.html', code=code)
+            else:
+                error = ("Fora do horário de agendamento. "
+                         f"Sua reserva é em {ag['dia']} às {ag['hora']}.")
 
     return render_template('acessar.html', error=error)
 
