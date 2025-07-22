@@ -1,254 +1,266 @@
-/* Reset básico */
+/* ========== Reset & Global ========== */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
-
-/* Corpo da página */
-body {
-  background: #151829;
-  color: #2fb191;
+html, body {
+  width: 100%;
+  height: 100%;
   font-family: Arial, sans-serif;
-  max-width: 90%;
-  margin: 0 auto;
-  padding-bottom: 40px;
+  background: #f5f5f5;
+  color: #333;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
 }
 
-/* Cabeçalho com logo centralizado */
-.logo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px 0;
-  background: #151829;
+/* ========== Container & Layout ========== */
+body {
+  max-width: 90%;
+  margin: 0 auto;
+}
+header.logo-container {
+  text-align: center;
+  padding: 16px 0;
 }
 .logo-container .logo {
   max-width: 90%;
   height: auto;
-  margin: 15px 0; /* cortou 15% acima/abaixo */
+  display: inline-block;
+  margin-bottom: 16px;
 }
-
-/* Botão “Acessar minha reserva” */
 .access-button {
   text-align: center;
-  margin: 20px 0;
+  margin-bottom: 32px;
 }
-.btn-circular {
-  display: inline-block;
-  background: #2fb191;
-  color: #151829;
-  text-decoration: none;
-  font-size: 1.2rem;
-  padding: 13px 30px;    /* +30% de altura */
-  border-radius: 30px;
-  transition: transform 0.2s ease;
-}
-.btn-circular:hover {
-  transform: scale(1.05);
-}
-
-/* Cartão de seleção de dias e horários */
 .selection-card {
-  background: #22253a;
+  background: #fff;
   border-radius: 8px;
-  padding: 20px;
-  margin: 0 10px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 32px;
 }
 .selection-header {
-  font-size: 1.2rem;
-  font-weight: normal;   /* sem negrito */
-  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: normal; /* remove bold */
+  margin-bottom: 16px;
   text-align: center;
-  margin-bottom: 10px;
+}
+/* Instruction text (if any) */
+.instruction-text {
+  margin-bottom: 24px;
+  text-align: center;
+  color: #666;
 }
 
-/* Seleção de dias */
+/* ========== “Acessar minha reserva” Button ========== */
+.btn-circular {
+  display: inline-block;
+  background: #28a745;
+  color: #fff;
+  border-radius: 32px;
+  width: calc(2 * 2.5rem);   /* adjust width proportional to height */
+  height: calc(2.5rem * 1.3); /* increase height by ~30% */
+  line-height: calc(2.5rem * 1.3);
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 0 auto;
+  transition: background 0.2s;
+}
+.btn-circular:hover {
+  background: #218838;
+}
+
+/* ========== Date Selector ========== */
 .date-selector {
   display: flex;
   justify-content: center;
-  gap: 10px;             /* espaço maior entre botões */
-  margin-bottom: 20px;
+  gap: 12px;           /* espaçamento maior entre botões */
+  margin-bottom: 24px;
 }
 .day-btn {
-  background: #2fb191;
-  color: #151829;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 14px;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  flex: 1;
+  max-width: 80px;
+  padding: 8px 0;
+  background: #28a745;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: background 0.2s;
 }
 .day-btn.active {
-  background: #ffffff;
-  color: #151829;
-}
-.day-btn:hover {
   background: #218838;
 }
+.day-btn:hover:not(.active) {
+  background: #33b85a;
+}
 
-/* Relógio circular de horários */
+/* ========== Clock Container ========== */
 .clock-container {
   position: relative;
   width: 100%;
-  max-width: 400px;      /* evita estourar na direita */
-  padding-bottom: 100%;   /* mantém proporção 1:1 */
-  margin: 0 auto 20px;    /* centraliza horizontalmente */
-  background: #22253a;
-  border-radius: 50%;
+  padding-top: 100%;  /* square */
+  margin: 0 auto;     /* center horizontally */
 }
 .clock-container button {
   position: absolute;
-  width: 60px;
-  height: 60px;
-  border: none;
+  width: 15%;   /* size of each “dot” */
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
-  background: #2fb191;
-  color: #151829;
-  font-weight: bold;
-  cursor: pointer;
-  transform: translate(-50%, -50%);
-  transition: background 0.2s ease, color 0.2s ease;
-}
-.clock-container button:hover:not(:disabled) {
-  background: #218838;
-  color: #ffffff;
-}
-.clock-container button:disabled {
-  background: #666;
-  color: #333;
-  cursor: not-allowed;
+  background: #28a745;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: background 0.2s;
 }
 .clock-container button.selected {
-  background: #ffffff;
-  color: #151829;
-  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+  background: #218838;
+}
+.clock-container button:disabled {
+  background: #ccc;
+  color: #666;
 }
 
-/* Modal de cabines */
+/* ========== Modal & Cabins Grid ========== */
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.6);
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
 }
 .modal.visible {
   display: flex;
 }
 .modal-content {
-  background: #ffffff;
-  color: #333333;
-  width: 100%;
-  max-width: 600px;
+  background: #fff;
   border-radius: 8px;
-  padding: 20px;
+  max-width: 80%;
+  width: 600px;
+  padding: 24px;
   position: relative;
-  max-height: 80vh;
   overflow-y: auto;
+  max-height: 90%;
 }
-.close-btn {
+.modal-content .close-btn {
   position: absolute;
-  top: 12px;
-  right: 16px;
+  top: 12px; right: 12px;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #333333;
 }
-
-/* Grid de cabines: 2 por linha */
 .cabin-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  margin-top: 10px;
+  gap: 16px;
+  margin-top: 16px;
 }
 .cabin-card {
-  background: #151829;
-  color: #2fb191;
-  padding: 15px;
-  border-radius: 16px;    /* bordas mais arredondadas */
+  background: #f9f9f9;
+  border-radius: 12px;
+  padding: 12px;
   text-align: center;
 }
 .cabin-card img {
-  max-width: 100%;
-  border-radius: 16px;    /* imagem arredondada */
-  margin: 10px 0;
+  width: 100%;
+  border-radius: 12px; /* bordas arredondadas */
+  margin-bottom: 8px;
+}
+.cabin-card h4 {
+  margin-bottom: 8px;
+  font-size: 1rem;
 }
 .cabin-card .btn {
   display: inline-block;
-  background: #2fb191;
-  color: #151829;
-  text-decoration: none;
+  background: #28a745;
+  color: #fff;
   padding: 8px 12px;
-  border-radius: 4px;
-  transition: background 0.2s ease;
+  border-radius: 6px;
+  font-size: 0.9rem;
 }
 .cabin-card .btn:hover {
   background: #218838;
-  color: #ffffff;
 }
 
-/* Formulários de reserva */
+/* ========== Forms (reservation / reservation_success) ========== */
 .form-page {
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 20px 10px;
+  justify-content: center;
+  padding: 32px 16px;
 }
 .form-card {
-  background: #22253a;
-  color: #ffffff;
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
   width: 100%;
   max-width: 400px;
-  border-radius: 8px;
-  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding-bottom: 32px; /* extra espaço para botão */
+}
+.form-header {
+  margin-bottom: 24px;
+  text-align: center;
 }
 .form-header h2 {
   margin-bottom: 8px;
 }
-.form-header p {
-  margin-bottom: 16px;
-}
 .form-card label {
   display: block;
-  margin-top: 10px;
+  margin-bottom: 4px;
+  font-weight: bold;
 }
 .form-card input {
   width: 100%;
-  padding: 10px;
-  margin-top: 4px;
-  border: none;
+  padding: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
   border-radius: 4px;
 }
 .submit-btn {
+  display: inline-block;
+  background: #28a745;
+  color: #fff;
+  padding: 12px 0;
   width: 100%;
-  background: #2fb191;
-  color: #151829;
-  border: none;
-  padding: 12px;
-  border-radius: 4px;
-  margin-top: 20px;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-top: 24px;    /* distância extra acima do botão */
+  text-align: center;
 }
 .submit-btn:hover {
   background: #218838;
-  color: #ffffff;
 }
+/* espaçamento entre parágrafos no card */
+.form-card p {
+  margin: 0 0 16px;
+}
+/* “Voltar ao Início” link */
 .link-voltar {
-  display: block;
-  text-align: center;
-  margin-top: 16px;
-  color: #2fb191;
-  text-decoration: none;
+  display: inline-block;
+  margin-top: 24px;
+  color: #28a745;
+  font-size: 0.9rem;
 }
-.link-voltar:hover {
-  text-decoration: underline;
+
+/* ========== Responsive tweaks ========== */
+@media (max-width: 600px) {
+  .cabin-grid {
+    grid-template-columns: 1fr;
+  }
+  .modal-content {
+    max-width: 100%;
+  }
 }
 ```0
