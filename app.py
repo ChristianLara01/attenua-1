@@ -175,7 +175,7 @@ def reserve(cabin_id, date_iso, slot):
         last  = request.form["last_name"]
         email = request.form["email"]
 
-        # gera hex de 6 dígitos e compõe código completo
+        # gera código: nomecabine + 6 hex
         code = secrets.token_hex(3)
         nome_simple = cabine["nome"].replace("CABINE ", "").strip().lower()
         full_code = f"{nome_simple}{code}"
@@ -225,14 +225,13 @@ def acessar():
         if not doc:
             error = "Código inválido."
         else:
-            # localiza o agendamento certo
             ag = next((a for a in doc["agendamentos"] if a["senha_unica"] == code), None)
             if not ag:
                 error = "Código inválido."
             elif not dentro_do_periodo(ag):
                 error = "Fora do horário da sua reserva."
             else:
-                # tudo OK → envia MQTT e mostra success
+                # tudo OK → abre a porta via MQTT
                 send_mqtt_message(str(doc["id"]))
                 return render_template('activate_success.html', code=code)
 
