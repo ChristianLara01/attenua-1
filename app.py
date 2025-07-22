@@ -137,7 +137,7 @@ def send_email(reserv):
 @app.route('/')
 def catalog():
     today = datetime.now()
-    dias = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]
+    dias = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(3)]
     return render_template('catalog.html', dias=dias)
 
 @app.route('/api/available_slots/<date_iso>')
