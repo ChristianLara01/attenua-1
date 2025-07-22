@@ -5,37 +5,51 @@
   <title>Reserva Confirmada</title>
   <style>
     body {
-      background-color: #f5f8ff;
       font-family: Arial, sans-serif;
-      color: #333;
-      padding: 20px;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
     }
-    .card {
+    .container {
+      max-width: 600px;
       background: white;
-      padding: 25px;
-      border-radius: 10px;
-      max-width: 400px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin: 50px auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 30px;
+      text-align: center;
     }
     h1 {
-      color: #2e6fce;
+      color: #28a745;
     }
     .info {
-      margin-bottom: 10px;
-      font-size: 16px;
+      margin: 20px 0;
+      font-size: 1.1rem;
+      color: #333;
     }
-    .info strong {
-      color: #555;
+    .codigo {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #222;
+      margin-top: 15px;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border-radius: 4px;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Reserva Confirmada ✅</h1>
-    <p class="info"><strong>Sua cabine:</strong> {{cabine_nome_formatado}}</p>
-    <p class="info"><strong>Data:</strong> {{data_formatada_ddmmaaaa}}</p>
-    <p class="info"><strong>Código de acesso:</strong> {{codigo_de_acesso}}</p>
+  <div class="container">
+    <h1>✅ Reserva Confirmada!</h1>
+    <p class="info">Sua reserva para o dia <strong>{{ dia|datetimeformat('%d/%m/%Y') }}</strong> às <strong>{{ hora }}</strong> foi registrada com sucesso.</p>
+    <p class="codigo">Código de acesso: <br><span>{{ senha }}</span></p>
+    <a class="btn" href="/">Voltar para o início</a>
   </div>
 </body>
 </html>
