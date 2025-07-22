@@ -1,306 +1,296 @@
-/* ========================
-   Variáveis e Reset
-   ======================== */
+/* ==============================
+   Tema Escuro Global
+   ============================== */
 :root {
-  --color-primary:   #28a745;
-  --color-primary-2: #218838;
-  --color-bg:        #f5f5f5;
-  --color-surface:   #ffffff;
-  --color-text:      #333333;
-  --color-muted:     #666666;
-  --radius:          8px;
-  --spacing:         16px;
-  --font-base:       1rem;
-  --font-heading:    1.25rem;
-  --transition:      0.2s ease;
+  --bg-color: #151829;
+  --card-bg: #1f1f2e;
+  --text-color: #e0e0e0;
+  --accent: #2fb191;
+  --accent-dark: #218f7b;
+  --border-radius: 8px;
 }
+
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
+
 body {
-  font-family: "Inter", sans-serif;
-  font-size: var(--font-base);
-  color: var(--color-text);
-  background: var(--color-bg);
-  line-height: 1.5;
-}
-a, button {  
-  font-family: inherit;
-  transition: background var(--transition), transform var(--transition);
-}
-img {
-  display: block;
-  max-width: 100%;
-}
-
-/* ========================
-   Container
-   ======================== */
-.wrapper {
-  max-width: 1200px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: Arial, sans-serif;
+  width: 90%;
+  max-width: 800px;
   margin: 0 auto;
-  padding: var(--spacing);
+  line-height: 1.4;
 }
 
-/* ========================
-   Header / Logo
-   ======================== */
-header {
+/* ==============================
+   Logo
+   ============================== */
+.logo-container {
   text-align: center;
-  margin-bottom: var(--spacing);
+  padding: 1rem 0;
 }
-header .logo {
-  max-height: 80px;
-  object-fit: contain;
-  transition: transform var(--transition);
-}
-header .logo:hover {
-  transform: scale(1.05);
+.logo-container .logo {
+  width: 90%;
+  max-width: 400px;
+  height: auto;
 }
 
-/* ========================
-   “Acessar minha reserva” Button
-   ======================== */
+/* ==============================
+   Botão "Acessar minha reserva"
+   ============================== */
 .access-button {
-  display: flex;
-  justify-content: center;
-  margin-bottom: calc(var(--spacing) * 2);
+  text-align: center;
+  margin: 2rem 0 1rem;  /* espaço acima e abaixo */
 }
-.btn-access {
-  background: var(--color-primary);
-  color: #fff;
-  padding: calc(var(--spacing) * 1.2) calc(var(--spacing) * 2);
-  border-radius: var(--radius);
-  font-size: var(--font-heading);
-  font-weight: 600;
+.btn-circular {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--bg-color);
+  text-decoration: none;
+  font-size: 1.25rem;
+  padding: 1rem 2rem;
+  border-radius: 999px;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
-.btn-access:hover {
-  background: var(--color-primary-2);
-  transform: translateY(-2px);
+.btn-circular:hover {
+  background: var(--accent-dark);
+  transform: scale(1.03);
 }
 
-/* ========================
-   Card Seleção (dias + relógio)
-   ======================== */
+/* ==============================
+   Cartão de Seleção
+   ============================== */
 .selection-card {
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  padding: calc(var(--spacing) * 2);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  margin-bottom: calc(var(--spacing) * 2);
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
 }
 .selection-header {
-  font-size: var(--font-heading);
-  text-align: center;
-  margin-bottom: var(--spacing);
-  font-weight: 500;
-  color: var(--color-text);
+  font-weight: normal;  /* sem negrito */
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
 }
-.date-selector {
-  display: flex;
-  overflow-x: auto;
-  gap: var(--spacing);
-  padding-bottom: var(--spacing);
-  margin-bottom: calc(var(--spacing) * 1.5);
-}
-.date-selector::-webkit-scrollbar { height: 6px; }
-.date-selector::-webkit-scrollbar-thumb {
-  background: var(--color-muted);
-  border-radius: 3px;
-}
-.day-btn {
-  flex: 0 0 auto;
-  background: var(--color-surface);
-  color: var(--color-text);
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius);
-  border: 1px solid #ddd;
-  font-weight: 500;
-  white-space: nowrap;
-}
-.day-btn.active {
-  background: var(--color-primary);
-  color: #fff;
-  border-color: var(--color-primary-2);
+.instruction-text {
+  margin-bottom: 1rem;
+  color: var(--text-color);
 }
 
-/* ========================
-   Relógio circular
-   ======================== */
+/* ==============================
+   Seletor de Dias
+   ============================== */
+.date-selector {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.day-btn {
+  background: var(--accent-dark);
+  color: var(--bg-color);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s ease;
+}
+.day-btn.active {
+  background: var(--accent);
+}
+.day-btn:hover:not(.active) {
+  background: var(--accent);
+}
+
+/* ==============================
+   Relógio Circular de Horários
+   ============================== */
 .clock-container {
   position: relative;
-  width: 100%;
-  padding-top: 100%; /* mantém quadrado */
+  width: 90vw;
+  max-width: 350px;
+  aspect-ratio: 1 / 1;
   margin: 0 auto;
 }
 .clock-container button {
-  --size: 14%;
   position: absolute;
-  width: var(--size);
-  aspect-ratio: 1/1;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background: var(--color-primary);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  border: none;
+  border: 2px solid var(--accent);
+  background: var(--bg-color);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background 0.2s ease, color 0.2s ease;
 }
-.clock-container button:hover:not(:disabled) {
-  background: var(--color-primary-2);
-  transform: translateY(-2px);
-}
+.clock-container button:hover,
 .clock-container button.selected {
-  background: var(--color-primary-2);
+  background: var(--accent);
+  color: var(--bg-color);
 }
 .clock-container button:disabled {
-  background: #ddd;
-  color: var(--color-muted);
+  background: #333;
+  color: #666;
+  border-color: #666;
   cursor: not-allowed;
 }
 
-/* posicionamento em círculo gerenciado via inline-style */
-
-/* ========================
-   Modal Cabines
-   ======================== */
+/* ==============================
+   Modal de Cabines
+   ============================== */
 .modal {
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   display: none;
+  background: rgba(0, 0, 0, 0.75);
   align-items: center;
   justify-content: center;
-  padding: var(--spacing);
+  z-index: 1000;
 }
 .modal.visible {
   display: flex;
 }
 .modal-content {
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  padding: calc(var(--spacing) * 1.5);
-  max-width: 600px;
-  width: 100%;
-  max-height: 90vh;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80%;
   overflow-y: auto;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  position: relative;
 }
 .close-btn {
   position: absolute;
-  top: var(--spacing);
-  right: var(--spacing);
+  top: 0.75rem;
+  right: 1rem;
   font-size: 1.5rem;
+  color: var(--text-color);
   cursor: pointer;
 }
+
+/* ==============================
+   Grid de Cabines
+   ============================== */
 .cabin-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-  gap: var(--spacing);
-  margin-top: var(--spacing);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
 }
 .cabin-card {
-  background: var(--color-bg);
-  border-radius: var(--radius);
-  padding: var(--spacing);
+  background: var(--bg-color);
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  color: var(--text-color);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
 }
 .cabin-card img {
   width: 100%;
-  border-radius: var(--radius);
-  margin-bottom: var(--spacing);
+  height: auto;
+  border-radius: var(--border-radius);
+  margin-bottom: 0.5rem;
 }
 .cabin-card h4 {
-  font-size: 1rem;
   margin-bottom: 0.5rem;
+  font-size: 1rem;
 }
 .cabin-card .btn {
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--accent);
+  color: var(--bg-color);
   padding: 0.5rem 1rem;
-  border-radius: var(--radius);
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  text-decoration: none;
   display: inline-block;
+  transition: background 0.2s ease;
 }
 .cabin-card .btn:hover {
-  background: var(--color-primary-2);
+  background: var(--accent-dark);
 }
 
-/* ========================
-   Formulários
-   ======================== */
+/* ==============================
+   Formulários (acessar & reservar)
+   ============================== */
 .form-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: calc(var(--spacing) * 2) 0;
+  padding: 2rem 0;
 }
 .form-card {
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  padding: calc(var(--spacing) * 1.5);
-  width: 100%;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin: 0 auto 2rem;
   max-width: 400px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  color: var(--text-color);
 }
-.form-card h2 {
-  font-size: var(--font-heading);
+.form-header h2 {
   margin-bottom: 0.5rem;
-  text-align: center;
 }
-.form-card p {
-  color: var(--color-muted);
-  text-align: center;
-  margin-bottom: var(--spacing);
+.form-header p {
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
 }
 .form-card label {
   display: block;
-  margin-bottom: 0.25rem;
-  font-weight: 500;
+  margin-top: 1rem;
+  font-size: 0.9rem;
 }
 .form-card input {
   width: 100%;
-  padding: 0.75rem;
-  margin-bottom: var(--spacing);
-  border: 1px solid #ccc;
-  border-radius: var(--radius);
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  border: 1px solid #444;
+  border-radius: var(--border-radius);
+  background: #22253a;
+  color: var(--text-color);
 }
 .submit-btn {
-  display: block;
   width: 100%;
-  background: var(--color-primary);
-  color: #fff;
+  margin-top: 1.5rem;
   padding: 0.75rem;
-  border-radius: var(--radius);
-  font-size: var(--font-base);
-  text-align: center;
-  margin-top: var(--spacing);
+  background: var(--accent);
+  color: var(--bg-color);
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 .submit-btn:hover {
-  background: var(--color-primary-2);
+  background: var(--accent-dark);
 }
 .link-voltar {
   display: block;
   text-align: center;
-  margin-top: var(--spacing);
-  color: var(--color-primary);
+  margin-top: 1rem;
+  color: var(--accent);
+  text-decoration: none;
   font-size: 0.9rem;
 }
+.link-voltar:hover {
+  text-decoration: underline;
+}
 
-/* ========================
-   Breakpoints
-   ======================== */
-@media (max-width: 768px) {
-  .btn-access {
-    width: 100%;
+/* ==============================
+   Responsividade
+   ============================== */
+@media (max-width: 500px) {
+  .cabin-grid {
+    grid-template-columns: 1fr;
   }
-  .date-selector {
-    gap: 8px;
-  }
-  .selection-card {
-    padding: var(--spacing);
+  .clock-container button {
+    width: 40px;
+    height: 40px;
+    font-size: 0.75rem;
   }
 }
