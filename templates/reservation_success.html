@@ -3,53 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>Reserva Confirmada</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 600px;
-      background: white;
-      margin: 50px auto;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 30px;
-      text-align: center;
-    }
-    h1 {
-      color: #28a745;
-    }
-    .info {
-      margin: 20px 0;
-      font-size: 1.1rem;
-      color: #333;
-    }
-    .codigo {
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #222;
-      margin-top: 15px;
-    }
-    .btn {
-      display: inline-block;
-      margin-top: 30px;
-      padding: 10px 20px;
-      background-color: #28a745;
-      color: white;
-      border-radius: 4px;
-      text-decoration: none;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-  <div class="container">
-    <h1>✅ Reserva Confirmada!</h1>
-    <p class="info">Sua reserva para o dia <strong>{{ dia|datetimeformat('%d/%m/%Y') }}</strong> às <strong>{{ hora }}</strong> foi registrada com sucesso.</p>
-    <p class="codigo">Código de acesso: <br><span>{{ senha }}</span></p>
-    <a class="btn" href="/">Voltar para o início</a>
+<body class="form-page">
+  <div class="form-card">
+    <div class="form-header">
+      <h2>Reserva Confirmada!</h2>
+      <p>Obrigado! Você receberá um e‑mail com o código de acesso.</p>
+    </div>
+
+    <p><strong>Cabine:</strong> {{ cabin_id }}</p>
+    <p><strong>Data:</strong> {{ dia }}</p>
+    <p><strong>Horário:</strong> {{ hora }}</p>
+    <p><strong>Código de acesso:</strong> {{ senha }}</p>
+
+    <a href="{{ url_for('catalog') }}" class="submit-btn" style="text-decoration:none;">
+      Voltar ao Início
+    </a>
   </div>
 </body>
 </html>
