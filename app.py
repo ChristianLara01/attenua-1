@@ -130,11 +130,40 @@ def catalog():
 
 @app.route('/api/available_slots/<date_iso>')
 def available_slots(date_iso):
-    START_HOUR, END_HOUR, INTERVAL = 15, 20, 30
-    slots = [f"{h:02d}:{m:02d}"
-             for h in range(START_HOUR, END_HOUR+1)
-             for m in range(0, 60, INTERVAL)
-             if not (h==END_HOUR and m>0)]
+    # mapeamento específico para os dias da feira
+    feira = {        
+        "2025-07-24": { "start": 15,  "end": 20,   "interval": 30 },
+        "2025-07-25": { "start": 8.5, "end": 20,   "interval": 30 },  # 8:30=>8.5
+        "2025-07-26": { "start": 8.5, "end": 21,   "interval": 30 }
+        "2025-07-29": { "start": 15,  "end": 20,   "interval": 30 },
+        "2025-07-30": { "start": 8.5, "end": 20,   "interval": 30 },  # 8:30=>8.5
+        "2025-07-31": { "start": 8.5, "end": 21,   "interval": 30 }
+    }
+
+    cfg = feira.get(date_iso, None)
+    if cfg:
+        START = cfg["start"]
+        END   = cfg["end"]
+        IVL   = cfg["interval"]
+    else:
+        # default
+        START, END, IVL = 15, 20, 30
+
+    # gera os slots
+    slots = []
+    h = int(START)
+    m = int((START - h) * 60)
+    while h < END or (h == END and m == 0):
+        slots.append(f"{h:02d}:{m:02d}")
+        # avança IVL minutos
+        m += IVL
+        if m >= 60:
+            h += 1
+            m -= 60
+        # se passar do END, para
+        if h + m/60 > END:
+            break
+
     col    = mongo_connect()
     cabins = list(col.find())
     result = []
