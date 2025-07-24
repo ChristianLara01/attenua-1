@@ -134,7 +134,7 @@ def available_slots(date_iso):
     feira = {        
         "2025-07-24": { "start": 15,  "end": 20,   "interval": 30 },
         "2025-07-25": { "start": 8.5, "end": 20,   "interval": 30 },  # 8:30=>8.5
-        "2025-07-26": { "start": 8.5, "end": 21,   "interval": 30 }
+        "2025-07-26": { "start": 8.5, "end": 21,   "interval": 30 },
         "2025-07-29": { "start": 15,  "end": 20,   "interval": 30 },
         "2025-07-30": { "start": 8.5, "end": 20,   "interval": 30 },  # 8:30=>8.5
         "2025-07-31": { "start": 8.5, "end": 21,   "interval": 30 }
