@@ -269,3 +269,40 @@ body {
 .link-voltar:hover {
   text-decoration: underline;
 }
+/* ... seu CSS existente ... */
+
+/* estilo para botões de horário desabilitados ou do passado */
+button.past,
+button:disabled {
+  background-color: #ccc !important;
+  color: #666 !important;
+  cursor: not-allowed;
+}
+
+/* deixa o texto “Escolha abaixo…” sem negrito */
+.selection-header {
+  font-weight: normal;
+}
+
+/* arredonda as imagens das cabines */
+.cabin-card img {
+  border-radius: 8px;
+}
+
+/* garante o clock-container centralizado e dentro dos limites */
+.clock-container {
+  position: relative;
+  width: 300px;    /* ou use max-width: 90vw */
+  height: 300px;   /* quadrado para o círculo */
+  margin: 0 auto;
+}
+
+/* se precisar ajustar overflow */
+.clock-container button {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border: none;
+  background: var(--primary-color, #2fb191);
+  color: #fff;
+  transition: background .2s;
+}
