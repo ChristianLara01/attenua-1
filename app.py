@@ -33,31 +33,37 @@ MQTT_HOST       = "917a3939272f48c09215df8a39c82c46.s1.eu.hivemq.cloud"
 MQTT_PORT       = 8883
 MQTT_USER       = "attenua"
 MQTT_PASS       = "Atualle1"
-MQTT_TOPIC_OPEN = "cabine/01/open"
+# no longer a single topic, we'll build per-cabin
 
-# ——— Offset fuso horário local (UTC–3) —————————————————
+# ——— Fuso horário local (UTC–3) —————————————————
 LOCAL_TZ_OFFSET = -3
 
-def mqtt_publish_open():
+def mqtt_publish_open(cabin_id: int):
+    """Publish 'abrir' to the topic for the given cabin_id."""
+    topic = f"cabine/{cabin_id:02d}/open"
     auth = {'username': MQTT_USER, 'password': MQTT_PASS}
     publish.single(
-        topic=MQTT_TOPIC_OPEN,
+        topic=topic,
         payload="abrir",
         hostname=MQTT_HOST,
         port=MQTT_PORT,
         auth=auth,
         tls={'insecure': True}
     )
-    app.logger.info(f"MQTT → publicado 'abrir' em {MQTT_TOPIC_OPEN}")
+    app.logger.info(f"MQTT → publicado 'abrir' em {topic}")
 
-def send_email(reserv):
+def send_email(reserv: dict):
+    """Send HTML confirmation with an 'Acessar Minha Reserva' button."""
+    # format date DD/MM/YYYY
     year, month, day = reserv["dia"].split('-')
     date_fmt = f"{day}/{month}/{year}"
+
     msg = MIMEMultipart("alternative")
     msg["From"]    = EMAIL_SENDER
     msg["To"]      = reserv["id_usuario"]
     msg["Subject"] = "Reserva Confirmada – ATTENUA CABINES ACÚSTICAS"
 
+    # build the HTML body
     html = f"""\
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8">
@@ -74,6 +80,10 @@ def send_email(reserv):
     .links a {{display:inline-block;margin:.5rem;padding:10px 20px;
                background:#28a745;color:#fff;text-decoration:none;
                border-radius:4px;font-size:.95rem}}
+    .access-btn {{padding:20px;text-align:center}}
+    .access-btn a {{display:inline-block;padding:12px 24px;
+                    background:#0069d9;color:#fff;text-decoration:none;
+                    border-radius:4px;font-weight:bold}}
     .footer {{padding:20px;font-size:.9rem;color:#555;text-align:center}}
   </style>
 </head><body>
@@ -84,6 +94,10 @@ def send_email(reserv):
       <p><span class="highlight">Data:</span> {date_fmt}</p>
       <p><span class="highlight">Horário:</span> {reserv['hora']}</p>
       <p><span class="highlight">Código de Acesso:</span> {reserv['senha_unica']}</p>
+    </div>
+    <div class="access-btn">
+      <a href="https://attenua.onrender.com/acessar?code={reserv['senha_unica']}"
+         target="_blank">Acessar Minha Reserva</a>
     </div>
     <div class="links">
       <a href="https://attenua.com.br" target="_blank">Visitar Attenua</a>
@@ -99,6 +113,7 @@ def send_email(reserv):
 """
     part = MIMEText(html, "html")
     msg.attach(part)
+
     with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
         server.login(EMAIL_SENDER, EMAIL_PASSWORD)
         server.send_message(msg)
@@ -109,6 +124,7 @@ def send_email(reserv):
 @app.route('/')
 def catalog():
     today = datetime.now()
+    # only today + next 2 days
     dias = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(3)]
     return render_template('catalog.html', dias=dias)
 
@@ -156,29 +172,35 @@ def reserve(cabin_id, date_iso, slot):
     col    = mongo_connect()
     cabine = col.find_one({"id": cabin_id})
     if request.method == "POST":
+        # collect form
         first = request.form["first_name"]
         last  = request.form["last_name"]
         email = request.form["email"]
+
+        # build 6‑hex code + cabin name
         code_simple = secrets.token_hex(3)
-        nome_simple = cabine["nome"].replace("CABINE ", "").lower()
+        nome_simple = cabine["nome"].replace("CABINE ", "").strip().lower()
         full_code   = f"{nome_simple}{code_simple}"
+
         reserva = {
-            "dia":         date_iso,
-            "hora":        slot,
-            "qtde_horas": 1,
-            "id_usuario": email,
-            "first_name": first,
-            "last_name":  last,
-            "senha_unica": full_code,
-            "cabin_id":   cabin_id,
-            "nome":       cabine["nome"]
+            "dia":          date_iso,
+            "hora":         slot,
+            "qtde_horas":   1,
+            "id_usuario":   email,
+            "first_name":   first,
+            "last_name":    last,
+            "senha_unica":  full_code,
+            "cabin_id":     cabin_id,
+            "nome":         cabine["nome"]
         }
         col.update_one({"id": cabin_id}, {"$push": {"agendamentos": reserva}})
         app.logger.info("Reserva salva no MongoDB")
+
         try:
             send_email(reserva)
         except Exception as e:
             app.logger.error(f"Erro SMTP: {e}")
+
         return render_template(
             'reservation_success.html',
             cabin_name=cabine["nome"],
@@ -186,6 +208,7 @@ def reserve(cabin_id, date_iso, slot):
             hora=slot,
             senha=full_code
         )
+
     return render_template(
         'reservation.html',
         cabin_id=cabin_id,
@@ -201,27 +224,32 @@ def activate_success(code):
 @app.route('/acessar', methods=["GET","POST"])
 def acessar():
     error = None
+    prefill = request.args.get("code", "").strip().lower()
     if request.method == "POST":
         code = request.form["code"].strip().lower()
         doc  = mongo_connect().find_one({"agendamentos.senha_unica": code})
         if not doc:
             error = "Código inválido."
         else:
+            # find that specific agendamento
             ag = next(a for a in doc["agendamentos"] if a["senha_unica"] == code)
+            # parse start + end window
             dt_inicio = datetime.strptime(f"{ag['dia']} {ag['hora']}", "%Y-%m-%d %H:%M")
             dt_fim    = dt_inicio + timedelta(minutes=30)
             now       = datetime.utcnow() + timedelta(hours=LOCAL_TZ_OFFSET)
             if dt_inicio <= now <= dt_fim:
                 try:
-                    mqtt_publish_open()
+                    mqtt_publish_open(ag["cabin_id"])
                 except Exception as e:
                     app.logger.error(f"Erro MQTT: {e}")
                     error = "Falha ao liberar a cabine. Tente novamente."
                 else:
                     return redirect(url_for('activate_success', code=code))
             else:
-                error = f"Fora do horário de agendamento. Sua reserva é em {ag['dia']} às {ag['hora']}."
-    return render_template('acessar.html', error=error)
+                error = (f"Fora do horário de agendamento. "
+                         f"Sua reserva é em {ag['dia']} às {ag['hora']}.")
+    # render form, passing along any prefill from query
+    return render_template('acessar.html', error=error, prefill=prefill)
 
 if __name__ == '__main__':
     app.run(debug=True)
