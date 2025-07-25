@@ -151,7 +151,7 @@ def requires_auth(f):
 @app.route('/')
 def catalog():
     hoje = datetime.now()
-    proximos = [(hoje + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(3)]
+    proximos = [(hoje + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(1)]
     return render_template('catalog.html', dias=proximos)
 
 @app.route('/api/available_slots/<date_iso>')
