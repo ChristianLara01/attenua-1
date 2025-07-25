@@ -353,3 +353,15 @@ button:disabled {
   color: #151829;
   box-shadow: 0 0 6px rgba(0,0,0,0.3);
 }
+.slots-section h3 { /* título das seções */
+  font-size: 1rem;
+  font-weight: normal;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.slots-grid { /* grid de botões */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 10px;
+}
