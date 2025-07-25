@@ -156,29 +156,56 @@ def catalog():
 
 @app.route('/api/available_slots/<date_iso>')
 def available_slots(date_iso):
-    # (mantém seus horários customizados conforme feira ou default...)
-    START_HOUR, END_HOUR, INTERVAL = 15, 20, 30
+    """
+    Retorna os slots disponíveis para uma data.
+    Para os dias da feira ECBR (2025-07-29, 2025-07-30, 2025-07-31),
+    usa horários customizados. Nos demais, usa o default 15:00–20:00 a cada 30 min.
+    """
+    # Mapeamento dos horários para a feira ECBR
+    feira_ecbr = {
+        "2025-07-25": {"start": 15.0, "end": 20.0, "interval": 30},
+        "2025-07-26": {"start": 8.5,  "end": 20.0, "interval": 30},  # 8:30 == 8.5
+        "2025-07-27": {"start": 8.5,  "end": 21.0, "interval": 30},
+        "2025-07-29": {"start": 15.0, "end": 20.0, "interval": 30},
+        "2025-07-30": {"start": 8.5,  "end": 20.0, "interval": 30},  # 8:30 == 8.5
+        "2025-07-31": {"start": 8.5,  "end": 21.0, "interval": 30}
+    }
+
+    # Seleciona config para a data, ou fallback default
+    cfg = feira_ecbr.get(date_iso, {"start": 15.0, "end": 20.0, "interval": 30})
+    START = cfg["start"]
+    END   = cfg["end"]
+    IVL   = cfg["interval"]
+
+    # Gera os slots em HH:MM
     slots = []
-    h = START_HOUR
-    m = 0
-    while h < END_HOUR or (h == END_HOUR and m == 0):
-        slots.append(f"{int(h):02d}:{m:02d}")
-        m += INTERVAL
+    h = int(START)
+    m = int((START - h) * 60)
+    while True:
+        # Adiciona o slot formatado
+        slots.append(f"{h:02d}:{m:02d}")
+        # Avança IVL minutos
+        m += IVL
         if m >= 60:
             h += 1
             m -= 60
+        # Se já passou do END, interrompe
+        if h + m/60 > END:
+            break
+
+    # Busca todas as cabines e marca cada slot como livre ou não
     col    = mongo_connect()
     cabins = list(col.find())
     result = []
     for slot in slots:
-        free = any(
+        livre = any(
             all(
                 ag["dia"] != date_iso or ag["hora"] != slot
                 for ag in cabine.get("agendamentos", [])
             )
             for cabine in cabins
         )
-        result.append({"slot": slot, "available": free})
+        result.append({"slot": slot, "available": livre})
     return jsonify(result)
 
 @app.route('/available/<date_iso>/<slot>')
