@@ -125,7 +125,7 @@ def send_email(reserv: dict):
 def catalog():
     today = datetime.now()
     # only today + next 2 days
-    dias = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(3)]
+    dias = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(1)]
     return render_template('catalog.html', dias=dias)
 
 @app.route('/api/available_slots/<date_iso>')
