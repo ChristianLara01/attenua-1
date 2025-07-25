@@ -37,9 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const slotsData = await resp.json();
 
-  // Divide em Manhã e Tarde
+  // Separa em Manhã (<12h), Tarde (12–17h59) e Noite (>=18h)
   const morning   = slotsData.filter(s => +s.slot.split(':')[0] < 12);
-  const afternoon = slotsData.filter(s => +s.slot.split(':')[0] >= 12);
+  const afternoon = slotsData.filter(s => {
+    const h = +s.slot.split(':')[0];
+    return h >= 12 && h < 18;
+  });
+  const night     = slotsData.filter(s => +s.slot.split(':')[0] >= 18);
 
   function renderSection(title, list) {
     const sec = document.createElement('div');
@@ -51,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const btn = document.createElement('button');
       btn.textContent = slot;
 
-      // Verifica horário passado
+      // Verifica se já passou
       const [hh, mm] = slot.split(':').map(Number);
       const slotDate = new Date(`${selectedDate}T${slot}:00`);
       const isPast = (selectedDate < today) ||
@@ -73,9 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
     timeGrid.appendChild(sec);
   }
 
-  renderSection('Manhã', morning);
-  renderSection('Tarde', afternoon);
+  renderSection('Manhã',   morning);
+  renderSection('Tarde',   afternoon);
+  renderSection('Noite',   night);
 }
+
 
   async function openModal(slot) {
     cabinsList.innerHTML = '';
