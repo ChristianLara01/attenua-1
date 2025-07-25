@@ -23,7 +23,7 @@ def mongo_connect():
     return client.attenua.reservas
 
 # ——— Configurações de SMTP —————————————————
-EMAIL_SENDER   = "christian@atualle.com.br"
+EMAIL_SENDER   = "atualle@atualle.com.br"
 EMAIL_PASSWORD = "@12Duda04"
 SMTP_HOST      = "smtp.hostinger.com"
 SMTP_PORT      = 465
