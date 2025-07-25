@@ -23,66 +23,59 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function loadSlots() {
-    clockContainer.innerHTML = '';
-    const now   = new Date();
-    const today = now.toISOString().slice(0,10);
+  const timeGrid = document.getElementById('timeGrid');
+  timeGrid.innerHTML = '';
+  const now   = new Date();
+  const today = now.toISOString().slice(0,10);
 
-    // busca slots
-    let resp = await fetch(`/api/available_slots/${selectedDate}`);
-    if (!resp.ok) resp = await fetch(`/available_slots/${selectedDate}`);
-    if (!resp.ok) {
-      clockContainer.innerHTML = '<p>Erro ao carregar horários.</p>';
-      return;
-    }
-    const slotsData = await resp.json();
-    const n         = slotsData.length;
+  // Busca disponibilidade
+  let resp = await fetch(`/api/available_slots/${selectedDate}`);
+  if (!resp.ok) resp = await fetch(`/available_slots/${selectedDate}`);
+  if (!resp.ok) {
+    timeGrid.innerHTML = '<p style="color:#e74c3c;text-align:center;">Erro ao carregar horários.</p>';
+    return;
+  }
+  const slotsData = await resp.json();
 
-    // cálculo do raio em px (40% do container)
-    const containerSize = clockContainer.clientWidth;
-    const radiusPercent = 40; // mesmo do CSS: 40%
-    const radiusPx      = containerSize * (radiusPercent / 100);
+  // Divide em Manhã e Tarde
+  const morning   = slotsData.filter(s => +s.slot.split(':')[0] < 12);
+  const afternoon = slotsData.filter(s => +s.slot.split(':')[0] >= 12);
 
-    // diâmetro de cada bolinha = comprimento da corda de ângulo 2π/n
-    let diameter = 2 * radiusPx * Math.sin(Math.PI / n);
+  function renderSection(title, list) {
+    const sec = document.createElement('div');
+    sec.className = 'slots-section';
+    sec.innerHTML = `<h3>${title}</h3><div class="slots-grid"></div>`;
+    const grid = sec.querySelector('.slots-grid');
 
-    // opcional: limitar min/max para ficar sempre legível
-    const MIN_D = 24;
-    const MAX_D = 60;
-    diameter = Math.max(MIN_D, Math.min(MAX_D, diameter));
-
-    slotsData.forEach(({ slot, available }, i) => {
+    list.forEach(({ slot, available }) => {
       const btn = document.createElement('button');
       btn.textContent = slot;
 
-      // desabilita slots já passados
+      // Verifica horário passado
       const [hh, mm] = slot.split(':').map(Number);
       const slotDate = new Date(`${selectedDate}T${slot}:00`);
-      const isPast   = (selectedDate < today) || (selectedDate === today && slotDate < now);
-      if (!available || isPast) {
-        btn.disabled = true;
-      }
+      const isPast = (selectedDate < today) ||
+                     (selectedDate === today && slotDate < now);
 
-      // aplica tamanho e posicionamento
-      btn.style.width        = `${diameter}px`;
-      btn.style.height       = `${diameter}px`;
-      btn.style.borderRadius = '50%';
-      const angle = (i / n) * 2 * Math.PI - Math.PI/2;
-      const x     = 50 + Math.cos(angle) * radiusPercent;
-      const y     = 50 + Math.sin(angle) * radiusPercent;
-      btn.style.left = `${x}%`;
-      btn.style.top  = `${y}%`;
+      if (!available || isPast) btn.disabled = true;
 
       btn.addEventListener('click', () => {
-        clockContainer.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
-        if (!btn.disabled) {
-          btn.classList.add('selected');
-          openModal(slot);
-        }
+        if (btn.disabled) return;
+        document.querySelectorAll('.slots-grid button')
+                .forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        openModal(slot);
       });
 
-      clockContainer.appendChild(btn);
+      grid.appendChild(btn);
     });
+
+    timeGrid.appendChild(sec);
   }
+
+  renderSection('Manhã', morning);
+  renderSection('Tarde', afternoon);
+}
 
   async function openModal(slot) {
     cabinsList.innerHTML = '';
