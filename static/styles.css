@@ -306,3 +306,50 @@ button:disabled {
   color: #fff;
   transition: background .2s;
 }
+/* Container geral das seções Manhã/Tarde */
+.slots-sections {
+  margin: 20px 10px;
+}
+
+/* Cada seção (Manhã ou Tarde) */
+.slots-section {
+  margin-bottom: 1.5rem;
+}
+.slots-section h3 {
+  font-size: 1rem;
+  font-weight: normal;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+/* Grid responsivo de botões de horário */
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 10px;
+}
+.slots-grid button {
+  background: #2fb191;
+  color: #151829;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.slots-grid button:hover:not(:disabled) {
+  background: #218838;
+  color: #ffffff;
+}
+.slots-grid button:disabled {
+  background: #666;
+  color: #333;
+  cursor: not-allowed;
+}
+.slots-grid button.selected {
+  background: #ffffff;
+  color: #151829;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+}
